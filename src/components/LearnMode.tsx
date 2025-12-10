@@ -29,6 +29,24 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     loadWords();
   }, [refreshTrigger]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && words.length > 0) {
+        if (!showTranslation) {
+          setShowTranslation(true);
+        } else {
+          if (currentIndex < words.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+            setShowTranslation(false);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showTranslation, currentIndex, words.length]);
+
   const loadWords = async () => {
     setIsLoading(true);
     try {
