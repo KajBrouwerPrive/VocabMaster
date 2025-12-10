@@ -35,10 +35,10 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         if (!showTranslation) {
           setShowTranslation(true);
         } else {
-          if (currentIndex < words.length - 1) {
-            setCurrentIndex(currentIndex + 1);
-            setShowTranslation(false);
-          }
+          // Go to next word, or restart from beginning if at the end
+          const nextIndex = currentIndex < words.length - 1 ? currentIndex + 1 : 0;
+          setCurrentIndex(nextIndex);
+          setShowTranslation(false);
         }
       }
     };
