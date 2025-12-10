@@ -34,6 +34,8 @@ export function QuizMode() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const [availableWordCount, setAvailableWordCount] = useState(0);
+  const [retryMode, setRetryMode] = useState(false);
+  const [retryAnswer, setRetryAnswer] = useState("");
 
   useEffect(() => {
     checkAvailableWords();
@@ -64,6 +66,8 @@ export function QuizMode() {
       setUserAnswer("");
       setShowFeedback(false);
       setLastCorrect(null);
+      setRetryMode(false);
+      setRetryAnswer("");
     } catch (error) {
       toast.error("Quiz starten mislukt");
     } finally {
@@ -90,8 +94,26 @@ export function QuizMode() {
 
     if (immeditateFeedback) {
       setShowFeedback(true);
+      if (!isCorrect) {
+        setRetryMode(true);
+        setRetryAnswer("");
+      }
     } else {
       goToNext();
+    }
+  };
+
+  const checkRetry = () => {
+    if (!currentWord) return;
+    const isCorrect =
+      retryAnswer.toLowerCase().trim() === currentWord.translation.toLowerCase().trim();
+    
+    if (isCorrect) {
+      toast.success("Goed zo!");
+      goToNext();
+    } else {
+      toast.error("Probeer opnieuw");
+      setRetryAnswer("");
     }
   };
 
@@ -99,6 +121,8 @@ export function QuizMode() {
     setShowFeedback(false);
     setLastCorrect(null);
     setUserAnswer("");
+    setRetryMode(false);
+    setRetryAnswer("");
 
     if (currentIndex < quizWords.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -109,7 +133,9 @@ export function QuizMode() {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      if (showFeedback) {
+      if (retryMode && retryAnswer.trim()) {
+        checkRetry();
+      } else if (showFeedback && !retryMode) {
         goToNext();
       } else if (userAnswer.trim()) {
         checkAnswer();
@@ -313,10 +339,35 @@ export function QuizMode() {
                 </div>
               )}
             </div>
-            <Button variant="default" onClick={goToNext} className="w-full">
-              <ArrowRight className="h-4 w-4" />
-              Volgende
-            </Button>
+            {retryMode ? (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground text-center">
+                  Typ het correcte woord om verder te gaan:
+                </p>
+                <Input
+                  value={retryAnswer}
+                  onChange={(e) => setRetryAnswer(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder={`Typ: ${currentWord?.translation}`}
+                  autoFocus
+                  className="text-center text-lg"
+                />
+                <Button
+                  variant="default"
+                  onClick={checkRetry}
+                  disabled={!retryAnswer.trim()}
+                  className="w-full"
+                >
+                  <Check className="h-4 w-4" />
+                  Bevestig
+                </Button>
+              </div>
+            ) : (
+              <Button variant="default" onClick={goToNext} className="w-full">
+                <ArrowRight className="h-4 w-4" />
+                Volgende
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
