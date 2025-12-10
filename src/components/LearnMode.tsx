@@ -25,6 +25,15 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const shuffleWords = (wordsToShuffle: Word[]) => {
+    const shuffled = [...wordsToShuffle];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   useEffect(() => {
     loadWords();
   }, [refreshTrigger]);
@@ -35,17 +44,22 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         if (!showTranslation) {
           setShowTranslation(true);
         } else {
-          // Go to next word, or restart from beginning if at the end
-          const nextIndex = currentIndex < words.length - 1 ? currentIndex + 1 : 0;
-          setCurrentIndex(nextIndex);
-          setShowTranslation(false);
+          if (currentIndex < words.length - 1) {
+            setCurrentIndex(currentIndex + 1);
+            setShowTranslation(false);
+          } else {
+            // Start new randomized cycle
+            setWords(shuffleWords(words));
+            setCurrentIndex(0);
+            setShowTranslation(false);
+          }
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showTranslation, currentIndex, words.length]);
+  }, [showTranslation, currentIndex, words]);
 
   const loadWords = async () => {
     setIsLoading(true);
