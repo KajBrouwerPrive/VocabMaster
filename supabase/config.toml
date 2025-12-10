@@ -1,0 +1,7 @@
+project_id = "czzifnicnrvzbbgslohv"
+
+[functions.translate-word]
+verify_jwt = false
+
+[functions.suggest-words]
+verify_jwt = false
