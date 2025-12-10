@@ -78,6 +78,9 @@ export async function addWord(
   translation: string,
   targetLanguage: string
 ): Promise<Word> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Je moet ingelogd zijn om woorden toe te voegen");
+
   const { data, error } = await supabase
     .from("words")
     .insert({
@@ -85,6 +88,7 @@ export async function addWord(
       source_language: sourceLanguage,
       translation: translation,
       target_language: targetLanguage,
+      user_id: user.id,
     })
     .select()
     .single();
@@ -105,6 +109,9 @@ export async function addWords(
   sourceLanguage: string,
   targetLanguage: string
 ): Promise<Word[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Je moet ingelogd zijn om woorden toe te voegen");
+
   const { data, error } = await supabase
     .from("words")
     .insert(
@@ -113,6 +120,7 @@ export async function addWords(
         source_language: sourceLanguage,
         translation: w.translation,
         target_language: targetLanguage,
+        user_id: user.id,
       }))
     )
     .select();
