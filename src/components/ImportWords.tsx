@@ -73,7 +73,30 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Je moet ingelogd zijn");
 
-      const wordsToInsert = parsedWords.map((w) => ({
+      // Get existing words for this user to check for duplicates
+      const { data: existingWords } = await supabase
+        .from("words")
+        .select("source_word, translation")
+        .eq("user_id", user.id);
+
+      const existingSet = new Set(
+        (existingWords || []).map((w) => `${w.source_word.toLowerCase()}|${w.translation.toLowerCase()}`)
+      );
+
+      // Filter out duplicates
+      const newWords = parsedWords.filter(
+        (w) => !existingSet.has(`${w.sourceWord.toLowerCase()}|${w.translation.toLowerCase()}`)
+      );
+
+      if (newWords.length === 0) {
+        toast.info("Alle woorden bestaan al in je woordenlijst");
+        setParsedWords([]);
+        setFileName(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+
+      const wordsToInsert = newWords.map((w) => ({
         source_word: w.sourceWord,
         source_language: "nl",
         translation: w.translation,
@@ -86,7 +109,11 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
 
       if (error) throw error;
 
-      toast.success(`${parsedWords.length} woorden geïmporteerd`);
+      const skipped = parsedWords.length - newWords.length;
+      const message = skipped > 0 
+        ? `${newWords.length} woorden toegevoegd, ${skipped} duplicaten overgeslagen`
+        : `${newWords.length} woorden geïmporteerd`;
+      toast.success(message);
       setParsedWords([]);
       setFileName(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
