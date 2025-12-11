@@ -39,11 +39,24 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   }, [refreshTrigger]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       if (e.key === "Enter" && words.length > 0) {
         if (!showTranslation) {
           setShowTranslation(true);
         } else {
+          // Mark current word as seen before moving to next
+          const currentWord = words[currentIndex];
+          if (currentWord && !currentWord.seen) {
+            try {
+              await markWordAsSeen(currentWord.id);
+              setWords((prev) =>
+                prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
+              );
+            } catch (error) {
+              // Silent fail, don't block navigation
+            }
+          }
+
           if (currentIndex < words.length - 1) {
             setCurrentIndex(currentIndex + 1);
             setShowTranslation(false);
