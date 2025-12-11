@@ -73,19 +73,20 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Je moet ingelogd zijn");
 
-      // Get existing words for this user to check for duplicates
+      // Get existing words to check for duplicates (constraint is on source_word + languages)
       const { data: existingWords } = await supabase
         .from("words")
-        .select("source_word, translation")
-        .eq("user_id", user.id);
+        .select("source_word")
+        .eq("source_language", "nl")
+        .eq("target_language", "es");
 
       const existingSet = new Set(
-        (existingWords || []).map((w) => `${w.source_word.toLowerCase()}|${w.translation.toLowerCase()}`)
+        (existingWords || []).map((w) => w.source_word.toLowerCase())
       );
 
-      // Filter out duplicates
+      // Filter out duplicates based on source_word (matches unique constraint)
       const newWords = parsedWords.filter(
-        (w) => !existingSet.has(`${w.sourceWord.toLowerCase()}|${w.translation.toLowerCase()}`)
+        (w) => !existingSet.has(w.sourceWord.toLowerCase())
       );
 
       if (newWords.length === 0) {
