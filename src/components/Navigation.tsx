@@ -1,7 +1,7 @@
-import { Book, GraduationCap, Plus, Brain } from "lucide-react";
+import { Book, GraduationCap, Plus, Brain, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type View = "learn" | "quiz" | "add" | "suggest";
+type View = "learn" | "quiz" | "add" | "suggest" | "import";
 
 interface NavigationProps {
   currentView: View;
@@ -14,6 +14,7 @@ export function Navigation({ currentView, onViewChange }: NavigationProps) {
     { id: "quiz" as View, label: "Toets", icon: GraduationCap },
     { id: "add" as View, label: "Toevoegen", icon: Plus },
     { id: "suggest" as View, label: "AI Suggesties", icon: Brain },
+    { id: "import" as View, label: "Importeren", icon: FileSpreadsheet },
   ];
 
   return (

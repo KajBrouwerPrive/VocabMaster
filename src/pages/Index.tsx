@@ -5,11 +5,12 @@ import { LearnMode } from "@/components/LearnMode";
 import { QuizMode } from "@/components/QuizMode";
 import { AddWordForm } from "@/components/AddWordForm";
 import { SuggestWords } from "@/components/SuggestWords";
+import { ImportWords } from "@/components/ImportWords";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut } from "lucide-react";
 
-type View = "learn" | "quiz" | "add" | "suggest";
+type View = "learn" | "quiz" | "add" | "suggest" | "import";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -86,6 +87,9 @@ const Index = () => {
             defaultSourceLanguage={defaultSourceLanguage}
             defaultTargetLanguage={defaultTargetLanguage}
           />
+        )}
+        {currentView === "import" && (
+          <ImportWords onWordsAdded={handleWordsAdded} />
         )}
       </main>
 
