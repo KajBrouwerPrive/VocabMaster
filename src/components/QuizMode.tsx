@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ export function QuizMode() {
   const [availableWordCount, setAvailableWordCount] = useState(0);
   const [retryMode, setRetryMode] = useState(false);
   const [retryAnswer, setRetryAnswer] = useState("");
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     checkAvailableWords();
@@ -97,6 +98,9 @@ export function QuizMode() {
       if (!isCorrect) {
         setRetryMode(true);
         setRetryAnswer("");
+      } else {
+        // Focus the next button when correct so user can press Enter
+        setTimeout(() => nextButtonRef.current?.focus(), 0);
       }
     } else {
       goToNext();
@@ -363,7 +367,7 @@ export function QuizMode() {
                 </Button>
               </div>
             ) : (
-              <Button variant="default" onClick={goToNext} className="w-full">
+              <Button ref={nextButtonRef} variant="default" onClick={goToNext} className="w-full">
                 <ArrowRight className="h-4 w-4" />
                 Volgende
               </Button>
