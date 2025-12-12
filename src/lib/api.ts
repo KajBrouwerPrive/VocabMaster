@@ -207,7 +207,8 @@ export async function markWordsAsSeen(wordIds: string[]): Promise<void> {
 export async function getQuizWords(
   count: number,
   sourceLanguage?: string,
-  targetLanguage?: string
+  targetLanguage?: string,
+  wordType?: string
 ): Promise<Word[]> {
   let query = supabase
     .from("words")
@@ -219,6 +220,9 @@ export async function getQuizWords(
   }
   if (targetLanguage) {
     query = query.eq("target_language", targetLanguage);
+  }
+  if (wordType && wordType !== "all") {
+    query = query.eq("word_type", wordType);
   }
 
   const { data, error } = await query;

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, type Word } from "@/lib/api";
+import { getQuizWords, getWords, type Word } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -12,8 +12,16 @@ import {
   RotateCcw,
   Trophy,
   ArrowRight,
+  Filter,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface QuizResult {
   word: Word;
@@ -37,15 +45,46 @@ export function QuizMode() {
   const [retryMode, setRetryMode] = useState(false);
   const [retryAnswer, setRetryAnswer] = useState("");
   const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const [allWords, setAllWords] = useState<Word[]>([]);
+  const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
+
+  // Get unique word types from all seen words
+  const wordTypes = useMemo(() => {
+    const types = new Set<string>();
+    allWords.filter(w => w.seen).forEach((word) => {
+      if (word.word_type) {
+        types.add(word.word_type);
+      }
+    });
+    return Array.from(types).sort();
+  }, [allWords]);
+
+  // Count available words based on filter
+  const filteredAvailableCount = useMemo(() => {
+    const seenWords = allWords.filter(w => w.seen);
+    if (wordTypeFilter === "all") {
+      return seenWords.length;
+    }
+    return seenWords.filter(w => w.word_type === wordTypeFilter).length;
+  }, [allWords, wordTypeFilter]);
 
   useEffect(() => {
     checkAvailableWords();
   }, []);
 
+  // Update word count when filter changes
+  useEffect(() => {
+    if (wordCount > filteredAvailableCount && filteredAvailableCount > 0) {
+      setWordCount(filteredAvailableCount);
+    }
+  }, [filteredAvailableCount]);
+
   const checkAvailableWords = async () => {
     try {
-      const words = await getQuizWords(1000);
-      setAvailableWordCount(words.length);
+      const words = await getWords();
+      setAllWords(words);
+      const seenWords = words.filter(w => w.seen);
+      setAvailableWordCount(seenWords.length);
     } catch (error) {
       console.error("Error checking available words:", error);
     }
@@ -54,7 +93,7 @@ export function QuizMode() {
   const startQuiz = async () => {
     setIsLoading(true);
     try {
-      const words = await getQuizWords(wordCount);
+      const words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter);
       if (words.length === 0) {
         toast.error("Geen geziene woorden beschikbaar. Leer eerst woorden in Leer Modus!");
         return;
@@ -173,29 +212,53 @@ export function QuizMode() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {availableWordCount === 0 ? (
+          {filteredAvailableCount === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">
-                Geen geziene woorden beschikbaar. Leer eerst woorden in Leer Modus!
+                {wordTypeFilter === "all" 
+                  ? "Geen geziene woorden beschikbaar. Leer eerst woorden in Leer Modus!"
+                  : `Geen geziene woorden van type "${wordTypeFilter}" beschikbaar.`}
               </p>
             </div>
           ) : (
             <>
               <p className="text-muted-foreground">
-                {availableWordCount} woorden beschikbaar voor toets
+                {filteredAvailableCount} woorden beschikbaar voor toets
               </p>
 
               <div className="space-y-4">
+                {wordTypes.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Filter className="h-4 w-4" />
+                      Soort woord
+                    </label>
+                    <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Alle woorden" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Alle woorden</SelectItem>
+                        {wordTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Aantal vragen</label>
                   <Input
                     type="number"
                     min={1}
-                    max={availableWordCount}
+                    max={filteredAvailableCount}
                     value={wordCount}
                     onChange={(e) =>
                       setWordCount(
-                        Math.min(parseInt(e.target.value) || 1, availableWordCount)
+                        Math.min(parseInt(e.target.value) || 1, filteredAvailableCount)
                       )
                     }
                   />
