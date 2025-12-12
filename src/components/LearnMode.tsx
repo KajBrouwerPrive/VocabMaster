@@ -6,12 +6,12 @@ import { toast } from "sonner";
 import {
   Book,
   Eye,
-  EyeOff,
   Trash2,
   ChevronLeft,
   ChevronRight,
   Loader2,
   CheckCircle,
+  Shuffle,
 } from "lucide-react";
 import { getLanguageName } from "@/components/LanguageSelector";
 
@@ -226,6 +226,18 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           </Button>
 
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                setWords(shuffleWords(words));
+                setCurrentIndex(0);
+                setShowTranslation(false);
+              }}
+              title="Shuffle woorden"
+            >
+              <Shuffle className="h-4 w-4" />
+            </Button>
             {!currentWord.seen && (
               <Button variant="success" onClick={handleMarkAsSeen}>
                 <Eye className="h-4 w-4" />
