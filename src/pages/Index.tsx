@@ -7,13 +7,15 @@ import { AddWordForm } from "@/components/AddWordForm";
 import { SuggestWords } from "@/components/SuggestWords";
 import { ImportWords } from "@/components/ImportWords";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
-import { Languages, LogOut } from "lucide-react";
+import { Languages, LogOut, Shield } from "lucide-react";
 
 type View = "learn" | "quiz" | "add" | "suggest" | "import";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<View>("learn");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -59,16 +61,24 @@ const Index = () => {
               </div>
               <h1 className="text-2xl font-bold tracking-tight">VocabMaster</h1>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Uitloggen
-            </Button>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
+                  <Shield className="h-3 w-3" />
+                  Admin
+                </div>
+              )}
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Uitloggen
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Navigation */}
-      <Navigation currentView={currentView} onViewChange={setCurrentView} />
+      <Navigation currentView={currentView} onViewChange={setCurrentView} isAdmin={isAdmin} />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-2xl">

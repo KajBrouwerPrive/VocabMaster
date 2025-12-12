@@ -97,13 +97,14 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
         return;
       }
 
+      // Admin imports words as shared (user_id = null) so everyone can see them
       const wordsToInsert = newWords.map((w) => ({
         source_word: w.sourceWord,
         source_language: "nl",
         translation: w.translation,
         target_language: "es",
         word_type: w.wordType || null,
-        user_id: user.id,
+        user_id: null, // Shared words for all users
       }));
 
       const { error } = await supabase.from("words").insert(wordsToInsert);
@@ -112,8 +113,8 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
 
       const skipped = parsedWords.length - newWords.length;
       const message = skipped > 0 
-        ? `${newWords.length} woorden toegevoegd, ${skipped} duplicaten overgeslagen`
-        : `${newWords.length} woorden geïmporteerd`;
+        ? `${newWords.length} gedeelde woorden toegevoegd, ${skipped} duplicaten overgeslagen`
+        : `${newWords.length} gedeelde woorden geïmporteerd`;
       toast.success(message);
       setParsedWords([]);
       setFileName(null);

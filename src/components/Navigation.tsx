@@ -6,20 +6,23 @@ type View = "learn" | "quiz" | "add" | "suggest" | "import";
 interface NavigationProps {
   currentView: View;
   onViewChange: (view: View) => void;
+  isAdmin: boolean;
 }
 
-export function Navigation({ currentView, onViewChange }: NavigationProps) {
+export function Navigation({ currentView, onViewChange, isAdmin }: NavigationProps) {
   const navItems = [
-    { id: "learn" as View, label: "Leren", icon: Book },
-    { id: "quiz" as View, label: "Toets", icon: GraduationCap },
-    { id: "add" as View, label: "Toevoegen", icon: Plus },
-    { id: "suggest" as View, label: "AI Suggesties", icon: Brain },
-    { id: "import" as View, label: "Importeren", icon: FileSpreadsheet },
+    { id: "learn" as View, label: "Leren", icon: Book, adminOnly: false },
+    { id: "quiz" as View, label: "Toets", icon: GraduationCap, adminOnly: false },
+    { id: "add" as View, label: "Toevoegen", icon: Plus, adminOnly: false },
+    { id: "suggest" as View, label: "AI Suggesties", icon: Brain, adminOnly: true },
+    { id: "import" as View, label: "Importeren", icon: FileSpreadsheet, adminOnly: true },
   ];
+
+  const visibleItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <nav className="flex flex-wrap justify-center gap-2 p-4">
-      {navItems.map((item) => (
+      {visibleItems.map((item) => (
         <Button
           key={item.id}
           variant={currentView === item.id ? "default" : "outline"}
