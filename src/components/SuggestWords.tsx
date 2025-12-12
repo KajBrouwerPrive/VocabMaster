@@ -77,8 +77,9 @@ export function SuggestWords({
 
     setIsAdding(true);
     try {
-      await addWords(wordsToAdd, sourceLanguage, targetLanguage);
-      toast.success(`${wordsToAdd.length} woorden toegevoegd!`);
+      // Admin adds words as shared (asShared = true) so everyone can see them
+      await addWords(wordsToAdd, sourceLanguage, targetLanguage, true);
+      toast.success(`${wordsToAdd.length} gedeelde woorden toegevoegd!`);
       setSuggestions([]);
       setSelectedWords(new Set());
       onWordsAdded();
