@@ -39,12 +39,14 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   }, [refreshTrigger]);
 
   useEffect(() => {
-    const handleKeyDown = async (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" && words.length > 0) {
+        e.preventDefault();
+        
         if (!showTranslation) {
           setShowTranslation(true);
         } else {
-          // Hide translation immediately before any async operations
+          // Hide translation immediately
           setShowTranslation(false);
           
           // Mark current word as seen (async, in background)
