@@ -8,6 +8,7 @@ export interface Word {
   target_language: string;
   seen: boolean;
   view_count: number;
+  word_type: string | null;
   created_at: string;
   updated_at: string;
 }
