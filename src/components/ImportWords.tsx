@@ -47,9 +47,9 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
               continue;
             }
             words.push({
-              sourceWord: String(row[0]).trim(),
-              translation: String(row[1]).trim(),
-              wordType: row[2] ? String(row[2]).trim() : "",
+              sourceWord: String(row[0]).trim().toLowerCase(),
+              translation: String(row[1]).trim().toLowerCase(),
+              wordType: row[2] ? String(row[2]).trim().toLowerCase() : "",
             });
           }
         }
