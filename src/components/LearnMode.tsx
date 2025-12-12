@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getWords, markWordAsSeen, deleteWord, type Word } from "@/lib/api";
+import { getWords, markWordAsSeen, deleteWord, incrementViewCount, type Word } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Book,
@@ -45,6 +45,19 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         
         if (!showTranslation) {
           setShowTranslation(true);
+          // Increment view count when showing translation
+          const currentWord = words[currentIndex];
+          if (currentWord) {
+            incrementViewCount(currentWord.id)
+              .then(() => {
+                setWords((prev) =>
+                  prev.map((w) => (w.id === currentWord.id ? { ...w, view_count: (w.view_count || 0) + 1 } : w))
+                );
+              })
+              .catch(() => {
+                // Silent fail
+              });
+          }
         } else {
           // Hide translation immediately
           setShowTranslation(false);
@@ -185,11 +198,16 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           className="relative min-h-[200px] rounded-xl bg-secondary/50 p-8 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-secondary/70"
           onClick={() => setShowTranslation(!showTranslation)}
         >
-          {currentWord.seen && (
-            <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            {currentWord.view_count > 0 && (
+              <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                {currentWord.view_count}x gezien
+              </span>
+            )}
+            {currentWord.seen && (
               <CheckCircle className="h-5 w-5 text-success" />
-            </div>
-          )}
+            )}
+          </div>
 
           <p className="text-xs text-muted-foreground mb-2">
             {getLanguageName(currentWord.source_language)}
