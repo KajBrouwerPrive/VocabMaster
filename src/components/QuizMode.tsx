@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, getWords, incrementIncorrectCount, type Word } from "@/lib/api";
+import { getQuizWords, getWords, incrementIncorrectCount, incrementQuizViewCount, type Word } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -108,6 +108,11 @@ export function QuizMode() {
       setLastCorrect(null);
       setRetryMode(false);
       setRetryAnswer("");
+      
+      // Increment quiz view count for first word
+      if (words.length > 0) {
+        incrementQuizViewCount(words[0].id).catch(() => {});
+      }
     } catch (error) {
       toast.error("Quiz starten mislukt");
     } finally {
@@ -175,7 +180,11 @@ export function QuizMode() {
     setRetryAnswer("");
 
     if (currentIndex < quizWords.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      
+      // Increment quiz view count for next word
+      incrementQuizViewCount(quizWords[nextIndex].id).catch(() => {});
     } else {
       setQuizFinished(true);
     }

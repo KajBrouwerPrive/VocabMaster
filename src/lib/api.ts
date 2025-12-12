@@ -8,6 +8,7 @@ export interface Word {
   target_language: string;
   seen: boolean;
   view_count: number;
+  quiz_view_count: number;
   incorrect_count: number;
   word_type: string | null;
   created_at: string;
@@ -207,6 +208,28 @@ export async function incrementIncorrectCount(wordId: string): Promise<void> {
   const { error } = await supabase
     .from("words")
     .update({ incorrect_count: (word?.incorrect_count || 0) + 1 })
+    .eq("id", wordId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Increment quiz view count for a word
+export async function incrementQuizViewCount(wordId: string): Promise<void> {
+  const { data: word, error: fetchError } = await supabase
+    .from("words")
+    .select("quiz_view_count")
+    .eq("id", wordId)
+    .single();
+
+  if (fetchError) {
+    throw new Error(fetchError.message);
+  }
+
+  const { error } = await supabase
+    .from("words")
+    .update({ quiz_view_count: (word?.quiz_view_count || 0) + 1 })
     .eq("id", wordId);
 
   if (error) {
