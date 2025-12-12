@@ -45,6 +45,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          incorrect_count: number
           seen: boolean
           source_language: string
           source_word: string
@@ -58,6 +59,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          incorrect_count?: number
           seen?: boolean
           source_language?: string
           source_word: string
@@ -71,6 +73,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          incorrect_count?: number
           seen?: boolean
           source_language?: string
           source_word?: string
