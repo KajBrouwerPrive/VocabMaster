@@ -196,18 +196,16 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             {currentWord.source_word}
           </h2>
 
-          <div
-            className={`transition-all duration-300 ${
-              showTranslation ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
-            }`}
-          >
-            <p className="text-xs text-muted-foreground mb-1">
-              {getLanguageName(currentWord.target_language)}
-            </p>
-            <p className="text-2xl text-primary font-medium">
-              {currentWord.translation}
-            </p>
-          </div>
+          {showTranslation && (
+            <div className="animate-fade-in">
+              <p className="text-xs text-muted-foreground mb-1">
+                {getLanguageName(currentWord.target_language)}
+              </p>
+              <p className="text-2xl text-primary font-medium">
+                {currentWord.translation}
+              </p>
+            </div>
+          )}
 
           {!showTranslation && (
             <p className="text-sm text-muted-foreground mt-4">
