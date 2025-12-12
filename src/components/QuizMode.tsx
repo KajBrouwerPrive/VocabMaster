@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, getWords, type Word } from "@/lib/api";
+import { getQuizWords, getWords, incrementIncorrectCount, type Word } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -131,6 +131,13 @@ export function QuizMode() {
 
     setResults((prev) => [...prev, result]);
     setLastCorrect(isCorrect);
+
+    // Increment incorrect count if wrong
+    if (!isCorrect) {
+      incrementIncorrectCount(currentWord.id).catch(() => {
+        // Silent fail
+      });
+    }
 
     if (immeditateFeedback) {
       setShowFeedback(true);
