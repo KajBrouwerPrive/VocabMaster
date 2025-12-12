@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getWords, markWordAsSeen, deleteWord, incrementViewCount, type Word } from "@/lib/api";
@@ -12,18 +12,46 @@ import {
   Loader2,
   CheckCircle,
   Shuffle,
+  Filter,
 } from "lucide-react";
 import { getLanguageName } from "@/components/LanguageSelector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface LearnModeProps {
   refreshTrigger: number;
 }
 
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
-  const [words, setWords] = useState<Word[]>([]);
+  const [allWords, setAllWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
+
+  // Get unique word types from all words
+  const wordTypes = useMemo(() => {
+    const types = new Set<string>();
+    allWords.forEach((word) => {
+      if (word.word_type) {
+        types.add(word.word_type);
+      }
+    });
+    return Array.from(types).sort();
+  }, [allWords]);
+
+  // Filter words based on selected word type
+  const words = useMemo(() => {
+    if (wordTypeFilter === "all") {
+      return allWords;
+    }
+    return allWords.filter((word) => word.word_type === wordTypeFilter);
+  }, [allWords, wordTypeFilter]);
 
   const shuffleWords = (wordsToShuffle: Word[]) => {
     const shuffled = [...wordsToShuffle];
@@ -50,7 +78,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           if (currentWord) {
             incrementViewCount(currentWord.id)
               .then(() => {
-                setWords((prev) =>
+                setAllWords((prev) =>
                   prev.map((w) => (w.id === currentWord.id ? { ...w, view_count: (w.view_count || 0) + 1 } : w))
                 );
               })
@@ -67,7 +95,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           if (currentWord && !currentWord.seen) {
             markWordAsSeen(currentWord.id)
               .then(() => {
-                setWords((prev) =>
+                setAllWords((prev) =>
                   prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
                 );
               })
@@ -80,7 +108,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             setCurrentIndex(currentIndex + 1);
           } else {
             // Start new randomized cycle
-            setWords(shuffleWords(words));
+            setAllWords(shuffleWords(allWords));
             setCurrentIndex(0);
           }
         }
@@ -95,7 +123,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     setIsLoading(true);
     try {
       const data = await getWords();
-      setWords(data);
+      setAllWords(data);
       setCurrentIndex(0);
       setShowTranslation(false);
     } catch (error) {
@@ -105,6 +133,12 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     }
   };
 
+  // Reset index when filter changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setShowTranslation(false);
+  }, [wordTypeFilter]);
+
   const currentWord = words[currentIndex];
 
   const handleMarkAsSeen = async () => {
@@ -112,7 +146,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
 
     try {
       await markWordAsSeen(currentWord.id);
-      setWords((prev) =>
+      setAllWords((prev) =>
         prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
       );
       toast.success("Woord gemarkeerd als gezien!");
@@ -126,7 +160,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
 
     try {
       await deleteWord(currentWord.id);
-      setWords((prev) => prev.filter((w) => w.id !== currentWord.id));
+      setAllWords((prev) => prev.filter((w) => w.id !== currentWord.id));
       if (currentIndex >= words.length - 1) {
         setCurrentIndex(Math.max(0, currentIndex - 1));
       }
@@ -187,9 +221,27 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             <Book className="h-5 w-5 text-primary" />
             Leer Modus
           </CardTitle>
-          <span className="text-sm text-muted-foreground">
-            {currentIndex + 1} / {words.length}
-          </span>
+          <div className="flex items-center gap-3">
+            {wordTypes.length > 0 && (
+              <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
+                <SelectTrigger className="w-[140px] h-8 text-xs">
+                  <Filter className="h-3 w-3 mr-1" />
+                  <SelectValue placeholder="Filter" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle woorden</SelectItem>
+                  {wordTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <span className="text-sm text-muted-foreground">
+              {currentIndex + 1} / {words.length}
+            </span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -250,7 +302,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               variant="outline"
               size="icon"
               onClick={() => {
-                setWords(shuffleWords(words));
+                setAllWords(shuffleWords(allWords));
                 setCurrentIndex(0);
                 setShowTranslation(false);
               }}
