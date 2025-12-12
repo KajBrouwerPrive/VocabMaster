@@ -44,27 +44,29 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         if (!showTranslation) {
           setShowTranslation(true);
         } else {
-          // Mark current word as seen before moving to next
+          // Hide translation immediately before any async operations
+          setShowTranslation(false);
+          
+          // Mark current word as seen (async, in background)
           const currentWord = words[currentIndex];
           if (currentWord && !currentWord.seen) {
-            try {
-              await markWordAsSeen(currentWord.id);
-              setWords((prev) =>
-                prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
-              );
-            } catch (error) {
-              // Silent fail, don't block navigation
-            }
+            markWordAsSeen(currentWord.id)
+              .then(() => {
+                setWords((prev) =>
+                  prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
+                );
+              })
+              .catch(() => {
+                // Silent fail
+              });
           }
 
           if (currentIndex < words.length - 1) {
             setCurrentIndex(currentIndex + 1);
-            setShowTranslation(false);
           } else {
             // Start new randomized cycle
             setWords(shuffleWords(words));
             setCurrentIndex(0);
-            setShowTranslation(false);
           }
         }
       }
