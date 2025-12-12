@@ -7,6 +7,7 @@ export interface Word {
   translation: string;
   target_language: string;
   seen: boolean;
+  view_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -160,6 +161,28 @@ export async function markWordAsSeen(wordId: string): Promise<void> {
   const { error } = await supabase
     .from("words")
     .update({ seen: true })
+    .eq("id", wordId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Increment view count for a word
+export async function incrementViewCount(wordId: string): Promise<void> {
+  const { data: word, error: fetchError } = await supabase
+    .from("words")
+    .select("view_count")
+    .eq("id", wordId)
+    .single();
+
+  if (fetchError) {
+    throw new Error(fetchError.message);
+  }
+
+  const { error } = await supabase
+    .from("words")
+    .update({ view_count: (word?.view_count || 0) + 1 })
     .eq("id", wordId);
 
   if (error) {

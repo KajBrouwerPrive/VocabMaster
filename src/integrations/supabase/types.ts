@@ -52,6 +52,7 @@ export type Database = {
           translation: string
           updated_at: string
           user_id: string | null
+          view_count: number
           word_type: string | null
         }
         Insert: {
@@ -64,6 +65,7 @@ export type Database = {
           translation: string
           updated_at?: string
           user_id?: string | null
+          view_count?: number
           word_type?: string | null
         }
         Update: {
@@ -76,6 +78,7 @@ export type Database = {
           translation?: string
           updated_at?: string
           user_id?: string | null
+          view_count?: number
           word_type?: string | null
         }
         Relationships: []
