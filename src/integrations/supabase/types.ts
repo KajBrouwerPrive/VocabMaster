@@ -46,6 +46,7 @@ export type Database = {
           created_at: string
           id: string
           incorrect_count: number
+          quiz_view_count: number
           seen: boolean
           source_language: string
           source_word: string
@@ -60,6 +61,7 @@ export type Database = {
           created_at?: string
           id?: string
           incorrect_count?: number
+          quiz_view_count?: number
           seen?: boolean
           source_language?: string
           source_word: string
@@ -74,6 +76,7 @@ export type Database = {
           created_at?: string
           id?: string
           incorrect_count?: number
+          quiz_view_count?: number
           seen?: boolean
           source_language?: string
           source_word?: string
