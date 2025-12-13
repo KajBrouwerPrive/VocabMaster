@@ -1,9 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Valid language codes
+const validLanguages = ['nl', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko'];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -11,9 +15,68 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing Authorization header');
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+    
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication failed:', authError?.message);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Authenticated user: ${user.id}`);
+
     const { word, sourceLanguage, targetLanguage } = await req.json();
     
-    console.log(`Translating "${word}" from ${sourceLanguage} to ${targetLanguage}`);
+    // Input validation
+    if (!word || typeof word !== 'string' || word.trim().length === 0) {
+      return new Response(JSON.stringify({ error: 'Word is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    if (word.length > 100) {
+      return new Response(JSON.stringify({ error: 'Word must be less than 100 characters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    if (!sourceLanguage || !validLanguages.includes(sourceLanguage)) {
+      return new Response(JSON.stringify({ error: 'Invalid source language' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    if (!targetLanguage || !validLanguages.includes(targetLanguage)) {
+      return new Response(JSON.stringify({ error: 'Invalid target language' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const sanitizedWord = word.trim();
+    
+    console.log(`Translating "${sanitizedWord}" from ${sourceLanguage} to ${targetLanguage} for user ${user.id}`);
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -35,7 +98,7 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Translate: "${word}"`
+            content: `Translate: "${sanitizedWord}"`
           }
         ],
       }),
@@ -70,7 +133,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error in translate-word:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: 'An error occurred while translating' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

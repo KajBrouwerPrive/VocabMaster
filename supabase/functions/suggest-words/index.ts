@@ -6,40 +6,103 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Valid language codes
+const validLanguages = ['nl', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko'];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('Missing Authorization header');
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+    const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    // Validate user with anon key client
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication failed:', authError?.message);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log(`Authenticated user: ${user.id}`);
+
     const { sourceLanguage, targetLanguage, category, count = 10 } = await req.json();
     
-    console.log(`Suggesting ${count} ${category || 'common'} words from ${sourceLanguage} to ${targetLanguage}`);
+    // Input validation
+    if (!sourceLanguage || !validLanguages.includes(sourceLanguage)) {
+      return new Response(JSON.stringify({ error: 'Invalid source language' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    if (!targetLanguage || !validLanguages.includes(targetLanguage)) {
+      return new Response(JSON.stringify({ error: 'Invalid target language' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    // Validate count parameter
+    const validatedCount = Math.min(Math.max(1, parseInt(count) || 10), 50);
+    
+    // Validate category if provided
+    if (category && (typeof category !== 'string' || category.length > 50)) {
+      return new Response(JSON.stringify({ error: 'Category must be a string with max 50 characters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const sanitizedCategory = category ? category.trim().substring(0, 50) : null;
+    
+    console.log(`Suggesting ${validatedCount} ${sanitizedCategory || 'common'} words from ${sourceLanguage} to ${targetLanguage} for user ${user.id}`);
     
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Create Supabase client to check existing words
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+    // Create Supabase client with service role to check existing words
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     
-    // Get existing words to avoid duplicates
+    // Get existing words to avoid duplicates (limit to 500 for prompt safety)
     const { data: existingWords } = await supabase
       .from('words')
       .select('source_word')
       .eq('source_language', sourceLanguage)
-      .eq('target_language', targetLanguage);
+      .eq('target_language', targetLanguage)
+      .limit(500);
     
     const existingWordList = existingWords?.map(w => w.source_word.toLowerCase()) || [];
     console.log(`Found ${existingWordList.length} existing words to exclude`);
 
-    const categoryPrompt = category 
-      ? `from the category "${category}"` 
+    const categoryPrompt = sanitizedCategory 
+      ? `from the category "${sanitizedCategory}"` 
       : 'that are commonly used in daily life';
+
+    // Limit existing word list in prompt to prevent token overflow
+    const existingWordsForPrompt = existingWordList.slice(0, 100).join(', ');
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -54,7 +117,7 @@ serve(async (req) => {
             role: 'system',
             content: `You are a language learning assistant. Generate vocabulary words in ${sourceLanguage} ${categoryPrompt} with their translations to ${targetLanguage}. 
             
-IMPORTANT: Do NOT include any of these words: ${existingWordList.join(', ')}
+IMPORTANT: Do NOT include any of these words: ${existingWordsForPrompt}
 
 Return ONLY a JSON array with objects containing "word" (in ${sourceLanguage}) and "translation" (in ${targetLanguage}).
 Example format: [{"word": "huis", "translation": "house"}, {"word": "auto", "translation": "car"}]
@@ -62,7 +125,7 @@ Return ONLY the JSON array, no other text.`
           },
           {
             role: 'user',
-            content: `Generate ${count} vocabulary words.`
+            content: `Generate ${validatedCount} vocabulary words.`
           }
         ],
       }),
@@ -109,7 +172,7 @@ Return ONLY the JSON array, no other text.`
     });
   } catch (error) {
     console.error('Error in suggest-words:', error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
+    return new Response(JSON.stringify({ error: 'An error occurred while generating suggestions' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
