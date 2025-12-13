@@ -295,8 +295,8 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           </div>
 
           {showTranslation && (
-            <div className="animate-fade-in mb-4">
-              <p className="text-xs text-muted-foreground mb-1">
+            <div className="animate-fade-in mb-4 grid grid-cols-[80px_1fr] items-center gap-2">
+              <p className="text-xs text-muted-foreground text-right">
                 {getLanguageName(currentWord.target_language)}
               </p>
               <p className="text-3xl font-bold text-foreground">
@@ -305,12 +305,14 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             </div>
           )}
 
-          <p className="text-xs text-muted-foreground mb-2">
-            {getLanguageName(currentWord.source_language)}
-          </p>
-          <h2 className={`font-bold text-center transition-all text-primary ${showTranslation ? 'text-xl' : 'text-3xl'}`}>
-            {currentWord.source_word}
-          </h2>
+          <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+            <p className="text-xs text-muted-foreground text-right">
+              {getLanguageName(currentWord.source_language)}
+            </p>
+            <h2 className={`font-bold transition-all text-primary ${showTranslation ? 'text-xl' : 'text-3xl'}`}>
+              {currentWord.source_word}
+            </h2>
+          </div>
 
           {!showTranslation && (
             <p className="text-sm text-muted-foreground mt-4">
