@@ -25,6 +25,9 @@ export function Statistics() {
     }
   };
 
+  // Filter words that user has seen
+  const seenWords = words.filter((word) => word.seen);
+
   // Filter words with more than 2 incorrect answers
   const difficultWords = words.filter((word) => word.incorrect_count > 2);
 
@@ -50,8 +53,8 @@ export function Statistics() {
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-lg bg-secondary/50 text-center">
-              <p className="text-3xl font-bold text-primary">{words.length}</p>
-              <p className="text-sm text-muted-foreground">Totaal woorden</p>
+              <p className="text-3xl font-bold text-primary">{seenWords.length}</p>
+              <p className="text-sm text-muted-foreground">Geziene woorden</p>
             </div>
             <div className="p-4 rounded-lg bg-secondary/50 text-center">
               <p className="text-3xl font-bold text-destructive">{difficultWords.length}</p>
