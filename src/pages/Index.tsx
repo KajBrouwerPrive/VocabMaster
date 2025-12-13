@@ -6,12 +6,13 @@ import { QuizMode } from "@/components/QuizMode";
 import { AddWordForm } from "@/components/AddWordForm";
 import { SuggestWords } from "@/components/SuggestWords";
 import { ImportWords } from "@/components/ImportWords";
+import { Statistics } from "@/components/Statistics";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut, Shield } from "lucide-react";
 
-type View = "learn" | "quiz" | "add" | "suggest" | "import";
+type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -84,6 +85,7 @@ const Index = () => {
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         {currentView === "learn" && <LearnMode refreshTrigger={refreshTrigger} />}
         {currentView === "quiz" && <QuizMode />}
+        {currentView === "stats" && <Statistics />}
         {currentView === "add" && (
           <AddWordForm
             onWordAdded={handleWordsAdded}
