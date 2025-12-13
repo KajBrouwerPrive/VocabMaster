@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getLanguageName } from "@/components/LanguageSelector";
 
 interface QuizResult {
   word: WordWithProgress;
@@ -396,7 +397,7 @@ export function QuizMode() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground mb-2">Vertaal naar het Engels:</p>
+          <p className="text-sm text-muted-foreground mb-2">Vertaal naar het {getLanguageName(currentWord?.target_language || "")}:</p>
           <h2 className="text-3xl font-bold">{currentWord?.source_word}</h2>
         </div>
 
