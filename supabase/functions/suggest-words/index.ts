@@ -27,9 +27,8 @@ serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
-    // Validate user with anon key client
+    // Create authenticated client with user's JWT - respects RLS policies
     const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } }
     });
@@ -83,11 +82,9 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Create Supabase client with service role to check existing words
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
-    // Get existing words to avoid duplicates (limit to 500 for prompt safety)
-    const { data: existingWords } = await supabase
+    // Get existing words to avoid duplicates using authenticated client (respects RLS)
+    // User will only see shared words + their own words, which is the correct behavior
+    const { data: existingWords } = await userClient
       .from('words')
       .select('source_word')
       .eq('source_language', sourceLanguage)
