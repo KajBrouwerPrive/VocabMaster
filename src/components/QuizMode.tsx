@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, getWords, incrementIncorrectCount, incrementQuizViewCount, type Word } from "@/lib/api";
+import { getQuizWords, getWordsWithProgress, incrementIncorrectCount, incrementQuizViewCount, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -24,13 +24,13 @@ import {
 } from "@/components/ui/select";
 
 interface QuizResult {
-  word: Word;
+  word: WordWithProgress;
   userAnswer: string;
   correct: boolean;
 }
 
 export function QuizMode() {
-  const [quizWords, setQuizWords] = useState<Word[]>([]);
+  const [quizWords, setQuizWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +45,7 @@ export function QuizMode() {
   const [retryMode, setRetryMode] = useState(false);
   const [retryAnswer, setRetryAnswer] = useState("");
   const nextButtonRef = useRef<HTMLButtonElement>(null);
-  const [allWords, setAllWords] = useState<Word[]>([]);
+  const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
   const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
 
   // Get unique word types from all seen words
@@ -81,7 +81,7 @@ export function QuizMode() {
 
   const checkAvailableWords = async () => {
     try {
-      const words = await getWords();
+      const words = await getWordsWithProgress();
       setAllWords(words);
       const seenWords = words.filter(w => w.seen);
       setAvailableWordCount(seenWords.length);

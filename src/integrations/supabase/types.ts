@@ -62,6 +62,50 @@ export type Database = {
         }
         Relationships: []
       }
+      user_word_progress: {
+        Row: {
+          created_at: string
+          id: string
+          incorrect_count: number
+          quiz_view_count: number
+          seen: boolean
+          updated_at: string
+          user_id: string
+          view_count: number
+          word_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          incorrect_count?: number
+          quiz_view_count?: number
+          seen?: boolean
+          updated_at?: string
+          user_id: string
+          view_count?: number
+          word_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          incorrect_count?: number
+          quiz_view_count?: number
+          seen?: boolean
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_word_progress_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "words"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       words: {
         Row: {
           created_at: string
