@@ -134,7 +134,12 @@ export function QuizMode() {
       correct: isCorrect,
     };
 
-    setResults((prev) => [...prev, result]);
+    // Only add result if this word hasn't been added yet
+    setResults((prev) => {
+      const alreadyExists = prev.some((r) => r.word.id === currentWord.id);
+      if (alreadyExists) return prev;
+      return [...prev, result];
+    });
     setLastCorrect(isCorrect);
 
     // Increment incorrect count if wrong
