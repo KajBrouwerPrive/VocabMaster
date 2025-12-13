@@ -7,7 +7,8 @@ export interface Word {
   translation: string;
   target_language: string;
   word_type: string | null;
-  user_id: string | null; // null = shared word (admin), uuid = personal word
+  user_id: string | null; // null = shared word, uuid = personal word
+  created_by: string | null; // who added the word
   created_at: string;
   updated_at: string;
 }
@@ -108,6 +109,7 @@ export async function addWord(
       translation: translation,
       target_language: targetLanguage,
       user_id: asShared ? null : user.id,
+      created_by: user.id,
     })
     .select()
     .single();
@@ -141,6 +143,7 @@ export async function addWords(
         translation: w.translation,
         target_language: targetLanguage,
         user_id: asShared ? null : user.id,
+        created_by: user.id,
       }))
     )
     .select();
