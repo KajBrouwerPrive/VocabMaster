@@ -297,7 +297,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           <p className="text-xs text-muted-foreground mb-2">
             {getLanguageName(currentWord.source_language)}
           </p>
-          <h2 className="text-3xl font-bold text-center mb-4">
+          <h2 className="text-3xl font-bold text-center mb-4 text-primary">
             {currentWord.source_word}
           </h2>
 
@@ -306,7 +306,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               <p className="text-xs text-muted-foreground mb-1">
                 {getLanguageName(currentWord.target_language)}
               </p>
-              <p className="text-2xl text-primary font-medium">
+              <p className="text-2xl font-medium">
                 {currentWord.translation}
               </p>
             </div>
