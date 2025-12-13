@@ -216,7 +216,11 @@ export async function getWordsWithProgress(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn");
 
-  let query = supabase.from("words").select("*").order("created_at", { ascending: false });
+  let query = supabase
+    .from("words")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .range(0, 49999); // Remove default 1000 limit
 
   if (sourceLanguage) {
     query = query.eq("source_language", sourceLanguage);
