@@ -295,23 +295,25 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           </div>
 
           {showTranslation && (
-            <div className="animate-fade-in mb-4 grid grid-cols-[80px_1fr] items-center gap-2">
+            <div className="animate-fade-in mb-4 grid grid-cols-[80px_1fr_80px] items-center gap-2 w-full">
               <p className="text-xs text-muted-foreground text-right">
                 {getLanguageName(currentWord.target_language)}
               </p>
-              <p className="text-3xl font-bold text-foreground">
+              <p className="text-3xl font-bold text-foreground text-center">
                 {currentWord.translation}
               </p>
+              <div></div>
             </div>
           )}
 
-          <div className="grid grid-cols-[80px_1fr] items-center gap-2">
+          <div className="grid grid-cols-[80px_1fr_80px] items-center gap-2 w-full">
             <p className="text-xs text-muted-foreground text-right">
               {getLanguageName(currentWord.source_language)}
             </p>
-            <h2 className={`font-bold transition-all text-primary ${showTranslation ? 'text-xl' : 'text-3xl'}`}>
+            <h2 className={`font-bold transition-all text-primary text-center ${showTranslation ? 'text-xl' : 'text-3xl'}`}>
               {currentWord.source_word}
             </h2>
+            <div></div>
           </div>
 
           {!showTranslation && (
