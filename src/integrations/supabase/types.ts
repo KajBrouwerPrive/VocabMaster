@@ -109,11 +109,11 @@ export type Database = {
       words: {
         Row: {
           created_at: string
-          created_by: string | null
           id: string
           incorrect_count: number
           quiz_view_count: number
           seen: boolean
+          shared: string
           source_language: string
           source_word: string
           target_language: string
@@ -125,11 +125,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          created_by?: string | null
           id?: string
           incorrect_count?: number
           quiz_view_count?: number
           seen?: boolean
+          shared?: string
           source_language?: string
           source_word: string
           target_language: string
@@ -141,11 +141,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          created_by?: string | null
           id?: string
           incorrect_count?: number
           quiz_view_count?: number
           seen?: boolean
+          shared?: string
           source_language?: string
           source_word?: string
           target_language?: string

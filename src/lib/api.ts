@@ -8,7 +8,7 @@ export interface Word {
   target_language: string;
   word_type: string | null;
   user_id: string | null; // null = shared word, uuid = personal word
-  created_by: string | null; // who added the word
+  shared: string; // "Yes" if added by admin, "No" otherwise
   created_at: string;
   updated_at: string;
 }
@@ -90,6 +90,18 @@ export async function getWordSuggestions(
   return data.suggestions;
 }
 
+// Check if user has admin role
+async function checkIsAdmin(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
+  
+  return !!data;
+}
+
 // Add a word to the database
 export async function addWord(
   sourceWord: string,
@@ -101,6 +113,8 @@ export async function addWord(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn om woorden toe te voegen");
 
+  const isAdmin = await checkIsAdmin(user.id);
+
   const { data, error } = await supabase
     .from("words")
     .insert({
@@ -109,7 +123,7 @@ export async function addWord(
       translation: translation,
       target_language: targetLanguage,
       user_id: asShared ? null : user.id,
-      created_by: user.id,
+      shared: isAdmin ? "Yes" : "No",
     })
     .select()
     .single();
@@ -134,6 +148,8 @@ export async function addWords(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn om woorden toe te voegen");
 
+  const isAdmin = await checkIsAdmin(user.id);
+
   const { data, error } = await supabase
     .from("words")
     .insert(
@@ -143,7 +159,7 @@ export async function addWords(
         translation: w.translation,
         target_language: targetLanguage,
         user_id: asShared ? null : user.id,
-        created_by: user.id,
+        shared: isAdmin ? "Yes" : "No",
       }))
     )
     .select();
