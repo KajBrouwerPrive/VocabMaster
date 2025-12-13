@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getWords, markWordAsSeen, deleteWord, incrementViewCount, type Word } from "@/lib/api";
+import { getWordsWithProgress, markWordAsSeen, deleteWord, incrementViewCount, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Book,
@@ -28,7 +28,7 @@ interface LearnModeProps {
 }
 
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
-  const [allWords, setAllWords] = useState<Word[]>([]);
+  const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +53,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     return allWords.filter((word) => word.word_type === wordTypeFilter);
   }, [allWords, wordTypeFilter]);
 
-  const shuffleWords = (wordsToShuffle: Word[]) => {
+  const shuffleWords = (wordsToShuffle: WordWithProgress[]) => {
     const shuffled = [...wordsToShuffle];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -122,7 +122,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const loadWords = async () => {
     setIsLoading(true);
     try {
-      const data = await getWords();
+      const data = await getWordsWithProgress();
       setAllWords(data);
       setCurrentIndex(0);
       setShowTranslation(false);
