@@ -6,6 +6,19 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { translateWord, addWord } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2, Plus, Sparkles } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const WORD_TYPES = [
+  { value: "zelfstandig naamwoord", label: "Zelfstandig naamwoord" },
+  { value: "werkwoord", label: "Werkwoord" },
+  { value: "overig", label: "Overig" },
+];
 
 interface AddWordFormProps {
   onWordAdded: () => void;
@@ -20,6 +33,7 @@ export function AddWordForm({
 }: AddWordFormProps) {
   const [word, setWord] = useState("");
   const [translation, setTranslation] = useState("");
+  const [wordType, setWordType] = useState<string>("overig");
   const [sourceLanguage, setSourceLanguage] = useState(defaultSourceLanguage);
   const [targetLanguage, setTargetLanguage] = useState(defaultTargetLanguage);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -53,10 +67,11 @@ export function AddWordForm({
 
     setIsAdding(true);
     try {
-      await addWord(word, sourceLanguage, translation, targetLanguage);
+      await addWord(word, sourceLanguage, translation, targetLanguage, false, wordType);
       toast.success("Woord toegevoegd!");
       setWord("");
       setTranslation("");
+      setWordType("overig");
       onWordAdded();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Toevoegen mislukt");
@@ -122,6 +137,22 @@ export function AddWordForm({
               onChange={(e) => setTranslation(e.target.value)}
               placeholder="Vertaling..."
             />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Woordsoort</label>
+            <Select value={wordType} onValueChange={setWordType}>
+              <SelectTrigger className="w-full bg-background">
+                <SelectValue placeholder="Selecteer woordsoort" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {WORD_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Button
