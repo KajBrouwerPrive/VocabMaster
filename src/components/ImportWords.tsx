@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, FileSpreadsheet, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ImportWordsProps {
   onWordsAdded: () => void;
@@ -17,10 +19,33 @@ interface ParsedWord {
 }
 
 export function ImportWords({ onWordsAdded }: ImportWordsProps) {
+  const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [parsedWords, setParsedWords] = useState<ParsedWord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Only admins can import words
+  if (roleLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          Laden...
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center text-muted-foreground">
+          Alleen admins kunnen woorden importeren.
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,12 +92,13 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
 
   const handleImport = async () => {
     if (parsedWords.length === 0) return;
+    if (!user) {
+      toast.error("Je moet ingelogd zijn");
+      return;
+    }
 
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Je moet ingelogd zijn");
-
       // Get existing words to check for duplicates (constraint is on source_word + languages)
       const { data: existingWords } = await supabase
         .from("words")
@@ -97,14 +123,15 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
         return;
       }
 
-      // Admin imports words as shared (user_id = null) so everyone can see them
+      // Admin imports words with their user_id and shared='Yes' so everyone can see them
       const wordsToInsert = newWords.map((w) => ({
         source_word: w.sourceWord,
         source_language: "nl",
         translation: w.translation,
         target_language: "es",
         word_type: w.wordType || null,
-        user_id: null, // Shared words for all users
+        user_id: user.id,
+        shared: "Yes",
       }));
 
       const { error } = await supabase.from("words").insert(wordsToInsert);
