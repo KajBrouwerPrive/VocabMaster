@@ -273,6 +273,13 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
                   })
                   .catch(() => {});
               }
+              // Go to next word or restart cycle
+              if (currentIndex < words.length - 1) {
+                setCurrentIndex(currentIndex + 1);
+              } else {
+                setAllWords(shuffleWords(allWords));
+                setCurrentIndex(0);
+              }
             }
           }}
         >
