@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/select";
 
 const WORD_TYPES = [
-  { value: "zelfstandig naamwoord", label: "Zelfstandig naamwoord" },
-  { value: "werkwoord", label: "Werkwoord" },
-  { value: "overig", label: "Overig" },
+  { value: "zelfstandig naamwoord", label: "zelfstandig naamwoord" },
+  { value: "werkwoord", label: "werkwoord" },
+  { value: "overig", label: "overig" },
 ];
 
 interface AddWordFormProps {
