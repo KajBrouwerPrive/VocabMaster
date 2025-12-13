@@ -294,23 +294,23 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground mb-2">
-            {getLanguageName(currentWord.source_language)}
-          </p>
-          <h2 className={`font-bold text-center mb-4 text-primary transition-all ${showTranslation ? 'text-4xl' : 'text-3xl'}`}>
-            {currentWord.source_word}
-          </h2>
-
           {showTranslation && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in mb-4">
               <p className="text-xs text-muted-foreground mb-1">
                 {getLanguageName(currentWord.target_language)}
               </p>
-              <p className="text-xl font-medium">
+              <p className="text-3xl font-bold text-primary">
                 {currentWord.translation}
               </p>
             </div>
           )}
+
+          <p className="text-xs text-muted-foreground mb-2">
+            {getLanguageName(currentWord.source_language)}
+          </p>
+          <h2 className={`font-bold text-center transition-all ${showTranslation ? 'text-xl' : 'text-3xl text-primary'}`}>
+            {currentWord.source_word}
+          </h2>
 
           {!showTranslation && (
             <p className="text-sm text-muted-foreground mt-4">
