@@ -217,7 +217,7 @@ export async function getWordsWithProgress(
   if (!user) throw new Error("Je moet ingelogd zijn");
 
   let query = supabase
-    .from("words")
+    .from("words_secure")
     .select("*")
     .order("created_at", { ascending: false })
     .range(0, 49999); // Remove default 1000 limit
@@ -264,7 +264,7 @@ export async function getWords(
   sourceLanguage?: string,
   targetLanguage?: string
 ): Promise<Word[]> {
-  let query = supabase.from("words").select("*").order("created_at", { ascending: false });
+  let query = supabase.from("words_secure").select("*").order("created_at", { ascending: false });
 
   if (sourceLanguage) {
     query = query.eq("source_language", sourceLanguage);
