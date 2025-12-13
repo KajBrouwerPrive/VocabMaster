@@ -100,16 +100,12 @@ const Index = () => {
             defaultTargetLanguage={defaultTargetLanguage}
           />
         )}
-        {currentView === "import" && (
-          <ImportWords onWordsAdded={handleWordsAdded} />
-        )}
+        {currentView === "import" && <ImportWords onWordsAdded={handleWordsAdded} />}
       </main>
 
       {/* Footer */}
       <footer className="border-t mt-auto py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          Leer woordjes met AI-vertalingen
-        </div>
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">Simpel woordjes leren</div>
       </footer>
     </div>
   );
