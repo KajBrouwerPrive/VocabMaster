@@ -248,7 +248,33 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         {/* Word Card */}
         <div
           className="relative min-h-[200px] rounded-xl bg-secondary/50 p-8 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-secondary/70"
-          onClick={() => setShowTranslation(!showTranslation)}
+          onClick={() => {
+            if (!showTranslation) {
+              setShowTranslation(true);
+              // Increment view count when showing translation
+              if (currentWord) {
+                incrementViewCount(currentWord.id)
+                  .then(() => {
+                    setAllWords((prev) =>
+                      prev.map((w) => (w.id === currentWord.id ? { ...w, view_count: (w.view_count || 0) + 1 } : w))
+                    );
+                  })
+                  .catch(() => {});
+              }
+            } else {
+              setShowTranslation(false);
+              // Mark as seen when hiding translation
+              if (currentWord && !currentWord.seen) {
+                markWordAsSeen(currentWord.id)
+                  .then(() => {
+                    setAllWords((prev) =>
+                      prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
+                    );
+                  })
+                  .catch(() => {});
+              }
+            }
+          }}
         >
           <div className="absolute top-4 right-4 flex items-center gap-2">
             {currentWord.view_count > 0 && (
