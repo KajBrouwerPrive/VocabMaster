@@ -23,13 +23,30 @@ interface ConjugationLearnModeProps {
   refreshTrigger: number;
 }
 
-type TenseType = "present" | "past" | "perfect";
+type TenseType = 
+  | "present" 
+  | "past" 
+  | "perfect" 
+  | "indefinido" 
+  | "futuro" 
+  | "futuro_perfecto" 
+  | "condicional" 
+  | "pluscuamperfecto" 
+  | "subjuntivo_presente" 
+  | "subjuntivo_imperfecto";
 
 const PRONOUNS = ["ik", "jij", "hij/zij", "wij", "jullie"];
 const TENSE_LABELS: Record<TenseType, string> = {
-  present: "Tegenwoordige tijd",
-  past: "Verleden tijd",
-  perfect: "Voltooide tijd",
+  present: "Presente",
+  past: "Imperfecto",
+  perfect: "Perfecto",
+  indefinido: "Indefinido",
+  futuro: "Futuro",
+  futuro_perfecto: "Futuro Perfecto",
+  condicional: "Condicional",
+  pluscuamperfecto: "Pluscuamperfecto",
+  subjuntivo_presente: "Subj. Presente",
+  subjuntivo_imperfecto: "Subj. Imperfecto",
 };
 
 export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModeProps) {

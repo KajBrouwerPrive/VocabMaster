@@ -8,6 +8,12 @@ import { Loader2, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { addConjugation } from "@/lib/conjugationApi";
 import { useUserRole } from "@/hooks/useUserRole";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface AddConjugationFormProps {
   onConjugationAdded: () => void;
@@ -21,6 +27,40 @@ const PRONOUNS = [
   { key: "jullie", label: "jullie" },
 ];
 
+const TENSES = [
+  { key: "present", label: "Presente (tegenwoordige tijd)" },
+  { key: "past", label: "Imperfecto (verleden tijd onvoltooid)" },
+  { key: "perfect", label: "Perfecto Compuesto (voltooide tijd)" },
+  { key: "indefinido", label: "Pretérito Indefinido (verleden tijd voltooid)" },
+  { key: "futuro", label: "Futuro Simple (zal-vorm)" },
+  { key: "futuro_perfecto", label: "Futuro Perfecto (zal hebben-vorm)" },
+  { key: "condicional", label: "Condicional (zou-vorm)" },
+  { key: "pluscuamperfecto", label: "Pluscuamperfecto (had-vorm)" },
+  { key: "subjuntivo_presente", label: "Subjuntivo Presente" },
+  { key: "subjuntivo_imperfecto", label: "Subjuntivo Imperfecto" },
+];
+
+type TenseKey = typeof TENSES[number]["key"];
+type PronounKey = "ik" | "jij" | "hij_zij" | "wij" | "jullie";
+type TenseForms = Record<PronounKey, string>;
+type AllTenseForms = Record<TenseKey, TenseForms>;
+
+const createEmptyForms = (): TenseForms => ({
+  ik: "",
+  jij: "",
+  hij_zij: "",
+  wij: "",
+  jullie: "",
+});
+
+const createAllEmptyForms = (): AllTenseForms => {
+  const forms: Partial<AllTenseForms> = {};
+  TENSES.forEach((tense) => {
+    forms[tense.key] = createEmptyForms();
+  });
+  return forms as AllTenseForms;
+};
+
 export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormProps) {
   const { isAdmin } = useUserRole();
   const { toast } = useToast();
@@ -29,38 +69,23 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
 
   const [infinitive, setInfinitive] = useState("");
   const [translation, setTranslation] = useState("");
-
-  const [presentForms, setPresentForms] = useState({
-    ik: "",
-    jij: "",
-    hij_zij: "",
-    wij: "",
-    jullie: "",
-  });
-
-  const [pastForms, setPastForms] = useState({
-    ik: "",
-    jij: "",
-    hij_zij: "",
-    wij: "",
-    jullie: "",
-  });
-
-  const [perfectForms, setPerfectForms] = useState({
-    ik: "",
-    jij: "",
-    hij_zij: "",
-    wij: "",
-    jullie: "",
-  });
+  const [allForms, setAllForms] = useState<AllTenseForms>(createAllEmptyForms());
 
   const resetForm = () => {
     setInfinitive("");
     setTranslation("");
-    setPresentForms({ ik: "", jij: "", hij_zij: "", wij: "", jullie: "" });
-    setPastForms({ ik: "", jij: "", hij_zij: "", wij: "", jullie: "" });
-    setPerfectForms({ ik: "", jij: "", hij_zij: "", wij: "", jullie: "" });
+    setAllForms(createAllEmptyForms());
     setShared(false);
+  };
+
+  const updateForm = (tense: TenseKey, pronoun: PronounKey, value: string) => {
+    setAllForms((prev) => ({
+      ...prev,
+      [tense]: {
+        ...prev[tense],
+        [pronoun]: value,
+      },
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,15 +100,12 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
       return;
     }
 
-    // Check all forms are filled
-    const allPresentFilled = Object.values(presentForms).every((v) => v.trim());
-    const allPastFilled = Object.values(pastForms).every((v) => v.trim());
-    const allPerfectFilled = Object.values(perfectForms).every((v) => v.trim());
-
-    if (!allPresentFilled || !allPastFilled || !allPerfectFilled) {
+    // Check at least present tense is filled (basic requirement)
+    const presentFilled = Object.values(allForms.present).every((v) => v.trim());
+    if (!presentFilled) {
       toast({
         title: "Fout",
-        description: "Vul alle vervoegingen in",
+        description: "Vul minimaal de presente (tegenwoordige tijd) in",
         variant: "destructive",
       });
       return;
@@ -96,21 +118,66 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
         translation: translation.trim(),
         source_language: "nl",
         target_language: "en",
-        present_ik: presentForms.ik.trim(),
-        present_jij: presentForms.jij.trim(),
-        present_hij_zij: presentForms.hij_zij.trim(),
-        present_wij: presentForms.wij.trim(),
-        present_jullie: presentForms.jullie.trim(),
-        past_ik: pastForms.ik.trim(),
-        past_jij: pastForms.jij.trim(),
-        past_hij_zij: pastForms.hij_zij.trim(),
-        past_wij: pastForms.wij.trim(),
-        past_jullie: pastForms.jullie.trim(),
-        perfect_ik: perfectForms.ik.trim(),
-        perfect_jij: perfectForms.jij.trim(),
-        perfect_hij_zij: perfectForms.hij_zij.trim(),
-        perfect_wij: perfectForms.wij.trim(),
-        perfect_jullie: perfectForms.jullie.trim(),
+        // Present
+        present_ik: allForms.present.ik.trim(),
+        present_jij: allForms.present.jij.trim(),
+        present_hij_zij: allForms.present.hij_zij.trim(),
+        present_wij: allForms.present.wij.trim(),
+        present_jullie: allForms.present.jullie.trim(),
+        // Past (Imperfecto)
+        past_ik: allForms.past.ik.trim(),
+        past_jij: allForms.past.jij.trim(),
+        past_hij_zij: allForms.past.hij_zij.trim(),
+        past_wij: allForms.past.wij.trim(),
+        past_jullie: allForms.past.jullie.trim(),
+        // Perfect
+        perfect_ik: allForms.perfect.ik.trim(),
+        perfect_jij: allForms.perfect.jij.trim(),
+        perfect_hij_zij: allForms.perfect.hij_zij.trim(),
+        perfect_wij: allForms.perfect.wij.trim(),
+        perfect_jullie: allForms.perfect.jullie.trim(),
+        // Indefinido
+        indefinido_ik: allForms.indefinido.ik.trim(),
+        indefinido_jij: allForms.indefinido.jij.trim(),
+        indefinido_hij_zij: allForms.indefinido.hij_zij.trim(),
+        indefinido_wij: allForms.indefinido.wij.trim(),
+        indefinido_jullie: allForms.indefinido.jullie.trim(),
+        // Futuro
+        futuro_ik: allForms.futuro.ik.trim(),
+        futuro_jij: allForms.futuro.jij.trim(),
+        futuro_hij_zij: allForms.futuro.hij_zij.trim(),
+        futuro_wij: allForms.futuro.wij.trim(),
+        futuro_jullie: allForms.futuro.jullie.trim(),
+        // Futuro Perfecto
+        futuro_perfecto_ik: allForms.futuro_perfecto.ik.trim(),
+        futuro_perfecto_jij: allForms.futuro_perfecto.jij.trim(),
+        futuro_perfecto_hij_zij: allForms.futuro_perfecto.hij_zij.trim(),
+        futuro_perfecto_wij: allForms.futuro_perfecto.wij.trim(),
+        futuro_perfecto_jullie: allForms.futuro_perfecto.jullie.trim(),
+        // Condicional
+        condicional_ik: allForms.condicional.ik.trim(),
+        condicional_jij: allForms.condicional.jij.trim(),
+        condicional_hij_zij: allForms.condicional.hij_zij.trim(),
+        condicional_wij: allForms.condicional.wij.trim(),
+        condicional_jullie: allForms.condicional.jullie.trim(),
+        // Pluscuamperfecto
+        pluscuamperfecto_ik: allForms.pluscuamperfecto.ik.trim(),
+        pluscuamperfecto_jij: allForms.pluscuamperfecto.jij.trim(),
+        pluscuamperfecto_hij_zij: allForms.pluscuamperfecto.hij_zij.trim(),
+        pluscuamperfecto_wij: allForms.pluscuamperfecto.wij.trim(),
+        pluscuamperfecto_jullie: allForms.pluscuamperfecto.jullie.trim(),
+        // Subjuntivo Presente
+        subjuntivo_presente_ik: allForms.subjuntivo_presente.ik.trim(),
+        subjuntivo_presente_jij: allForms.subjuntivo_presente.jij.trim(),
+        subjuntivo_presente_hij_zij: allForms.subjuntivo_presente.hij_zij.trim(),
+        subjuntivo_presente_wij: allForms.subjuntivo_presente.wij.trim(),
+        subjuntivo_presente_jullie: allForms.subjuntivo_presente.jullie.trim(),
+        // Subjuntivo Imperfecto
+        subjuntivo_imperfecto_ik: allForms.subjuntivo_imperfecto.ik.trim(),
+        subjuntivo_imperfecto_jij: allForms.subjuntivo_imperfecto.jij.trim(),
+        subjuntivo_imperfecto_hij_zij: allForms.subjuntivo_imperfecto.hij_zij.trim(),
+        subjuntivo_imperfecto_wij: allForms.subjuntivo_imperfecto.wij.trim(),
+        subjuntivo_imperfecto_jullie: allForms.subjuntivo_imperfecto.jullie.trim(),
         shared: shared ? "Yes" : "No",
       });
 
@@ -133,6 +200,25 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
     }
   };
 
+  const renderTenseInputs = (tenseKey: TenseKey) => (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      {PRONOUNS.map((p) => (
+        <div key={`${tenseKey}-${p.key}`} className="space-y-1">
+          <Label htmlFor={`${tenseKey}-${p.key}`} className="text-xs text-muted-foreground">
+            {p.label}
+          </Label>
+          <Input
+            id={`${tenseKey}-${p.key}`}
+            value={allForms[tenseKey][p.key as PronounKey]}
+            onChange={(e) => updateForm(tenseKey, p.key as PronounKey, e.target.value)}
+            placeholder={`${p.label}...`}
+            maxLength={100}
+          />
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -146,104 +232,40 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="infinitive">Infinitief (NL)</Label>
+              <Label htmlFor="infinitive">Infinitief</Label>
               <Input
                 id="infinitive"
                 value={infinitive}
                 onChange={(e) => setInfinitive(e.target.value)}
-                placeholder="lopen"
+                placeholder="hablar"
                 maxLength={100}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="translation">Vertaling (EN)</Label>
+              <Label htmlFor="translation">Vertaling</Label>
               <Input
                 id="translation"
                 value={translation}
                 onChange={(e) => setTranslation(e.target.value)}
-                placeholder="to walk"
+                placeholder="spreken"
                 maxLength={100}
               />
             </div>
           </div>
 
-          {/* Present Tense */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Tegenwoordige tijd</Label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {PRONOUNS.map((p) => (
-                <div key={`present-${p.key}`} className="space-y-1">
-                  <Label htmlFor={`present-${p.key}`} className="text-xs text-muted-foreground">
-                    {p.label}
-                  </Label>
-                  <Input
-                    id={`present-${p.key}`}
-                    value={presentForms[p.key as keyof typeof presentForms]}
-                    onChange={(e) =>
-                      setPresentForms((prev) => ({
-                        ...prev,
-                        [p.key]: e.target.value,
-                      }))
-                    }
-                    placeholder={`${p.label}...`}
-                    maxLength={100}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Past Tense */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Verleden tijd</Label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {PRONOUNS.map((p) => (
-                <div key={`past-${p.key}`} className="space-y-1">
-                  <Label htmlFor={`past-${p.key}`} className="text-xs text-muted-foreground">
-                    {p.label}
-                  </Label>
-                  <Input
-                    id={`past-${p.key}`}
-                    value={pastForms[p.key as keyof typeof pastForms]}
-                    onChange={(e) =>
-                      setPastForms((prev) => ({
-                        ...prev,
-                        [p.key]: e.target.value,
-                      }))
-                    }
-                    placeholder={`${p.label}...`}
-                    maxLength={100}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Perfect Tense */}
-          <div className="space-y-3">
-            <Label className="text-base font-semibold">Voltooide tijd</Label>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {PRONOUNS.map((p) => (
-                <div key={`perfect-${p.key}`} className="space-y-1">
-                  <Label htmlFor={`perfect-${p.key}`} className="text-xs text-muted-foreground">
-                    {p.label}
-                  </Label>
-                  <Input
-                    id={`perfect-${p.key}`}
-                    value={perfectForms[p.key as keyof typeof perfectForms]}
-                    onChange={(e) =>
-                      setPerfectForms((prev) => ({
-                        ...prev,
-                        [p.key]: e.target.value,
-                      }))
-                    }
-                    placeholder={`${p.label}...`}
-                    maxLength={100}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Tenses in Accordion */}
+          <Accordion type="multiple" defaultValue={["present"]} className="w-full">
+            {TENSES.map((tense) => (
+              <AccordionItem key={tense.key} value={tense.key}>
+                <AccordionTrigger className="text-sm font-semibold">
+                  {tense.label}
+                </AccordionTrigger>
+                <AccordionContent className="pt-2">
+                  {renderTenseInputs(tense.key)}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
 
           {/* Shared Toggle (Admin only) */}
           {isAdmin && (
