@@ -18,6 +18,7 @@ import {
   incrementConjugationViewCount,
   VerbConjugationWithProgress,
 } from "@/lib/conjugationApi";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ConjugationLearnModeProps {
   refreshTrigger: number;
@@ -42,18 +43,31 @@ const TENSE_LABELS: Record<TenseType, string> = {
   perfect: "Perfecto",
   indefinido: "Indefinido",
   futuro: "Futuro",
-  futuro_perfecto: "Futuro Perfecto",
+  futuro_perfecto: "Futuro Perf.",
   condicional: "Condicional",
-  pluscuamperfecto: "Pluscuamperfecto",
-  subjuntivo_presente: "Subj. Presente",
-  subjuntivo_imperfecto: "Subj. Imperfecto",
+  pluscuamperfecto: "Pluscuamperf.",
+  subjuntivo_presente: "Subj. Pres.",
+  subjuntivo_imperfecto: "Subj. Imperf.",
 };
+
+const ALL_TENSES: TenseType[] = [
+  "present",
+  "past",
+  "perfect",
+  "indefinido",
+  "futuro",
+  "futuro_perfecto",
+  "condicional",
+  "pluscuamperfecto",
+  "subjuntivo_presente",
+  "subjuntivo_imperfecto",
+];
 
 export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModeProps) {
   const [allConjugations, setAllConjugations] = useState<VerbConjugationWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showConjugations, setShowConjugations] = useState(false);
-  const [selectedTense, setSelectedTense] = useState<TenseType>("present");
+  const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -90,7 +104,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         if (!showConjugations) {
-          setShowConjugations(true);
+          handleShowConjugations();
         } else {
           goNext();
         }
@@ -110,6 +124,27 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       conj[`${prefix}_wij` as keyof VerbConjugationWithProgress] as string,
       conj[`${prefix}_jullie` as keyof VerbConjugationWithProgress] as string,
     ];
+  };
+
+  const toggleTense = (tense: TenseType) => {
+    setSelectedTenses((prev) => {
+      if (prev.includes(tense)) {
+        // Don't allow deselecting if it's the only one
+        if (prev.length === 1) return prev;
+        return prev.filter((t) => t !== tense);
+      } else {
+        // Max 3 tenses
+        if (prev.length >= 3) {
+          toast({
+            title: "Maximum bereikt",
+            description: "Je kunt maximaal 3 tijden selecteren",
+          });
+          return prev;
+        }
+        return [...prev, tense];
+      }
+    });
+    setShowConjugations(false);
   };
 
   const goNext = useCallback(() => {
@@ -213,26 +248,34 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     );
   }
 
-  const forms = getConjugationForms(currentConjugation, selectedTense);
-
   return (
     <div className="space-y-4">
-      {/* Tense Selection */}
-      <div className="flex justify-center gap-2 flex-wrap">
-        {(Object.keys(TENSE_LABELS) as TenseType[]).map((tense) => (
-          <Button
-            key={tense}
-            variant={selectedTense === tense ? "default" : "outline"}
-            size="sm"
-            onClick={() => {
-              setSelectedTense(tense);
-              setShowConjugations(false);
-            }}
-          >
-            {TENSE_LABELS[tense]}
-          </Button>
-        ))}
-      </div>
+      {/* Tense Selection with Checkboxes */}
+      <Card>
+        <CardContent className="p-4">
+          <p className="text-sm text-muted-foreground mb-3">
+            Selecteer maximaal 3 tijden:
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            {ALL_TENSES.map((tense) => (
+              <label
+                key={tense}
+                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                  selectedTenses.includes(tense)
+                    ? "bg-primary/10 border border-primary/30"
+                    : "bg-secondary/30 border border-transparent hover:bg-secondary/50"
+                }`}
+              >
+                <Checkbox
+                  checked={selectedTenses.includes(tense)}
+                  onCheckedChange={() => toggleTense(tense)}
+                />
+                <span className="text-xs font-medium">{TENSE_LABELS[tense]}</span>
+              </label>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Card */}
       <Card className="overflow-hidden">
@@ -244,7 +287,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
             </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4">
           {!showConjugations ? (
             <Button
               onClick={handleShowConjugations}
@@ -252,21 +295,37 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
               className="w-full h-24 text-lg"
             >
               <Eye className="h-5 w-5 mr-2" />
-              Toon {TENSE_LABELS[selectedTense]}
+              Toon vervoegingen
             </Button>
           ) : (
-            <div className="space-y-3 animate-in fade-in duration-300">
-              {PRONOUNS.map((pronoun, index) => (
-                <div
-                  key={pronoun}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
-                >
-                  <span className="font-medium text-muted-foreground w-20">
-                    {pronoun}
-                  </span>
-                  <span className="text-lg font-semibold">{forms[index]}</span>
-                </div>
-              ))}
+            <div className="animate-in fade-in duration-300 overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2 font-medium text-muted-foreground">Persoon</th>
+                    {selectedTenses.map((tense) => (
+                      <th key={tense} className="text-left p-2 font-medium text-primary">
+                        {TENSE_LABELS[tense]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {PRONOUNS.map((pronoun, idx) => (
+                    <tr key={pronoun} className="border-b last:border-0">
+                      <td className="p-2 font-medium text-muted-foreground">{pronoun}</td>
+                      {selectedTenses.map((tense) => {
+                        const forms = getConjugationForms(currentConjugation, tense);
+                        return (
+                          <td key={tense} className="p-2 font-semibold">
+                            {forms[idx] || "-"}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardContent>
