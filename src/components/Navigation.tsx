@@ -1,7 +1,7 @@
-import { Book, GraduationCap, Plus, Brain, FileSpreadsheet, BarChart3 } from "lucide-react";
+import { Book, GraduationCap, Plus, Brain, FileSpreadsheet, BarChart3, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats";
+type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats" | "conjugations" | "add-conjugation";
 
 interface NavigationProps {
   currentView: View;
@@ -12,9 +12,11 @@ interface NavigationProps {
 export function Navigation({ currentView, onViewChange, isAdmin }: NavigationProps) {
   const navItems = [
     { id: "learn" as View, label: "Leren", icon: Book, adminOnly: false },
+    { id: "conjugations" as View, label: "Vervoegingen", icon: GitBranch, adminOnly: false },
     { id: "quiz" as View, label: "Toets", icon: GraduationCap, adminOnly: false },
     { id: "stats" as View, label: "Statistieken", icon: BarChart3, adminOnly: false },
-    { id: "add" as View, label: "Toevoegen", icon: Plus, adminOnly: false },
+    { id: "add" as View, label: "Woord +", icon: Plus, adminOnly: false },
+    { id: "add-conjugation" as View, label: "Werkwoord +", icon: Plus, adminOnly: false },
     { id: "suggest" as View, label: "AI Suggesties", icon: Brain, adminOnly: true },
     { id: "import" as View, label: "Importeren", icon: FileSpreadsheet, adminOnly: true },
   ];
@@ -29,6 +31,7 @@ export function Navigation({ currentView, onViewChange, isAdmin }: NavigationPro
           variant={currentView === item.id ? "default" : "outline"}
           onClick={() => onViewChange(item.id)}
           className="gap-2"
+          size="sm"
         >
           <item.icon className="h-4 w-4" />
           {item.label}

@@ -7,12 +7,14 @@ import { AddWordForm } from "@/components/AddWordForm";
 import { SuggestWords } from "@/components/SuggestWords";
 import { ImportWords } from "@/components/ImportWords";
 import { Statistics } from "@/components/Statistics";
+import { ConjugationLearnMode } from "@/components/ConjugationLearnMode";
+import { AddConjugationForm } from "@/components/AddConjugationForm";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut, Shield } from "lucide-react";
 
-type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats";
+type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats" | "conjugations" | "add-conjugation";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -20,6 +22,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<View>("learn");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [conjugationRefreshTrigger, setConjugationRefreshTrigger] = useState(0);
   const [defaultSourceLanguage] = useState("nl");
   const [defaultTargetLanguage] = useState("en");
 
@@ -31,6 +34,10 @@ const Index = () => {
 
   const handleWordsAdded = () => {
     setRefreshTrigger((prev) => prev + 1);
+  };
+
+  const handleConjugationsAdded = () => {
+    setConjugationRefreshTrigger((prev) => prev + 1);
   };
 
   const handleSignOut = async () => {
@@ -84,6 +91,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         {currentView === "learn" && <LearnMode refreshTrigger={refreshTrigger} />}
+        {currentView === "conjugations" && <ConjugationLearnMode refreshTrigger={conjugationRefreshTrigger} />}
         {currentView === "quiz" && <QuizMode />}
         {currentView === "stats" && <Statistics />}
         {currentView === "add" && (
@@ -92,6 +100,9 @@ const Index = () => {
             defaultSourceLanguage={defaultSourceLanguage}
             defaultTargetLanguage={defaultTargetLanguage}
           />
+        )}
+        {currentView === "add-conjugation" && (
+          <AddConjugationForm onConjugationAdded={handleConjugationsAdded} />
         )}
         {currentView === "suggest" && (
           <SuggestWords
