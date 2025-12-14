@@ -7,21 +7,66 @@ export interface VerbConjugation {
   translation: string;
   source_language: string;
   target_language: string;
+  // Presente (tegenwoordige tijd)
   present_ik: string;
   present_jij: string;
   present_hij_zij: string;
   present_wij: string;
   present_jullie: string;
+  // Imperfecto (verleden tijd onvoltooid)
   past_ik: string;
   past_jij: string;
   past_hij_zij: string;
   past_wij: string;
   past_jullie: string;
+  // Perfecto compuesto (voltooide tijd)
   perfect_ik: string;
   perfect_jij: string;
   perfect_hij_zij: string;
   perfect_wij: string;
   perfect_jullie: string;
+  // Pretérito indefinido (verleden tijd voltooid)
+  indefinido_ik: string;
+  indefinido_jij: string;
+  indefinido_hij_zij: string;
+  indefinido_wij: string;
+  indefinido_jullie: string;
+  // Futuro simple (zal-vorm)
+  futuro_ik: string;
+  futuro_jij: string;
+  futuro_hij_zij: string;
+  futuro_wij: string;
+  futuro_jullie: string;
+  // Futuro perfecto (zal hebben-vorm)
+  futuro_perfecto_ik: string;
+  futuro_perfecto_jij: string;
+  futuro_perfecto_hij_zij: string;
+  futuro_perfecto_wij: string;
+  futuro_perfecto_jullie: string;
+  // Condicional (zou-vorm)
+  condicional_ik: string;
+  condicional_jij: string;
+  condicional_hij_zij: string;
+  condicional_wij: string;
+  condicional_jullie: string;
+  // Pluscuamperfecto (had-vorm)
+  pluscuamperfecto_ik: string;
+  pluscuamperfecto_jij: string;
+  pluscuamperfecto_hij_zij: string;
+  pluscuamperfecto_wij: string;
+  pluscuamperfecto_jullie: string;
+  // Subjuntivo presente
+  subjuntivo_presente_ik: string;
+  subjuntivo_presente_jij: string;
+  subjuntivo_presente_hij_zij: string;
+  subjuntivo_presente_wij: string;
+  subjuntivo_presente_jullie: string;
+  // Subjuntivo imperfecto
+  subjuntivo_imperfecto_ik: string;
+  subjuntivo_imperfecto_jij: string;
+  subjuntivo_imperfecto_hij_zij: string;
+  subjuntivo_imperfecto_wij: string;
+  subjuntivo_imperfecto_jullie: string;
   shared: string;
   created_at: string;
   updated_at: string;
