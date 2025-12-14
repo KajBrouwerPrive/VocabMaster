@@ -66,7 +66,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const loadConjugations = useCallback(async () => {
     try {
       setIsLoading(true);
-      const data = await getConjugations("nl", "en");
+      const data = await getConjugations("nl", "es");
       setAllConjugations(data);
       setCurrentIndex(0);
       setShowConjugations(false);
