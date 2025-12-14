@@ -96,7 +96,7 @@ export function QuizMode() {
     try {
       const words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter);
       if (words.length === 0) {
-        toast.error("Geen geziene woorden beschikbaar. Leer eerst woorden in Leer Modus!");
+        toast.error("Geen geleerde woorden beschikbaar. Markeer eerst woorden als geleerd!");
         return;
       }
       setQuizWords(words);
@@ -238,8 +238,8 @@ export function QuizMode() {
             <div className="text-center py-8 space-y-2">
               <p className="text-muted-foreground">
                 {wordTypeFilter === "all" 
-                  ? "Geen geziene woorden beschikbaar."
-                  : `Geen geziene woorden van type "${wordTypeFilter}" beschikbaar.`}
+                  ? "Geen geleerde woorden beschikbaar."
+                  : `Geen geleerde woorden van type "${wordTypeFilter}" beschikbaar.`}
               </p>
               <p className="text-sm text-muted-foreground">
                 Ga naar "Woordjes" en klik op het vinkje (✓) om woorden als geleerd te markeren. 
