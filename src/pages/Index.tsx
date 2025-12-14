@@ -15,7 +15,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut, Shield } from "lucide-react";
 
-type View = "learn" | "quiz" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation";
+type View = "learn" | "quiz" | "quiz-conjugations" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -94,6 +94,11 @@ const Index = () => {
         {currentView === "learn" && <LearnMode refreshTrigger={refreshTrigger} />}
         {currentView === "conjugations" && <ConjugationLearnMode refreshTrigger={conjugationRefreshTrigger} />}
         {currentView === "quiz" && <QuizMode />}
+        {currentView === "quiz-conjugations" && (
+          <div className="text-center py-12 text-muted-foreground">
+            Toets Vervoegingen - binnenkort beschikbaar
+          </div>
+        )}
         {currentView === "stats" && <Statistics />}
         {currentView === "add" && (
           <AddWordForm
