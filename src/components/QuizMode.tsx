@@ -235,11 +235,15 @@ export function QuizMode() {
         </CardHeader>
         <CardContent className="space-y-6">
           {filteredAvailableCount === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-8 space-y-2">
               <p className="text-muted-foreground">
                 {wordTypeFilter === "all" 
-                  ? "Geen geziene woorden beschikbaar. Leer eerst woorden in Leer Modus!"
+                  ? "Geen geziene woorden beschikbaar."
                   : `Geen geziene woorden van type "${wordTypeFilter}" beschikbaar.`}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Ga naar "Woordjes" en klik op het vinkje (✓) om woorden als geleerd te markeren. 
+                Alleen geleerde woorden verschijnen in de toets.
               </p>
             </div>
           ) : (
