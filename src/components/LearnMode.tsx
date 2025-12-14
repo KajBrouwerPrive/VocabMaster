@@ -149,7 +149,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
       setAllWords((prev) =>
         prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
       );
-      toast.success("Woord gemarkeerd als gezien!");
+      toast.success("Woord gemarkeerd als geleerd!");
     } catch (error) {
       toast.error("Markeren mislukt");
     }
@@ -286,7 +286,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           <div className="absolute top-4 right-4 flex items-center gap-2">
             {currentWord.view_count > 0 && (
               <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                {currentWord.view_count}x gezien
+                {currentWord.view_count}x bekeken
               </span>
             )}
             {currentWord.seen && (
@@ -350,7 +350,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             {!currentWord.seen && (
               <Button variant="success" onClick={handleMarkAsSeen}>
                 <Eye className="h-4 w-4" />
-                Gezien
+                Geleerd
               </Button>
             )}
             <Button variant="destructive" size="icon" onClick={handleDelete}>
