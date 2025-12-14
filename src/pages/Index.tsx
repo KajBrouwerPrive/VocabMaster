@@ -6,6 +6,7 @@ import { QuizMode } from "@/components/QuizMode";
 import { AddWordForm } from "@/components/AddWordForm";
 import { SuggestWords } from "@/components/SuggestWords";
 import { ImportWords } from "@/components/ImportWords";
+import { ImportConjugations } from "@/components/ImportConjugations";
 import { Statistics } from "@/components/Statistics";
 import { ConjugationLearnMode } from "@/components/ConjugationLearnMode";
 import { AddConjugationForm } from "@/components/AddConjugationForm";
@@ -14,7 +15,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut, Shield } from "lucide-react";
 
-type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats" | "conjugations" | "add-conjugation";
+type View = "learn" | "quiz" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -111,7 +112,8 @@ const Index = () => {
             defaultTargetLanguage={defaultTargetLanguage}
           />
         )}
-        {currentView === "import" && <ImportWords onWordsAdded={handleWordsAdded} />}
+        {currentView === "import-words" && <ImportWords onWordsAdded={handleWordsAdded} />}
+        {currentView === "import-conjugations" && <ImportConjugations onConjugationsAdded={handleConjugationsAdded} />}
       </main>
 
       {/* Footer */}

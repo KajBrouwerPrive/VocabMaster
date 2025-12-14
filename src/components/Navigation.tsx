@@ -1,7 +1,7 @@
 import { Book, GraduationCap, Plus, Brain, FileSpreadsheet, BarChart3, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type View = "learn" | "quiz" | "add" | "suggest" | "import" | "stats" | "conjugations" | "add-conjugation";
+type View = "learn" | "quiz" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation";
 
 interface NavigationProps {
   currentView: View;
@@ -18,7 +18,8 @@ export function Navigation({ currentView, onViewChange, isAdmin }: NavigationPro
     { id: "add" as View, label: "Woord +", icon: Plus, adminOnly: false },
     { id: "add-conjugation" as View, label: "Werkwoord +", icon: Plus, adminOnly: false },
     { id: "suggest" as View, label: "AI Suggesties", icon: Brain, adminOnly: true },
-    { id: "import" as View, label: "Importeren", icon: FileSpreadsheet, adminOnly: true },
+    { id: "import-words" as View, label: "Import Woorden", icon: FileSpreadsheet, adminOnly: true },
+    { id: "import-conjugations" as View, label: "Import Werkwoorden", icon: FileSpreadsheet, adminOnly: true },
   ];
 
   const visibleItems = navItems.filter(item => !item.adminOnly || isAdmin);
