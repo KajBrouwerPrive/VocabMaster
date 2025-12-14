@@ -41,6 +41,50 @@ export type Database = {
         }
         Relationships: []
       }
+      user_conjugation_progress: {
+        Row: {
+          conjugation_id: string
+          created_at: string
+          id: string
+          incorrect_count: number
+          quiz_view_count: number
+          seen: boolean
+          updated_at: string
+          user_id: string
+          view_count: number
+        }
+        Insert: {
+          conjugation_id: string
+          created_at?: string
+          id?: string
+          incorrect_count?: number
+          quiz_view_count?: number
+          seen?: boolean
+          updated_at?: string
+          user_id: string
+          view_count?: number
+        }
+        Update: {
+          conjugation_id?: string
+          created_at?: string
+          id?: string
+          incorrect_count?: number
+          quiz_view_count?: number
+          seen?: boolean
+          updated_at?: string
+          user_id?: string
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_conjugation_progress_conjugation_id_fkey"
+            columns: ["conjugation_id"]
+            isOneToOne: false
+            referencedRelation: "verb_conjugations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -112,6 +156,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      verb_conjugations: {
+        Row: {
+          created_at: string
+          id: string
+          infinitive: string
+          past_hij_zij: string
+          past_ik: string
+          past_jij: string
+          past_jullie: string
+          past_wij: string
+          perfect_hij_zij: string
+          perfect_ik: string
+          perfect_jij: string
+          perfect_jullie: string
+          perfect_wij: string
+          present_hij_zij: string
+          present_ik: string
+          present_jij: string
+          present_jullie: string
+          present_wij: string
+          shared: string
+          source_language: string
+          target_language: string
+          translation: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          infinitive: string
+          past_hij_zij: string
+          past_ik: string
+          past_jij: string
+          past_jullie: string
+          past_wij: string
+          perfect_hij_zij: string
+          perfect_ik: string
+          perfect_jij: string
+          perfect_jullie: string
+          perfect_wij: string
+          present_hij_zij: string
+          present_ik: string
+          present_jij: string
+          present_jullie: string
+          present_wij: string
+          shared?: string
+          source_language?: string
+          target_language?: string
+          translation: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          infinitive?: string
+          past_hij_zij?: string
+          past_ik?: string
+          past_jij?: string
+          past_jullie?: string
+          past_wij?: string
+          perfect_hij_zij?: string
+          perfect_ik?: string
+          perfect_jij?: string
+          perfect_jullie?: string
+          perfect_wij?: string
+          present_hij_zij?: string
+          present_ik?: string
+          present_jij?: string
+          present_jullie?: string
+          present_wij?: string
+          shared?: string
+          source_language?: string
+          target_language?: string
+          translation?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       words: {
         Row: {
