@@ -16,6 +16,7 @@ import {
   Filter,
 } from "lucide-react";
 import { getLanguageName } from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Select,
   SelectContent,
@@ -29,6 +30,7 @@ interface LearnModeProps {
 }
 
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
+  const { t } = useLanguage();
   const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
@@ -128,7 +130,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
       setCurrentIndex(0);
       setShowTranslation(false);
     } catch (error) {
-      toast.error("Woorden laden mislukt");
+      toast.error(t.common_error);
     } finally {
       setIsLoading(false);
     }
@@ -150,9 +152,8 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
       setAllWords((prev) =>
         prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
       );
-      toast.success("Woord gemarkeerd als geleerd!");
     } catch (error) {
-      toast.error("Markeren mislukt");
+      toast.error(t.common_error);
     }
   };
 
@@ -166,9 +167,8 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         setCurrentIndex(Math.max(0, currentIndex - 1));
       }
       setShowTranslation(false);
-      toast.success("Woord verwijderd");
     } catch (error) {
-      toast.error("Verwijderen mislukt");
+      toast.error(t.common_error);
     }
   };
 
@@ -202,12 +202,12 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Book className="h-5 w-5 text-primary" />
-            Leer Modus
+            {t.learn_title}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center py-8">
           <p className="text-muted-foreground">
-            Nog geen woorden toegevoegd. Voeg eerst woorden toe om te leren!
+            {t.learn_no_words}
           </p>
         </CardContent>
       </Card>
@@ -220,17 +220,17 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Book className="h-5 w-5 text-primary" />
-            Leer Modus
+            {t.learn_title}
           </CardTitle>
           <div className="flex items-center gap-3">
             {wordTypes.length > 0 && (
               <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
                 <SelectTrigger className="w-[140px] h-8 text-xs">
                   <Filter className="h-3 w-3 mr-1" />
-                  <SelectValue placeholder="Filter" />
+                  <SelectValue placeholder={t.common_filter} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alle woorden</SelectItem>
+                  <SelectItem value="all">{t.learn_filter_all}</SelectItem>
                   {wordTypes.map((type) => (
                     <SelectItem key={type} value={type}>
                       {type}
@@ -287,7 +287,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           <div className="absolute top-4 right-4 flex items-center gap-2">
             {currentWord.view_count > 0 && (
               <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                {currentWord.view_count}x bekeken
+                {currentWord.view_count}x
               </span>
             )}
             {currentWord.seen && (
@@ -319,7 +319,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
 
           {!showTranslation && (
             <p className="text-sm text-muted-foreground mt-4">
-              Klik om vertaling te zien
+              {t.learn_show_translation}
             </p>
           )}
         </div>
@@ -344,7 +344,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
                 setCurrentIndex(0);
                 setShowTranslation(false);
               }}
-              title="Shuffle woorden"
+              title={t.learn_shuffle}
             >
               <Shuffle className="h-4 w-4" />
             </Button>
@@ -373,7 +373,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               }}
             >
               <ChevronRight className="h-4 w-4" />
-              Volgende
+              {t.common_next}
             </Button>
             <Button variant="destructive" size="icon" onClick={handleDelete}>
               <Trash2 className="h-4 w-4" />
@@ -397,7 +397,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           return (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{seenCount} van {words.length} geleerd</span>
+                <span className="text-muted-foreground">{seenCount} / {words.length} {t.learn_learned}</span>
                 <span className="font-medium text-primary">{percentage}%</span>
               </div>
               <Progress value={percentage} className="h-3" />
