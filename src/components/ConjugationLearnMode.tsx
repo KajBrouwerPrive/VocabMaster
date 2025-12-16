@@ -19,6 +19,7 @@ import {
   VerbConjugationWithProgress,
 } from "@/lib/conjugationApi";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConjugationLearnModeProps {
   refreshTrigger: number;
@@ -64,6 +65,7 @@ const ALL_TENSES: TenseType[] = [
 ];
 
 export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModeProps) {
+  const { t } = useLanguage();
   const [allConjugations, setAllConjugations] = useState<VerbConjugationWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showConjugations, setShowConjugations] = useState(false);
@@ -87,14 +89,14 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     } catch (error) {
       console.error("Failed to load conjugations:", error);
       toast({
-        title: "Fout",
-        description: "Kon vervoegingen niet laden",
+        title: t.common_error,
+        description: t.common_error,
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [toast, t]);
 
   useEffect(() => {
     loadConjugations();
@@ -129,16 +131,10 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const toggleTense = (tense: TenseType) => {
     setSelectedTenses((prev) => {
       if (prev.includes(tense)) {
-        // Don't allow deselecting if it's the only one
         if (prev.length === 1) return prev;
         return prev.filter((t) => t !== tense);
       } else {
-        // Max 3 tenses
         if (prev.length >= 3) {
-          toast({
-            title: "Maximum bereikt",
-            description: "Je kunt maximaal 3 tijden selecteren",
-          });
           return prev;
         }
         return [...prev, tense];
@@ -166,8 +162,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     setAllConjugations(shuffled);
     setCurrentIndex(0);
     setShowConjugations(false);
-    toast({ title: "Geschud!", description: "Vervoegingen zijn door elkaar gegooid" });
-  }, [allConjugations, toast]);
+  }, [allConjugations]);
 
   const handleShowConjugations = async () => {
     setShowConjugations(true);
@@ -191,7 +186,6 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
             : c
         )
       );
-      toast({ title: "Geleerd!", description: "Werkwoord gemarkeerd als geleerd" });
       if (currentIndex >= conjugations.length - 1 && currentIndex > 0) {
         setCurrentIndex((prev) => prev - 1);
       }
@@ -199,8 +193,8 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     } catch (error) {
       console.error("Failed to mark as seen:", error);
       toast({
-        title: "Fout",
-        description: "Kon niet markeren als geleerd",
+        title: t.common_error,
+        description: t.common_error,
         variant: "destructive",
       });
     }
@@ -211,7 +205,6 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     try {
       await deleteConjugation(currentConjugation.id);
       setAllConjugations((prev) => prev.filter((c) => c.id !== currentConjugation.id));
-      toast({ title: "Verwijderd", description: "Werkwoord is verwijderd" });
       if (currentIndex >= conjugations.length - 1 && currentIndex > 0) {
         setCurrentIndex((prev) => prev - 1);
       }
@@ -219,8 +212,8 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     } catch (error) {
       console.error("Failed to delete conjugation:", error);
       toast({
-        title: "Fout",
-        description: "Kon werkwoord niet verwijderen",
+        title: t.common_error,
+        description: t.common_error,
         variant: "destructive",
       });
     }
@@ -240,8 +233,8 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         <CardContent className="py-12 text-center">
           <p className="text-muted-foreground">
             {allConjugations.length === 0
-              ? "Nog geen werkwoorden toegevoegd. Voeg eerst werkwoorden toe!"
-              : "Alle werkwoorden geleerd! Goed gedaan! 🎉"}
+              ? t.learn_no_words
+              : "🎉"}
           </p>
         </CardContent>
       </Card>
@@ -254,7 +247,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       <Card>
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground mb-3">
-            Selecteer maximaal 3 tijden:
+            {t.common_filter}:
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
             {ALL_TENSES.map((tense) => (
@@ -295,14 +288,14 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
               className="w-full h-24 text-lg"
             >
               <Eye className="h-5 w-5 mr-2" />
-              Toon vervoegingen
+              {t.learn_show_translation}
             </Button>
           ) : (
             <div className="animate-in fade-in duration-300 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-2 font-medium text-muted-foreground">Persoon</th>
+                    <th className="text-left p-2 font-medium text-muted-foreground"></th>
                     {selectedTenses.map((tense) => (
                       <th key={tense} className="text-left p-2 font-medium text-primary">
                         {TENSE_LABELS[tense]}
@@ -336,13 +329,13 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         <Button variant="outline" size="icon" onClick={goPrevious} disabled={currentIndex === 0}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <Button variant="outline" size="icon" onClick={handleShuffle}>
+        <Button variant="outline" size="icon" onClick={handleShuffle} title={t.learn_shuffle}>
           <Shuffle className="h-4 w-4" />
         </Button>
-        <Button variant="default" size="icon" onClick={handleMarkAsSeen}>
+        <Button variant="default" size="icon" onClick={handleMarkAsSeen} title={t.learn_learned}>
           <Check className="h-4 w-4" />
         </Button>
-        <Button variant="destructive" size="icon" onClick={handleDelete}>
+        <Button variant="destructive" size="icon" onClick={handleDelete} title={t.common_delete}>
           <Trash2 className="h-4 w-4" />
         </Button>
         <Button
@@ -357,10 +350,10 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
 
       {/* Progress */}
       <div className="text-center text-sm text-muted-foreground">
-        {currentIndex + 1} / {conjugations.length} te leren
+        {currentIndex + 1} / {conjugations.length}
         {allConjugations.length > conjugations.length && (
           <span className="ml-2">
-            ({allConjugations.length - conjugations.length} geleerd)
+            ({allConjugations.length - conjugations.length} {t.learn_learned})
           </span>
         )}
       </div>
