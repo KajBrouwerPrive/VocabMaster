@@ -12,8 +12,10 @@ import { ConjugationLearnMode } from "@/components/ConjugationLearnMode";
 import { AddConjugationForm } from "@/components/AddConjugationForm";
 import { RequestConjugationForm } from "@/components/RequestConjugationForm";
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { AppLanguageSwitcher } from "@/components/AppLanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut, Shield } from "lucide-react";
 
@@ -22,6 +24,7 @@ type View = "learn" | "quiz" | "quiz-conjugations" | "add" | "suggest" | "import
 const Index = () => {
   const { user, loading, signOut } = useAuth();
   const { isAdmin } = useUserRole();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<View>("learn");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -72,7 +75,8 @@ const Index = () => {
               </div>
               <h1 className="text-2xl font-bold tracking-tight">VocabMaster</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <AppLanguageSwitcher />
               {isAdmin && (
                 <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
                   <Shield className="h-3 w-3" />
@@ -81,7 +85,7 @@ const Index = () => {
               )}
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
-                Uitloggen
+                {t.common_logout}
               </Button>
             </div>
           </div>
@@ -98,7 +102,7 @@ const Index = () => {
         {currentView === "quiz" && <QuizMode />}
         {currentView === "quiz-conjugations" && (
           <div className="text-center py-12 text-muted-foreground">
-            Toets Vervoegingen - binnenkort beschikbaar
+            {t.nav_quiz_conjugations} - coming soon
           </div>
         )}
         {currentView === "stats" && <Statistics />}
@@ -127,7 +131,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t mt-auto py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">Simpel woordjes leren</div>
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">VocabMaster</div>
       </footer>
     </div>
   );

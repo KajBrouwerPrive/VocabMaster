@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { BookOpen, LogIn, UserPlus } from 'lucide-react';
-import { z } from 'zod';
-
-const authSchema = z.object({
-  email: z.string().trim().email({ message: "Ongeldig e-mailadres" }),
-  password: z.string().min(6, { message: "Wachtwoord moet minimaal 6 tekens zijn" }),
-  displayName: z.string().trim().max(100, { message: "Naam mag maximaal 100 tekens zijn" }).optional(),
-});
+import { AppLanguageSwitcher } from '@/components/AppLanguageSwitcher';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,6 +17,7 @@ export default function Auth() {
   const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp, user, loading } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,14 +31,14 @@ export default function Auth() {
     setIsLoading(true);
 
     try {
-      const validation = authSchema.safeParse({ 
-        email, 
-        password, 
-        displayName: isLogin ? undefined : displayName 
-      });
+      if (!email || !email.includes('@')) {
+        toast.error(t.common_error);
+        setIsLoading(false);
+        return;
+      }
 
-      if (!validation.success) {
-        toast.error(validation.error.errors[0].message);
+      if (password.length < 6) {
+        toast.error(t.common_error);
         setIsLoading(false);
         return;
       }
@@ -50,30 +46,20 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('Ongeldige inloggegevens');
-          } else {
-            toast.error(error.message);
-          }
+          toast.error(t.common_error);
         } else {
-          toast.success('Succesvol ingelogd!');
           navigate('/');
         }
       } else {
         const { error } = await signUp(email, password, displayName);
         if (error) {
-          if (error.message.includes('User already registered')) {
-            toast.error('Dit e-mailadres is al geregistreerd');
-          } else {
-            toast.error(error.message);
-          }
+          toast.error(t.common_error);
         } else {
-          toast.success('Account aangemaakt! Je bent nu ingelogd.');
           navigate('/');
         }
       }
     } catch (err) {
-      toast.error('Er is iets misgegaan');
+      toast.error(t.common_error);
     } finally {
       setIsLoading(false);
     }
@@ -82,13 +68,16 @@ export default function Auth() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse text-muted-foreground">Laden...</div>
+        <div className="animate-pulse text-muted-foreground">{t.common_loading}</div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
+      <div className="absolute top-4 right-4">
+        <AppLanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md shadow-soft">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
@@ -96,18 +85,17 @@ export default function Auth() {
           </div>
           <CardTitle className="text-2xl font-display">VocabMaster</CardTitle>
           <CardDescription>
-            {isLogin ? 'Log in om verder te gaan' : 'Maak een account aan'}
+            {isLogin ? t.auth_login : t.auth_register}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-2">
-                <Label htmlFor="displayName">Naam (optioneel)</Label>
+                <Label htmlFor="displayName">Name</Label>
                 <Input
                   id="displayName"
                   type="text"
-                  placeholder="Je naam"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   maxLength={100}
@@ -115,18 +103,17 @@ export default function Auth() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email">{t.auth_email}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="je@email.nl"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Wachtwoord</Label>
+              <Label htmlFor="password">{t.auth_password}</Label>
               <Input
                 id="password"
                 type="password"
@@ -139,16 +126,16 @@ export default function Auth() {
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? (
-                <span className="animate-pulse">Bezig...</span>
+                <span className="animate-pulse">{t.common_loading}</span>
               ) : isLogin ? (
                 <>
                   <LogIn className="mr-2 h-4 w-4" />
-                  Inloggen
+                  {t.auth_login_button}
                 </>
               ) : (
                 <>
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Registreren
+                  {t.auth_register_button}
                 </>
               )}
             </Button>
@@ -159,7 +146,7 @@ export default function Auth() {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              {isLogin ? 'Nog geen account? Registreer hier' : 'Heb je al een account? Log in'}
+              {isLogin ? t.auth_no_account : t.auth_has_account}
             </button>
           </div>
         </CardContent>
