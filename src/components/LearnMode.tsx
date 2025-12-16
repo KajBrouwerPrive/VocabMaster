@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { getWordsWithProgress, markWordAsSeen, deleteWord, incrementViewCount, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
@@ -368,25 +369,20 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
           </Button>
         </div>
 
-        {/* Progress indicator */}
-        <div className="flex gap-1 justify-center flex-wrap">
-          {words.map((word, index) => (
-            <button
-              key={word.id}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex
-                  ? "bg-primary w-4"
-                  : word.seen
-                  ? "bg-success/50"
-                  : "bg-muted-foreground/30"
-              }`}
-              onClick={() => {
-                setCurrentIndex(index);
-                setShowTranslation(false);
-              }}
-            />
-          ))}
-        </div>
+        {/* Progress bar */}
+        {(() => {
+          const seenCount = words.filter(w => w.seen).length;
+          const percentage = Math.round((seenCount / words.length) * 100);
+          return (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{seenCount} van {words.length} geleerd</span>
+                <span className="font-medium text-primary">{percentage}%</span>
+              </div>
+              <Progress value={percentage} className="h-3" />
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
   );
