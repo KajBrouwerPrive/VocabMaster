@@ -10,12 +10,14 @@ import { ImportConjugations } from "@/components/ImportConjugations";
 import { Statistics } from "@/components/Statistics";
 import { ConjugationLearnMode } from "@/components/ConjugationLearnMode";
 import { AddConjugationForm } from "@/components/AddConjugationForm";
+import { RequestConjugationForm } from "@/components/RequestConjugationForm";
+import { AdminDashboard } from "@/components/AdminDashboard";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Languages, LogOut, Shield } from "lucide-react";
 
-type View = "learn" | "quiz" | "quiz-conjugations" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation";
+type View = "learn" | "quiz" | "quiz-conjugations" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation" | "request-conjugation" | "admin";
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -110,6 +112,8 @@ const Index = () => {
         {currentView === "add-conjugation" && (
           <AddConjugationForm onConjugationAdded={handleConjugationsAdded} />
         )}
+        {currentView === "request-conjugation" && <RequestConjugationForm />}
+        {currentView === "admin" && <AdminDashboard />}
         {currentView === "suggest" && (
           <SuggestWords
             onWordsAdded={handleWordsAdded}
