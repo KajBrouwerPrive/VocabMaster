@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWordsWithProgress, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import { BarChart3, AlertTriangle, Loader2 } from "lucide-react";
-import { getLanguageName } from "@/components/LanguageSelector";
+
 
 export function Statistics() {
   const [words, setWords] = useState<WordWithProgress[]>([]);
@@ -81,30 +81,22 @@ export function Statistics() {
             </p>
           ) : (
             <div className="space-y-2">
-              {difficultWords
-                .sort((a, b) => b.incorrect_count - a.incorrect_count)
-                .map((word) => (
-                  <div
-                    key={word.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-destructive/20"
-                  >
-                    <div className="grid grid-cols-[80px_1fr_80px] items-center gap-2 flex-1">
-                      <span className="text-xs text-muted-foreground text-right">
-                        {getLanguageName(word.source_language)}
-                      </span>
-                      <span className="font-medium text-primary">{word.source_word}</span>
-                      <div></div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-sm text-muted-foreground">
-                        → {word.translation}
-                      </span>
-                      <span className="text-sm font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">
-                        {word.incorrect_count}x fout
-                      </span>
-                    </div>
+            {difficultWords
+              .sort((a, b) => b.incorrect_count - a.incorrect_count)
+              .map((word) => (
+                <div
+                  key={word.id}
+                  className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border border-destructive/20"
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="text-lg font-semibold text-primary">{word.source_word}</span>
+                    <span className="text-sm text-muted-foreground">{word.translation}</span>
                   </div>
-                ))}
+                  <span className="text-sm font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">
+                    {word.incorrect_count}x fout
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
