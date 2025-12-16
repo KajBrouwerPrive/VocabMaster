@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWordsWithProgress, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import { BarChart3, AlertTriangle, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 
 export function Statistics() {
+  const { t } = useLanguage();
   const [words, setWords] = useState<WordWithProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -19,7 +21,7 @@ export function Statistics() {
       const data = await getWordsWithProgress();
       setWords(data);
     } catch (error) {
-      toast.error("Statistieken laden mislukt");
+      toast.error(t.common_error);
     } finally {
       setIsLoading(false);
     }
@@ -47,18 +49,18 @@ export function Statistics() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            Statistieken
+            {t.stats_title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-lg bg-secondary/50 text-center">
               <p className="text-3xl font-bold text-primary">{seenWords.length}</p>
-              <p className="text-sm text-muted-foreground">Geleerde woorden</p>
+              <p className="text-sm text-muted-foreground">{t.stats_learned}</p>
             </div>
             <div className="p-4 rounded-lg bg-secondary/50 text-center">
               <p className="text-3xl font-bold text-destructive">{difficultWords.length}</p>
-              <p className="text-sm text-muted-foreground">Moeilijke woorden</p>
+              <p className="text-sm text-muted-foreground">{t.stats_incorrect}</p>
             </div>
           </div>
         </CardContent>
@@ -68,16 +70,13 @@ export function Statistics() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Moeilijke woorden
+            {t.stats_incorrect}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Woorden die meer dan 2x fout zijn gegaan bij een toets
-          </p>
         </CardHeader>
         <CardContent>
           {difficultWords.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              Geen moeilijke woorden gevonden. Goed bezig!
+              🎉
             </p>
           ) : (
             <div className="space-y-2">
@@ -93,7 +92,7 @@ export function Statistics() {
                     <span className="text-sm text-muted-foreground">{word.translation}</span>
                   </div>
                   <span className="text-sm font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">
-                    {word.incorrect_count}x fout
+                    {word.incorrect_count}x
                   </span>
                 </div>
               ))}
