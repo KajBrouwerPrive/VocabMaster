@@ -348,12 +348,33 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             >
               <Shuffle className="h-4 w-4" />
             </Button>
-            {!currentWord.seen && (
-              <Button variant="success" onClick={handleMarkAsSeen}>
-                <Eye className="h-4 w-4" />
-                Geleerd
-              </Button>
-            )}
+            <Button
+              variant="success"
+              onClick={async () => {
+                // Mark current word as learned
+                if (currentWord && !currentWord.seen) {
+                  try {
+                    await markWordAsSeen(currentWord.id);
+                    setAllWords((prev) =>
+                      prev.map((w) => (w.id === currentWord.id ? { ...w, seen: true } : w))
+                    );
+                  } catch (error) {
+                    // Silent fail
+                  }
+                }
+                // Go to next word or restart cycle
+                setShowTranslation(false);
+                if (currentIndex < words.length - 1) {
+                  setCurrentIndex(currentIndex + 1);
+                } else {
+                  setAllWords(shuffleWords(allWords));
+                  setCurrentIndex(0);
+                }
+              }}
+            >
+              <ChevronRight className="h-4 w-4" />
+              Volgende
+            </Button>
             <Button variant="destructive" size="icon" onClick={handleDelete}>
               <Trash2 className="h-4 w-4" />
             </Button>
