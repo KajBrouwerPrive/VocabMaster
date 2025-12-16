@@ -7,6 +7,7 @@ import { getWordSuggestions, addWords, type WordSuggestion } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2, Brain, Plus, Check, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SuggestWordsProps {
   onWordsAdded: () => void;
@@ -19,6 +20,7 @@ export function SuggestWords({
   defaultSourceLanguage,
   defaultTargetLanguage,
 }: SuggestWordsProps) {
+  const { t } = useLanguage();
   const [sourceLanguage, setSourceLanguage] = useState(defaultSourceLanguage);
   const [targetLanguage, setTargetLanguage] = useState(defaultTargetLanguage);
   const [category, setCategory] = useState("");
@@ -39,9 +41,8 @@ export function SuggestWords({
       );
       setSuggestions(result);
       setSelectedWords(new Set(result.map((_, i) => i)));
-      toast.success(`${result.length} suggesties opgehaald!`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Suggesties ophalen mislukt");
+      toast.error(t.common_error);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +72,7 @@ export function SuggestWords({
       .map((s) => ({ sourceWord: s.word, translation: s.translation }));
 
     if (wordsToAdd.length === 0) {
-      toast.error("Selecteer minimaal één woord");
+      toast.error(t.common_error);
       return;
     }
 
@@ -79,12 +80,12 @@ export function SuggestWords({
     try {
       // Admin adds words as shared (asShared = true) so everyone can see them
       await addWords(wordsToAdd, sourceLanguage, targetLanguage, true);
-      toast.success(`${wordsToAdd.length} gedeelde woorden toegevoegd!`);
+      toast.success(t.add_word_success);
       setSuggestions([]);
       setSelectedWords(new Set());
       onWordsAdded();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Toevoegen mislukt");
+      toast.error(t.add_word_error);
     } finally {
       setIsAdding(false);
     }
@@ -95,7 +96,7 @@ export function SuggestWords({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
-          AI Woordsuggesties
+          {t.suggest_title}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -103,28 +104,28 @@ export function SuggestWords({
           <LanguageSelector
             value={sourceLanguage}
             onChange={setSourceLanguage}
-            label="Brontaal"
+            label={t.common_source_language}
             excludeLanguage={targetLanguage}
           />
           <LanguageSelector
             value={targetLanguage}
             onChange={setTargetLanguage}
-            label="Doeltaal"
+            label={t.common_target_language}
             excludeLanguage={sourceLanguage}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Categorie (optioneel)</label>
+            <label className="text-sm font-medium">{t.suggest_category}</label>
             <Input
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder="bijv. eten, reizen, sport..."
+              placeholder={t.suggest_category_placeholder}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Aantal woorden</label>
+            <label className="text-sm font-medium">{t.suggest_count}</label>
             <Input
               type="number"
               min={1}
@@ -146,23 +147,23 @@ export function SuggestWords({
           ) : (
             <Brain className="h-4 w-4" />
           )}
-          Genereer Suggesties
+          {t.suggest_get}
         </Button>
 
         {suggestions.length > 0 && (
           <div className="space-y-4 animate-slide-up">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {selectedWords.size} van {suggestions.length} geselecteerd
+                {selectedWords.size} / {suggestions.length}
               </span>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onClick={selectAll}>
                   <Check className="h-3 w-3 mr-1" />
-                  Alles
+                  {t.suggest_select_all}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={selectNone}>
                   <X className="h-3 w-3 mr-1" />
-                  Niets
+                  {t.suggest_select_none}
                 </Button>
               </div>
             </div>
@@ -200,7 +201,7 @@ export function SuggestWords({
               ) : (
                 <Plus className="h-4 w-4" />
               )}
-              {selectedWords.size} Woorden Toevoegen
+              {t.suggest_add_selected} ({selectedWords.size})
             </Button>
           </div>
         )}

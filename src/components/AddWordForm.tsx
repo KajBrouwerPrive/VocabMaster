@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const WORD_TYPES = [
   { value: "zelfstandig naamwoord", label: "zelfstandig naamwoord" },
@@ -33,6 +34,7 @@ export function AddWordForm({
   defaultSourceLanguage,
   defaultTargetLanguage,
 }: AddWordFormProps) {
+  const { t } = useLanguage();
   const { isAdmin } = useUserRole();
   const [word, setWord] = useState("");
   const [translation, setTranslation] = useState("");
@@ -113,12 +115,11 @@ export function AddWordForm({
     setWordType(selectedWordItem.word_type || "");
     setSelectedWord(selectedWordItem);
     setShowDropdown(false);
-    toast.success("Woord geselecteerd!");
   };
 
   const handleTranslate = async () => {
     if (!word.trim()) {
-      toast.error("Voer eerst een woord in");
+      toast.error(t.common_error);
       return;
     }
 
@@ -126,9 +127,8 @@ export function AddWordForm({
     try {
       const result = await translateWord(word, sourceLanguage, targetLanguage);
       setTranslation(result);
-      toast.success("Vertaling opgehaald!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Vertaling mislukt");
+      toast.error(t.common_error);
     } finally {
       setIsTranslating(false);
     }
@@ -139,7 +139,7 @@ export function AddWordForm({
 
     // If user selected an existing word, just confirm
     if (selectedWord) {
-      toast.success("Dit woord is al beschikbaar in de algemene set!");
+      toast.success(t.add_word_existing);
       setWord("");
       setTranslation("");
       setWordType("");
@@ -149,26 +149,26 @@ export function AddWordForm({
     }
 
     if (!word.trim() || !translation.trim()) {
-      toast.error("Vul alle velden in");
+      toast.error(t.common_error);
       return;
     }
 
     if (!wordType) {
-      toast.error("Selecteer een woordsoort");
+      toast.error(t.common_error);
       return;
     }
 
     setIsAdding(true);
     try {
       await addWord(word, sourceLanguage, translation, targetLanguage, false, wordType);
-      toast.success("Woord toegevoegd!");
+      toast.success(t.add_word_success);
       setWord("");
       setTranslation("");
       setWordType("");
       setSelectedWord(null);
       onWordAdded();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Toevoegen mislukt");
+      toast.error(t.add_word_error);
     } finally {
       setIsAdding(false);
     }
@@ -181,7 +181,7 @@ export function AddWordForm({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Plus className="h-5 w-5 text-primary" />
-          Woord Toevoegen
+          {t.add_word_title}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -190,19 +190,19 @@ export function AddWordForm({
             <LanguageSelector
               value={sourceLanguage}
               onChange={setSourceLanguage}
-              label="Brontaal"
+              label={t.common_source_language}
               excludeLanguage={targetLanguage}
             />
             <LanguageSelector
               value={targetLanguage}
               onChange={setTargetLanguage}
-              label="Doeltaal"
+              label={t.common_target_language}
               excludeLanguage={sourceLanguage}
             />
           </div>
 
           <div className="space-y-2 relative">
-            <label className="text-sm font-medium">Woord</label>
+            <label className="text-sm font-medium">{t.common_word}</label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
@@ -210,7 +210,7 @@ export function AddWordForm({
                   value={word}
                   onChange={(e) => setWord(e.target.value)}
                   onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
-                  placeholder="Voer woord in (min. 3 letters)..."
+                  placeholder={t.add_word_placeholder}
                   className="w-full"
                 />
                 {isSearching && (
@@ -250,14 +250,10 @@ export function AddWordForm({
                   ) : (
                     <Sparkles className="h-4 w-4" />
                   )}
-                  Vertaal
+                  {t.common_translate}
                 </Button>
               )}
             </div>
-            
-            {!isAdmin && word.trim().length > 0 && word.trim().length < 3 && (
-              <p className="text-xs text-muted-foreground">Typ nog {3 - word.trim().length} letter(s) om te zoeken</p>
-            )}
           </div>
 
           {/* Show selected existing word */}
@@ -265,7 +261,7 @@ export function AddWordForm({
             <div className="p-4 border rounded-lg bg-primary/10 space-y-2">
               <p className="text-sm font-medium text-primary flex items-center gap-2">
                 <Check className="h-4 w-4" />
-                Woord geselecteerd
+                {t.add_word_existing}
               </p>
               <p className="text-sm">
                 <span className="font-semibold">{selectedWord.source_word}</span> → {selectedWord.translation}
@@ -276,7 +272,7 @@ export function AddWordForm({
                 size="sm"
                 className="w-full"
               >
-                Bevestigen
+                {t.add_word_confirm}
               </Button>
             </div>
           )}
@@ -284,26 +280,20 @@ export function AddWordForm({
           {/* Show manual entry form if word not found or user is admin */}
           {showManualEntry && (
             <>
-              {!isAdmin && (
-                <p className="text-sm text-muted-foreground">
-                  Woord niet gevonden. Voeg het zelf toe:
-                </p>
-              )}
-              
               <div className="space-y-2">
-                <label className="text-sm font-medium">Vertaling</label>
+                <label className="text-sm font-medium">{t.common_translation}</label>
                 <Input
                   value={translation}
                   onChange={(e) => setTranslation(e.target.value)}
-                  placeholder="Vertaling..."
+                  placeholder={t.common_translation}
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium">Woordsoort *</label>
+                <label className="text-sm font-medium">{t.common_word_type} *</label>
                 <Select value={wordType} onValueChange={setWordType}>
                   <SelectTrigger className="w-full bg-background">
-                    <SelectValue placeholder="Selecteer woordsoort" />
+                    <SelectValue placeholder={t.common_word_type} />
                   </SelectTrigger>
                   <SelectContent className="bg-background z-50">
                     {WORD_TYPES.map((type) => (
@@ -326,7 +316,7 @@ export function AddWordForm({
                 ) : (
                   <Plus className="h-4 w-4" />
                 )}
-                Toevoegen
+                {t.common_add}
               </Button>
             </>
           )}
