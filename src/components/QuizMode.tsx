@@ -27,6 +27,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getLanguageName } from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuizResult {
   word: WordWithProgress;
@@ -37,6 +38,7 @@ interface QuizResult {
 type SelectionMode = "random" | "manual";
 
 export function QuizMode() {
+  const { t } = useLanguage();
   const [quizWords, setQuizWords] = useState<WordWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
@@ -148,7 +150,7 @@ export function QuizMode() {
       
       if (selectionMode === "manual") {
         if (selectedWordIds.size === 0) {
-          toast.error("Selecteer minimaal één woord");
+          toast.error(t.common_error);
           return;
         }
         // Get selected words and shuffle them
@@ -160,7 +162,7 @@ export function QuizMode() {
       }
       
       if (words.length === 0) {
-        toast.error("Geen geleerde woorden beschikbaar. Markeer eerst woorden als geleerd!");
+        toast.error(t.quiz_no_words);
         return;
       }
       
@@ -180,7 +182,7 @@ export function QuizMode() {
         incrementQuizViewCount(words[0].id).catch(() => {});
       }
     } catch (error) {
-      toast.error("Quiz starten mislukt");
+      toast.error(t.common_error);
     } finally {
       setIsLoading(false);
     }
@@ -235,10 +237,10 @@ export function QuizMode() {
       retryAnswer.toLowerCase().trim() === currentWord.translation.toLowerCase().trim();
     
     if (isCorrect) {
-      toast.success("Goed zo!");
+      toast.success(t.quiz_correct);
       goToNext();
     } else {
-      toast.error("Probeer opnieuw");
+      toast.error(t.quiz_incorrect);
       setRetryAnswer("");
     }
   };
@@ -296,32 +298,26 @@ export function QuizMode() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary" />
-            Toets
+            {t.quiz_title}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {filteredAvailableCount === 0 && selectionMode === "random" ? (
             <div className="text-center py-8 space-y-2">
               <p className="text-muted-foreground">
-                {wordTypeFilter === "all" 
-                  ? "Geen geleerde woorden beschikbaar."
-                  : `Geen geleerde woorden van type "${wordTypeFilter}" beschikbaar.`}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Ga naar "Woordjes" en klik op het vinkje (✓) om woorden als geleerd te markeren. 
-                Alleen geleerde woorden verschijnen in de toets.
+                {t.quiz_no_words}
               </p>
             </div>
           ) : (
             <>
               <p className="text-muted-foreground">
-                {filteredAvailableCount} woorden beschikbaar voor toets
+                {filteredAvailableCount} {t.common_word}
               </p>
 
               <div className="space-y-4">
                 {/* Selection Mode Toggle */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Selectie methode</label>
+                  <label className="text-sm font-medium">{t.common_filter}</label>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
                       type="button"
@@ -330,7 +326,7 @@ export function QuizMode() {
                       className="w-full"
                     >
                       <Shuffle className="h-4 w-4 mr-2" />
-                      Willekeurig
+                      {t.learn_shuffle}
                     </Button>
                     <Button
                       type="button"
@@ -339,7 +335,7 @@ export function QuizMode() {
                       className="w-full"
                     >
                       <ListChecks className="h-4 w-4 mr-2" />
-                      Zelf kiezen
+                      {t.common_filter}
                     </Button>
                   </div>
                 </div>
@@ -348,14 +344,14 @@ export function QuizMode() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium flex items-center gap-2">
                       <Filter className="h-4 w-4" />
-                      Soort woord
+                      {t.common_word_type}
                     </label>
                     <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
                       <SelectTrigger className="bg-background">
-                        <SelectValue placeholder="Alle woorden" />
+                        <SelectValue placeholder={t.learn_filter_all} />
                       </SelectTrigger>
                       <SelectContent className="bg-background z-50">
-                        <SelectItem value="all">Alle woorden</SelectItem>
+                        <SelectItem value="all">{t.learn_filter_all}</SelectItem>
                         {wordTypes.map((type) => (
                           <SelectItem key={type} value={type}>
                             {type}
@@ -368,7 +364,7 @@ export function QuizMode() {
 
                 {selectionMode === "random" ? (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Aantal vragen</label>
+                    <label className="text-sm font-medium">{t.quiz_question_count}</label>
                     <Input
                       type="number"
                       min={1}
@@ -385,7 +381,7 @@ export function QuizMode() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-medium">
-                        Selecteer woorden ({selectedWordIds.size} geselecteerd)
+                        {selectedWordIds.size} {t.common_word}
                       </label>
                       <div className="flex gap-2">
                         <Button
@@ -394,7 +390,7 @@ export function QuizMode() {
                           size="sm"
                           onClick={selectAllVisible}
                         >
-                          Alles
+                          {t.suggest_select_all}
                         </Button>
                         <Button
                           type="button"
@@ -402,13 +398,13 @@ export function QuizMode() {
                           size="sm"
                           onClick={deselectAll}
                         >
-                          Niets
+                          {t.suggest_select_none}
                         </Button>
                       </div>
                     </div>
                     
                     <Input
-                      placeholder="Zoek woorden..."
+                      placeholder={t.common_search}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="mb-2"
@@ -439,7 +435,7 @@ export function QuizMode() {
                         ))}
                         {seenWords.length === 0 && (
                           <p className="text-center text-muted-foreground py-4">
-                            Geen woorden gevonden
+                            {t.learn_no_words}
                           </p>
                         )}
                       </div>
@@ -449,12 +445,7 @@ export function QuizMode() {
 
                 <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
                   <div>
-                    <p className="font-medium">Directe feedback</p>
-                    <p className="text-sm text-muted-foreground">
-                      {immeditateFeedback
-                        ? "Je ziet direct of het goed of fout is"
-                        : "Je ziet alle resultaten aan het einde"}
-                    </p>
+                    <p className="font-medium">{t.quiz_check}</p>
                   </div>
                   <Switch
                     checked={immeditateFeedback}
@@ -474,7 +465,7 @@ export function QuizMode() {
                 ) : (
                   <GraduationCap className="h-4 w-4" />
                 )}
-                Start Toets {selectionMode === "manual" && selectedWordIds.size > 0 && `(${selectedWordIds.size} woorden)`}
+                {t.quiz_start} {selectionMode === "manual" && selectedWordIds.size > 0 && `(${selectedWordIds.size})`}
               </Button>
             </>
           )}
@@ -490,7 +481,7 @@ export function QuizMode() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-accent" />
-            Resultaat
+            {t.quiz_complete}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -499,7 +490,7 @@ export function QuizMode() {
               {percentage}%
             </div>
             <p className="text-muted-foreground">
-              {correctCount} van {quizWords.length} goed
+              {correctCount} / {quizWords.length} {t.quiz_correct}
             </p>
           </div>
 
@@ -523,9 +514,9 @@ export function QuizMode() {
                 </div>
                 {!result.correct && (
                   <div className="ml-6 mt-1 text-sm">
-                    <span className="text-muted-foreground">Jouw antwoord: </span>
-                    <span className="text-destructive">{result.userAnswer || "(leeg)"}</span>
-                    <span className="text-muted-foreground"> → Correct: </span>
+                    <span className="text-muted-foreground">{t.quiz_your_answer}: </span>
+                    <span className="text-destructive">{result.userAnswer || "-"}</span>
+                    <span className="text-muted-foreground"> → </span>
                     <span className="text-success">{result.word.translation}</span>
                   </div>
                 )}
@@ -535,7 +526,7 @@ export function QuizMode() {
 
           <Button variant="outline" onClick={resetQuiz} className="w-full">
             <RotateCcw className="h-4 w-4" />
-            Opnieuw
+            {t.quiz_restart}
           </Button>
         </CardContent>
       </Card>
@@ -549,7 +540,7 @@ export function QuizMode() {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <GraduationCap className="h-5 w-5 text-primary" />
-            Toets
+            {t.quiz_title}
           </CardTitle>
           <span className="text-sm text-muted-foreground">
             {currentIndex + 1} / {quizWords.length}
@@ -558,7 +549,7 @@ export function QuizMode() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="text-center py-8">
-          <p className="text-sm text-muted-foreground mb-2">Vertaal naar het {getLanguageName(currentWord?.target_language || "")}:</p>
+          <p className="text-sm text-muted-foreground mb-2">{t.common_translate} → {getLanguageName(currentWord?.target_language || "")}:</p>
           <h2 className="text-3xl font-bold">{currentWord?.source_word}</h2>
         </div>
 
@@ -574,16 +565,15 @@ export function QuizMode() {
               {lastCorrect ? (
                 <div className="flex items-center justify-center gap-2 text-success">
                   <Check className="h-5 w-5" />
-                  <span className="font-medium">Correct!</span>
+                  <span className="font-medium">{t.quiz_correct}</span>
                 </div>
               ) : (
                 <div>
                   <div className="flex items-center justify-center gap-2 text-destructive mb-2">
                     <X className="h-5 w-5" />
-                    <span className="font-medium">Fout</span>
+                    <span className="font-medium">{t.quiz_incorrect}</span>
                   </div>
                   <p className="text-sm">
-                    <span className="text-muted-foreground">Correct antwoord: </span>
                     <span className="font-medium">{currentWord?.translation}</span>
                   </p>
                 </div>
@@ -591,14 +581,11 @@ export function QuizMode() {
             </div>
             {retryMode ? (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground text-center">
-                  Typ het correcte woord om verder te gaan:
-                </p>
                 <Input
                   value={retryAnswer}
                   onChange={(e) => setRetryAnswer(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={`Typ: ${currentWord?.translation}`}
+                  placeholder={currentWord?.translation}
                   autoFocus
                   className="text-center text-lg"
                 />
@@ -609,13 +596,13 @@ export function QuizMode() {
                   className="w-full"
                 >
                   <Check className="h-4 w-4" />
-                  Bevestig
+                  {t.quiz_check}
                 </Button>
               </div>
             ) : (
               <Button ref={nextButtonRef} variant="default" onClick={goToNext} className="w-full">
                 <ArrowRight className="h-4 w-4" />
-                Volgende
+                {t.common_next}
               </Button>
             )}
           </div>
@@ -625,7 +612,7 @@ export function QuizMode() {
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type je antwoord..."
+              placeholder={t.quiz_your_answer}
               autoFocus
               className="text-center text-lg"
             />
@@ -636,7 +623,7 @@ export function QuizMode() {
               className="w-full"
             >
               <Check className="h-4 w-4" />
-              Controleer
+              {t.quiz_check}
             </Button>
           </div>
         )}
