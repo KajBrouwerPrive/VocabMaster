@@ -13,6 +13,8 @@ import {
   Trophy,
   ArrowRight,
   Filter,
+  ListChecks,
+  Shuffle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -22,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { getLanguageName } from "@/components/LanguageSelector";
 
 interface QuizResult {
@@ -29,6 +33,8 @@ interface QuizResult {
   userAnswer: string;
   correct: boolean;
 }
+
+type SelectionMode = "random" | "manual";
 
 export function QuizMode() {
   const [quizWords, setQuizWords] = useState<WordWithProgress[]>([]);
@@ -48,6 +54,9 @@ export function QuizMode() {
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
   const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>("random");
+  const [selectedWordIds, setSelectedWordIds] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Get unique word types from all seen words
   const wordTypes = useMemo(() => {
@@ -59,6 +68,22 @@ export function QuizMode() {
     });
     return Array.from(types).sort();
   }, [allWords]);
+
+  // Get seen words for manual selection
+  const seenWords = useMemo(() => {
+    let words = allWords.filter(w => w.seen);
+    if (wordTypeFilter !== "all") {
+      words = words.filter(w => w.word_type === wordTypeFilter);
+    }
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      words = words.filter(w => 
+        w.source_word.toLowerCase().includes(query) ||
+        w.translation.toLowerCase().includes(query)
+      );
+    }
+    return words;
+  }, [allWords, wordTypeFilter, searchQuery]);
 
   // Count available words based on filter
   const filteredAvailableCount = useMemo(() => {
@@ -80,6 +105,11 @@ export function QuizMode() {
     }
   }, [filteredAvailableCount]);
 
+  // Clear selection when switching modes or filters
+  useEffect(() => {
+    setSelectedWordIds(new Set());
+  }, [selectionMode, wordTypeFilter]);
+
   const checkAvailableWords = async () => {
     try {
       const words = await getWordsWithProgress();
@@ -91,14 +121,49 @@ export function QuizMode() {
     }
   };
 
+  const toggleWordSelection = (wordId: string) => {
+    setSelectedWordIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(wordId)) {
+        newSet.delete(wordId);
+      } else {
+        newSet.add(wordId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllVisible = () => {
+    setSelectedWordIds(new Set(seenWords.map(w => w.id)));
+  };
+
+  const deselectAll = () => {
+    setSelectedWordIds(new Set());
+  };
+
   const startQuiz = async () => {
     setIsLoading(true);
     try {
-      const words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter);
+      let words: WordWithProgress[];
+      
+      if (selectionMode === "manual") {
+        if (selectedWordIds.size === 0) {
+          toast.error("Selecteer minimaal één woord");
+          return;
+        }
+        // Get selected words and shuffle them
+        words = allWords
+          .filter(w => selectedWordIds.has(w.id))
+          .sort(() => Math.random() - 0.5);
+      } else {
+        words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter);
+      }
+      
       if (words.length === 0) {
         toast.error("Geen geleerde woorden beschikbaar. Markeer eerst woorden als geleerd!");
         return;
       }
+      
       setQuizWords(words);
       setQuizStarted(true);
       setCurrentIndex(0);
@@ -217,6 +282,7 @@ export function QuizMode() {
     setUserAnswer("");
     setShowFeedback(false);
     setLastCorrect(null);
+    setSelectedWordIds(new Set());
     checkAvailableWords();
   };
 
@@ -234,7 +300,7 @@ export function QuizMode() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {filteredAvailableCount === 0 ? (
+          {filteredAvailableCount === 0 && selectionMode === "random" ? (
             <div className="text-center py-8 space-y-2">
               <p className="text-muted-foreground">
                 {wordTypeFilter === "all" 
@@ -253,6 +319,31 @@ export function QuizMode() {
               </p>
 
               <div className="space-y-4">
+                {/* Selection Mode Toggle */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Selectie methode</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      type="button"
+                      variant={selectionMode === "random" ? "default" : "outline"}
+                      onClick={() => setSelectionMode("random")}
+                      className="w-full"
+                    >
+                      <Shuffle className="h-4 w-4 mr-2" />
+                      Willekeurig
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={selectionMode === "manual" ? "default" : "outline"}
+                      onClick={() => setSelectionMode("manual")}
+                      className="w-full"
+                    >
+                      <ListChecks className="h-4 w-4 mr-2" />
+                      Zelf kiezen
+                    </Button>
+                  </div>
+                </div>
+
                 {wordTypes.length > 0 && (
                   <div className="space-y-2">
                     <label className="text-sm font-medium flex items-center gap-2">
@@ -260,10 +351,10 @@ export function QuizMode() {
                       Soort woord
                     </label>
                     <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-background">
                         <SelectValue placeholder="Alle woorden" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background z-50">
                         <SelectItem value="all">Alle woorden</SelectItem>
                         {wordTypes.map((type) => (
                           <SelectItem key={type} value={type}>
@@ -275,20 +366,86 @@ export function QuizMode() {
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Aantal vragen</label>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={filteredAvailableCount}
-                    value={wordCount}
-                    onChange={(e) =>
-                      setWordCount(
-                        Math.min(parseInt(e.target.value) || 1, filteredAvailableCount)
-                      )
-                    }
-                  />
-                </div>
+                {selectionMode === "random" ? (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Aantal vragen</label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={filteredAvailableCount}
+                      value={wordCount}
+                      onChange={(e) =>
+                        setWordCount(
+                          Math.min(parseInt(e.target.value) || 1, filteredAvailableCount)
+                        )
+                      }
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">
+                        Selecteer woorden ({selectedWordIds.size} geselecteerd)
+                      </label>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={selectAllVisible}
+                        >
+                          Alles
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={deselectAll}
+                        >
+                          Niets
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <Input
+                      placeholder="Zoek woorden..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="mb-2"
+                    />
+                    
+                    <ScrollArea className="h-64 border rounded-lg p-2">
+                      <div className="space-y-1">
+                        {seenWords.map((word) => (
+                          <label
+                            key={word.id}
+                            className="flex items-center gap-3 p-2 rounded-md hover:bg-accent cursor-pointer"
+                          >
+                            <Checkbox
+                              checked={selectedWordIds.has(word.id)}
+                              onCheckedChange={() => toggleWordSelection(word.id)}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium">{word.source_word}</span>
+                              <span className="text-muted-foreground"> → </span>
+                              <span className="text-sm">{word.translation}</span>
+                            </div>
+                            {word.word_type && (
+                              <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded">
+                                {word.word_type}
+                              </span>
+                            )}
+                          </label>
+                        ))}
+                        {seenWords.length === 0 && (
+                          <p className="text-center text-muted-foreground py-4">
+                            Geen woorden gevonden
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
                   <div>
@@ -309,7 +466,7 @@ export function QuizMode() {
               <Button
                 variant="hero"
                 onClick={startQuiz}
-                disabled={isLoading}
+                disabled={isLoading || (selectionMode === "manual" && selectedWordIds.size === 0)}
                 className="w-full"
               >
                 {isLoading ? (
@@ -317,7 +474,7 @@ export function QuizMode() {
                 ) : (
                   <GraduationCap className="h-4 w-4" />
                 )}
-                Start Toets
+                Start Toets {selectionMode === "manual" && selectedWordIds.size > 0 && `(${selectedWordIds.size} woorden)`}
               </Button>
             </>
           )}
