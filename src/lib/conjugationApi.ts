@@ -93,7 +93,7 @@ export async function getConjugations(
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) throw new Error("User not authenticated");
 
-  let query = supabase.from("verb_conjugations").select("*");
+  let query = supabase.from("verb_conjugations_secure").select("*");
 
   if (sourceLanguage) {
     query = query.eq("source_language", sourceLanguage);
