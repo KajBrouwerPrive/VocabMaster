@@ -184,13 +184,6 @@ export type Database = {
             referencedRelation: "words"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "user_word_progress_word_id_fkey"
-            columns: ["word_id"]
-            isOneToOne: false
-            referencedRelation: "words_secure"
-            referencedColumns: ["id"]
-          },
         ]
       }
       verb_conjugations: {
@@ -449,42 +442,29 @@ export type Database = {
           view_count: number | null
           word_type: string | null
         }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          incorrect_count?: number | null
-          quiz_view_count?: number | null
-          seen?: boolean | null
-          shared?: string | null
-          source_language?: string | null
-          source_word?: string | null
-          target_language?: string | null
-          translation?: string | null
-          updated_at?: string | null
-          user_id?: never
-          view_count?: number | null
-          word_type?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          incorrect_count?: number | null
-          quiz_view_count?: number | null
-          seen?: boolean | null
-          shared?: string | null
-          source_language?: string | null
-          source_word?: string | null
-          target_language?: string | null
-          translation?: string | null
-          updated_at?: string | null
-          user_id?: never
-          view_count?: number | null
-          word_type?: string | null
-        }
         Relationships: []
       }
     }
     Functions: {
+      get_words_secure: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          incorrect_count: number
+          quiz_view_count: number
+          seen: boolean
+          shared: string
+          source_language: string
+          source_word: string
+          target_language: string
+          translation: string
+          updated_at: string
+          user_id: string
+          view_count: number
+          word_type: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
