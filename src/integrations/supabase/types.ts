@@ -74,6 +74,7 @@ export type Database = {
       user_conjugation_progress: {
         Row: {
           conjugation_id: string
+          correct_count: number
           created_at: string
           id: string
           incorrect_count: number
@@ -85,6 +86,7 @@ export type Database = {
         }
         Insert: {
           conjugation_id: string
+          correct_count?: number
           created_at?: string
           id?: string
           incorrect_count?: number
@@ -96,6 +98,7 @@ export type Database = {
         }
         Update: {
           conjugation_id?: string
+          correct_count?: number
           created_at?: string
           id?: string
           incorrect_count?: number
@@ -138,6 +141,7 @@ export type Database = {
       }
       user_word_progress: {
         Row: {
+          correct_count: number
           created_at: string
           id: string
           incorrect_count: number
@@ -149,6 +153,7 @@ export type Database = {
           word_id: string
         }
         Insert: {
+          correct_count?: number
           created_at?: string
           id?: string
           incorrect_count?: number
@@ -160,6 +165,7 @@ export type Database = {
           word_id: string
         }
         Update: {
+          correct_count?: number
           created_at?: string
           id?: string
           incorrect_count?: number

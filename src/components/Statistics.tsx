@@ -30,8 +30,8 @@ export function Statistics() {
   // Filter words that user has seen
   const seenWords = words.filter((word) => word.seen);
 
-  // Filter words with more than 2 incorrect answers
-  const difficultWords = words.filter((word) => word.incorrect_count > 2);
+  // Filter words where incorrect - correct > 2
+  const difficultWords = words.filter((word) => (word.incorrect_count - (word.correct_count || 0)) > 2);
 
   if (isLoading) {
     return (
@@ -81,7 +81,7 @@ export function Statistics() {
           ) : (
             <div className="space-y-2">
             {difficultWords
-              .sort((a, b) => b.incorrect_count - a.incorrect_count)
+              .sort((a, b) => (b.incorrect_count - (b.correct_count || 0)) - (a.incorrect_count - (a.correct_count || 0)))
               .map((word) => (
                 <div
                   key={word.id}
@@ -91,9 +91,14 @@ export function Statistics() {
                     <span className="text-lg font-semibold text-primary">{word.source_word}</span>
                     <span className="text-sm text-muted-foreground">{word.translation}</span>
                   </div>
-                  <span className="text-sm font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">
-                    {word.incorrect_count}x
-                  </span>
+                  <div className="flex gap-2 items-center">
+                    <span className="text-sm font-medium text-destructive bg-destructive/10 px-2 py-1 rounded">
+                      {word.incorrect_count}x ✗
+                    </span>
+                    <span className="text-sm font-medium text-success bg-success/10 px-2 py-1 rounded">
+                      {word.correct_count || 0}x ✓
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
