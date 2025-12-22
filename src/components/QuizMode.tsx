@@ -366,15 +366,30 @@ export function QuizMode() {
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t.quiz_question_count}</label>
                     <Input
-                      type="number"
-                      min={1}
-                      max={filteredAvailableCount}
+                      type="text"
+                      inputMode="numeric"
                       value={wordCount}
-                      onChange={(e) =>
-                        setWordCount(
-                          Math.min(parseInt(e.target.value) || 1, filteredAvailableCount)
-                        )
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty input for typing
+                        if (value === "") {
+                          setWordCount(0);
+                          return;
+                        }
+                        // Only allow numeric input
+                        const num = parseInt(value);
+                        if (!isNaN(num) && num >= 0) {
+                          setWordCount(num);
+                        }
+                      }}
+                      onBlur={() => {
+                        // On blur, clamp the value to valid range
+                        if (wordCount < 1) {
+                          setWordCount(1);
+                        } else if (wordCount > filteredAvailableCount && filteredAvailableCount > 0) {
+                          setWordCount(filteredAvailableCount);
+                        }
+                      }}
                     />
                   </div>
                 ) : (
