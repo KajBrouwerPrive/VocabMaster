@@ -18,6 +18,7 @@ export interface WordWithProgress extends Word {
   view_count: number;
   quiz_view_count: number;
   incorrect_count: number;
+  correct_count: number;
 }
 
 export interface UserWordProgress {
@@ -28,6 +29,7 @@ export interface UserWordProgress {
   view_count: number;
   quiz_view_count: number;
   incorrect_count: number;
+  correct_count: number;
 }
 
 export interface WordSuggestion {
@@ -197,6 +199,7 @@ async function getOrCreateProgress(userId: string, wordId: string): Promise<User
       view_count: 0,
       quiz_view_count: 0,
       incorrect_count: 0,
+      correct_count: 0,
     })
     .select()
     .single();
@@ -255,6 +258,7 @@ export async function getWordsWithProgress(
       view_count: p?.view_count ?? 0,
       quiz_view_count: p?.quiz_view_count ?? 0,
       incorrect_count: p?.incorrect_count ?? 0,
+      correct_count: p?.correct_count ?? 0,
     };
   });
 }
@@ -346,6 +350,24 @@ export async function incrementQuizViewCount(wordId: string): Promise<void> {
   const { error } = await supabase
     .from("user_word_progress")
     .update({ quiz_view_count: progress.quiz_view_count + 1 })
+    .eq("user_id", user.id)
+    .eq("word_id", wordId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+// Increment correct count for a word (user-specific)
+export async function incrementCorrectCount(wordId: string): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Je moet ingelogd zijn");
+
+  const progress = await getOrCreateProgress(user.id, wordId);
+
+  const { error } = await supabase
+    .from("user_word_progress")
+    .update({ correct_count: progress.correct_count + 1 })
     .eq("user_id", user.id)
     .eq("word_id", wordId);
 
