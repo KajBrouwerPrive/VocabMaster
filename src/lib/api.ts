@@ -435,7 +435,8 @@ export async function getQuizWords(
   sourceLanguage?: string,
   targetLanguage?: string,
   wordType?: string,
-  minNiveau?: string
+  minNiveau?: string,
+  thema?: string
 ): Promise<WordWithProgress[]> {
   const wordsWithProgress = await getWordsWithProgress(sourceLanguage, targetLanguage);
   
@@ -458,6 +459,11 @@ export async function getQuizWords(
         return wordIndex >= minIndex;
       });
     }
+  }
+
+  // Filter by thema
+  if (thema && thema !== "all") {
+    seenWords = seenWords.filter(w => w.thema === thema);
   }
 
   // Shuffle and take requested count
