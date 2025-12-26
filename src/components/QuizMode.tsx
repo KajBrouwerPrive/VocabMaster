@@ -55,7 +55,6 @@ export function QuizMode() {
   const [retryAnswer, setRetryAnswer] = useState("");
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
-  const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("random");
   const [selectedWordIds, setSelectedWordIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,23 +67,9 @@ export function QuizMode() {
     return NIVEAU_ORDER.indexOf(niveau.toUpperCase());
   };
 
-  // Get unique word types from all seen words
-  const wordTypes = useMemo(() => {
-    const types = new Set<string>();
-    allWords.filter(w => w.seen).forEach((word) => {
-      if (word.word_type) {
-        types.add(word.word_type);
-      }
-    });
-    return Array.from(types).sort();
-  }, [allWords]);
-
   // Get seen words for manual selection
   const seenWords = useMemo(() => {
     let words = allWords.filter(w => w.seen);
-    if (wordTypeFilter !== "all") {
-      words = words.filter(w => w.word_type === wordTypeFilter);
-    }
     if (minNiveauFilter !== "all") {
       const minIndex = getNiveauIndex(minNiveauFilter);
       words = words.filter(w => {
@@ -100,14 +85,11 @@ export function QuizMode() {
       );
     }
     return words;
-  }, [allWords, wordTypeFilter, minNiveauFilter, searchQuery]);
+  }, [allWords, minNiveauFilter, searchQuery]);
 
   // Count available words based on filter
   const filteredAvailableCount = useMemo(() => {
     let words = allWords.filter(w => w.seen);
-    if (wordTypeFilter !== "all") {
-      words = words.filter(w => w.word_type === wordTypeFilter);
-    }
     if (minNiveauFilter !== "all") {
       const minIndex = getNiveauIndex(minNiveauFilter);
       words = words.filter(w => {
@@ -116,7 +98,7 @@ export function QuizMode() {
       });
     }
     return words.length;
-  }, [allWords, wordTypeFilter, minNiveauFilter]);
+  }, [allWords, minNiveauFilter]);
 
   useEffect(() => {
     checkAvailableWords();
@@ -132,7 +114,7 @@ export function QuizMode() {
   // Clear selection when switching modes or filters
   useEffect(() => {
     setSelectedWordIds(new Set());
-  }, [selectionMode, wordTypeFilter, minNiveauFilter]);
+  }, [selectionMode, minNiveauFilter]);
 
   const checkAvailableWords = async () => {
     try {
@@ -180,7 +162,7 @@ export function QuizMode() {
           .filter(w => selectedWordIds.has(w.id))
           .sort(() => Math.random() - 0.5);
       } else {
-        words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter, minNiveauFilter);
+        words = await getQuizWords(wordCount, undefined, undefined, undefined, minNiveauFilter);
       }
       
       if (words.length === 0) {
@@ -366,27 +348,6 @@ export function QuizMode() {
                   </div>
                 </div>
 
-                {wordTypes.length > 0 && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Filter className="h-4 w-4" />
-                      {t.common_word_type}
-                    </label>
-                    <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
-                      <SelectTrigger className="bg-background">
-                        <SelectValue placeholder={t.learn_filter_all} />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background z-50">
-                        <SelectItem value="all">{t.learn_filter_all}</SelectItem>
-                        {wordTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
