@@ -391,6 +391,7 @@ export type Database = {
           source_language: string
           source_word: string
           target_language: string
+          thema: string | null
           translation: string
           updated_at: string
           user_id: string | null
@@ -408,6 +409,7 @@ export type Database = {
           source_language?: string
           source_word: string
           target_language: string
+          thema?: string | null
           translation: string
           updated_at?: string
           user_id?: string | null
@@ -425,6 +427,7 @@ export type Database = {
           source_language?: string
           source_word?: string
           target_language?: string
+          thema?: string | null
           translation?: string
           updated_at?: string
           user_id?: string | null
@@ -511,6 +514,7 @@ export type Database = {
           source_language: string | null
           source_word: string | null
           target_language: string | null
+          thema: string | null
           translation: string | null
           updated_at: string | null
           user_id: string | null
@@ -528,6 +532,7 @@ export type Database = {
           source_language?: string | null
           source_word?: string | null
           target_language?: string | null
+          thema?: string | null
           translation?: string | null
           updated_at?: string | null
           user_id?: never
@@ -545,6 +550,7 @@ export type Database = {
           source_language?: string | null
           source_word?: string | null
           target_language?: string | null
+          thema?: string | null
           translation?: string | null
           updated_at?: string | null
           user_id?: never
