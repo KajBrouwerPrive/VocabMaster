@@ -103,32 +103,8 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
 
     setIsLoading(true);
     try {
-      // Get existing words to check for duplicates (constraint is on source_word + languages)
-      const { data: existingWords } = await supabase
-        .from("words")
-        .select("source_word")
-        .eq("source_language", "nl")
-        .eq("target_language", "es");
-
-      const existingSet = new Set(
-        (existingWords || []).map((w) => w.source_word.toLowerCase())
-      );
-
-      // Filter out duplicates based on source_word (matches unique constraint)
-      const newWords = parsedWords.filter(
-        (w) => !existingSet.has(w.sourceWord.toLowerCase())
-      );
-
-      if (newWords.length === 0) {
-        toast.info("Alle woorden bestaan al in je woordenlijst");
-        setParsedWords([]);
-        setFileName(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        return;
-      }
-
       // Admin imports words with their user_id and shared='Yes' so everyone can see them
-      const wordsToInsert = newWords.map((w) => ({
+      const wordsToInsert = parsedWords.map((w) => ({
         source_word: w.sourceWord,
         source_language: "nl",
         translation: w.translation,
@@ -140,14 +116,28 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
         shared: "Yes",
       }));
 
-      const { error } = await supabase.from("words").insert(wordsToInsert);
+      // Insert words one by one to handle duplicates gracefully
+      let inserted = 0;
+      let skipped = 0;
 
-      if (error) throw error;
+      for (const word of wordsToInsert) {
+        const { error } = await supabase.from("words").insert(word);
+        if (error) {
+          // If duplicate key error, just skip this word
+          if (error.code === "23505") {
+            skipped++;
+          } else {
+            console.error("Error inserting word:", error);
+            skipped++;
+          }
+        } else {
+          inserted++;
+        }
+      }
 
-      const skipped = parsedWords.length - newWords.length;
       const message = skipped > 0 
-        ? `${newWords.length} gedeelde woorden toegevoegd, ${skipped} duplicaten overgeslagen`
-        : `${newWords.length} gedeelde woorden geïmporteerd`;
+        ? `${inserted} gedeelde woorden toegevoegd, ${skipped} duplicaten overgeslagen`
+        : `${inserted} gedeelde woorden geïmporteerd`;
       toast.success(message);
       setParsedWords([]);
       setFileName(null);
