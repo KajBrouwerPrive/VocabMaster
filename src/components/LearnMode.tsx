@@ -29,12 +29,18 @@ interface LearnModeProps {
   refreshTrigger: number;
 }
 
-// Level order for filtering
-const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
+// Niveau groups for filtering
+const NIVEAU_GROUPS = [
+  { value: "A", label: "A", levels: ["A1", "A2"] },
+  { value: "B", label: "B", levels: ["B1", "B2"] },
+  { value: "C", label: "C", levels: ["C1", "C2"] },
+];
 
-const getNiveauIndex = (niveau: string | null | undefined): number => {
-  if (!niveau) return -1;
-  return NIVEAU_ORDER.indexOf(niveau.toUpperCase());
+const matchesNiveauGroup = (niveau: string | null | undefined, group: string): boolean => {
+  if (!niveau) return false;
+  const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
+  if (!niveauGroup) return false;
+  return niveauGroup.levels.includes(niveau.toUpperCase());
 };
 
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
@@ -44,20 +50,16 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
+  const [niveauFilter, setNiveauFilter] = useState<string>("all");
   const [themaFilter, setThemaFilter] = useState<string>("all");
 
   // Filter words based on minimum niveau and theme
   const words = useMemo(() => {
     let filtered = allWords;
     
-    // Filter by minimum niveau
-    if (minNiveauFilter !== "all") {
-      const minIndex = getNiveauIndex(minNiveauFilter);
-      filtered = filtered.filter((word) => {
-        const wordIndex = getNiveauIndex(word.niveau);
-        return wordIndex >= minIndex;
-      });
+    // Filter by niveau group
+    if (niveauFilter !== "all") {
+      filtered = filtered.filter((word) => matchesNiveauGroup(word.niveau, niveauFilter));
     }
 
     // Filter by theme
@@ -66,7 +68,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     }
     
     return filtered;
-  }, [allWords, minNiveauFilter, themaFilter]);
+  }, [allWords, niveauFilter, themaFilter]);
 
   const shuffleWords = (wordsToShuffle: WordWithProgress[]) => {
     const shuffled = [...wordsToShuffle];
@@ -156,7 +158,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   useEffect(() => {
     setCurrentIndex(0);
     setShowTranslation(false);
-  }, [minNiveauFilter, themaFilter]);
+  }, [niveauFilter, themaFilter]);
 
   const currentWord = words[currentIndex];
 
@@ -239,15 +241,15 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             {t.learn_title}
           </CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
-            <Select value={minNiveauFilter} onValueChange={setMinNiveauFilter}>
+            <Select value={niveauFilter} onValueChange={setNiveauFilter}>
               <SelectTrigger className="w-[90px] h-8 text-xs">
                 <SelectValue placeholder="Niveau" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle</SelectItem>
-                {NIVEAU_ORDER.map((niveau) => (
-                  <SelectItem key={niveau} value={niveau}>
-                    {niveau}+
+                {NIVEAU_GROUPS.map((group) => (
+                  <SelectItem key={group.value} value={group.value}>
+                    {group.label}
                   </SelectItem>
                 ))}
               </SelectContent>

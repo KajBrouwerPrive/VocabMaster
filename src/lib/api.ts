@@ -429,13 +429,27 @@ export async function markWordsAsSeen(wordIds: string[]): Promise<void> {
   }
 }
 
+// Niveau groups for filtering
+const NIVEAU_GROUPS: Record<string, string[]> = {
+  "A": ["A1", "A2"],
+  "B": ["B1", "B2"],
+  "C": ["C1", "C2"],
+};
+
+const matchesNiveauGroup = (niveau: string | null | undefined, group: string): boolean => {
+  if (!niveau) return false;
+  const levels = NIVEAU_GROUPS[group];
+  if (!levels) return false;
+  return levels.includes(niveau.toUpperCase());
+};
+
 // Get random seen words for quiz (user-specific progress)
 export async function getQuizWords(
   count: number,
   sourceLanguage?: string,
   targetLanguage?: string,
   wordType?: string,
-  minNiveau?: string,
+  niveauGroup?: string,
   thema?: string
 ): Promise<WordWithProgress[]> {
   const wordsWithProgress = await getWordsWithProgress(sourceLanguage, targetLanguage);
@@ -448,17 +462,9 @@ export async function getQuizWords(
     seenWords = seenWords.filter(w => w.word_type === wordType);
   }
 
-  // Filter by minimum niveau
-  if (minNiveau && minNiveau !== "all") {
-    const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
-    const minIndex = NIVEAU_ORDER.indexOf(minNiveau.toUpperCase());
-    if (minIndex >= 0) {
-      seenWords = seenWords.filter(w => {
-        if (!w.niveau) return false;
-        const wordIndex = NIVEAU_ORDER.indexOf(w.niveau.toUpperCase());
-        return wordIndex >= minIndex;
-      });
-    }
+  // Filter by niveau group (A, B, or C)
+  if (niveauGroup && niveauGroup !== "all") {
+    seenWords = seenWords.filter(w => matchesNiveauGroup(w.niveau, niveauGroup));
   }
 
   // Filter by thema
