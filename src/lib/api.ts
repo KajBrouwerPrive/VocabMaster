@@ -8,6 +8,7 @@ export interface Word {
   target_language: string;
   word_type: string | null;
   niveau: string | null;
+  thema: string | null;
   user_id: string | null; // null = shared word, uuid = personal word
   shared: string; // "Yes" if added by admin, "No" otherwise
   created_at: string;
