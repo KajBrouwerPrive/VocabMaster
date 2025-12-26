@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { getWordsWithProgress, markWordAsSeen, deleteWord, incrementViewCount, type WordWithProgress } from "@/lib/api";
+import { getWordsWithProgress, markWordAsSeen, deleteWord, incrementViewCount, getAllThemes, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Book,
@@ -40,22 +40,12 @@ const getNiveauIndex = (niveau: string | null | undefined): number => {
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const { t } = useLanguage();
   const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
+  const [allThemes, setAllThemes] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
   const [themaFilter, setThemaFilter] = useState<string>("all");
-
-  // Get unique themes from all words
-  const themes = useMemo(() => {
-    const themaSet = new Set<string>();
-    allWords.forEach((word) => {
-      if (word.thema) {
-        themaSet.add(word.thema);
-      }
-    });
-    return Array.from(themaSet).sort();
-  }, [allWords]);
 
   // Filter words based on minimum niveau and theme
   const words = useMemo(() => {
@@ -147,8 +137,12 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const loadWords = async () => {
     setIsLoading(true);
     try {
-      const data = await getWordsWithProgress();
+      const [data, themes] = await Promise.all([
+        getWordsWithProgress(),
+        getAllThemes(),
+      ]);
       setAllWords(data);
+      setAllThemes(themes);
       setCurrentIndex(0);
       setShowTranslation(false);
     } catch (error) {
@@ -264,7 +258,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Alle thema's</SelectItem>
-                {themes.map((thema) => (
+                {allThemes.map((thema) => (
                   <SelectItem key={thema} value={thema}>
                     {thema}
                   </SelectItem>

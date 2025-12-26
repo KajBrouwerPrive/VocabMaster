@@ -473,3 +473,29 @@ export async function deleteWord(wordId: string): Promise<void> {
     throw new Error(error.message);
   }
 }
+
+// Get all unique themes from shared words
+export async function getAllThemes(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("words_secure")
+    .select("thema")
+    .eq("shared", "Yes")
+    .not("thema", "is", null);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  // Cast to include thema field
+  const dataWithThema = data as Array<{ thema?: string | null }>;
+  
+  // Get unique themes
+  const themaSet = new Set<string>();
+  dataWithThema.forEach((word) => {
+    if (word.thema) {
+      themaSet.add(word.thema);
+    }
+  });
+
+  return Array.from(themaSet).sort();
+}
