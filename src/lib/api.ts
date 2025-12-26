@@ -262,6 +262,7 @@ export async function getWordsWithProgress(
       target_language: word.target_language!,
       word_type: word.word_type ?? null,
       niveau: (word as { niveau?: string | null }).niveau ?? null,
+      thema: (word as { thema?: string | null }).thema ?? null,
       user_id: word.user_id ?? null,
       shared: word.shared!,
       created_at: word.created_at!,
