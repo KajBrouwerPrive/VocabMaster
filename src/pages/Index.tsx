@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { LearnMode } from "@/components/LearnMode";
 import { QuizMode } from "@/components/QuizMode";
+import { ConjugationQuizMode } from "@/components/ConjugationQuizMode";
 import { AddWordForm } from "@/components/AddWordForm";
 import { SuggestWords } from "@/components/SuggestWords";
 import { ImportWords } from "@/components/ImportWords";
@@ -100,11 +101,7 @@ const Index = () => {
         {currentView === "learn" && <LearnMode refreshTrigger={refreshTrigger} />}
         {currentView === "conjugations" && <ConjugationLearnMode refreshTrigger={conjugationRefreshTrigger} />}
         {currentView === "quiz" && <QuizMode />}
-        {currentView === "quiz-conjugations" && (
-          <div className="text-center py-12 text-muted-foreground">
-            {t.nav_quiz_conjugations} - coming soon
-          </div>
-        )}
+        {currentView === "quiz-conjugations" && <ConjugationQuizMode />}
         {currentView === "stats" && <Statistics />}
         {currentView === "add" && (
           <AddWordForm
