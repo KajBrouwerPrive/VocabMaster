@@ -16,6 +16,7 @@ interface ParsedWord {
   sourceWord: string;
   translation: string;
   wordType: string;
+  niveau: string;
 }
 
 export function ImportWords({ onWordsAdded }: ImportWordsProps) {
@@ -75,6 +76,7 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
               sourceWord: String(row[0]).trim().toLowerCase(),
               translation: String(row[1]).trim().toLowerCase(),
               wordType: row[2] ? String(row[2]).trim().toLowerCase() : "",
+              niveau: row[3] ? String(row[3]).trim() : "",
             });
           }
         }
@@ -130,6 +132,7 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
         translation: w.translation,
         target_language: "es",
         word_type: w.wordType || null,
+        niveau: w.niveau || null,
         user_id: user.id,
         shared: "Yes",
       }));
@@ -170,7 +173,7 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Upload een Excel-bestand met 3 kolommen: A = Nederlands woord, B = Spaanse vertaling, C = Soort woord
+          Upload een Excel-bestand met 4 kolommen: A = Nederlands woord, B = Spaanse vertaling, C = Soort woord, D = Niveau
         </p>
 
         <div className="flex gap-2">
