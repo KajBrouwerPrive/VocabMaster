@@ -100,6 +100,7 @@ interface Translations {
   stats_not_learned: string;
   stats_quiz_attempts: string;
   stats_incorrect: string;
+  stats_per_niveau: string;
   
   // Auth
   auth_login: string;
@@ -198,6 +199,7 @@ const translations: Record<AppLanguage, Translations> = {
     stats_not_learned: 'Niet geleerd',
     stats_quiz_attempts: 'Toets pogingen',
     stats_incorrect: 'Fout beantwoord',
+    stats_per_niveau: 'Statistieken per niveau',
     auth_login: 'Inloggen',
     auth_register: 'Registreren',
     auth_email: 'E-mail',
@@ -292,6 +294,7 @@ const translations: Record<AppLanguage, Translations> = {
     stats_not_learned: 'Not learned',
     stats_quiz_attempts: 'Quiz attempts',
     stats_incorrect: 'Incorrect answers',
+    stats_per_niveau: 'Statistics per level',
     auth_login: 'Login',
     auth_register: 'Register',
     auth_email: 'Email',
@@ -386,6 +389,7 @@ const translations: Record<AppLanguage, Translations> = {
     stats_not_learned: 'Non appris',
     stats_quiz_attempts: 'Tentatives de quiz',
     stats_incorrect: 'Réponses incorrectes',
+    stats_per_niveau: 'Statistiques par niveau',
     auth_login: 'Connexion',
     auth_register: 'Inscription',
     auth_email: 'E-mail',
@@ -480,6 +484,7 @@ const translations: Record<AppLanguage, Translations> = {
     stats_not_learned: 'No aprendidas',
     stats_quiz_attempts: 'Intentos de prueba',
     stats_incorrect: 'Respuestas incorrectas',
+    stats_per_niveau: 'Estadísticas por nivel',
     auth_login: 'Iniciar sesión',
     auth_register: 'Registrarse',
     auth_email: 'Correo electrónico',
