@@ -377,6 +377,7 @@ export type Database = {
           created_at: string
           id: string
           incorrect_count: number
+          niveau: string | null
           quiz_view_count: number
           seen: boolean
           shared: string
@@ -393,6 +394,7 @@ export type Database = {
           created_at?: string
           id?: string
           incorrect_count?: number
+          niveau?: string | null
           quiz_view_count?: number
           seen?: boolean
           shared?: string
@@ -409,6 +411,7 @@ export type Database = {
           created_at?: string
           id?: string
           incorrect_count?: number
+          niveau?: string | null
           quiz_view_count?: number
           seen?: boolean
           shared?: string
