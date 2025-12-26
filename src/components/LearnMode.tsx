@@ -258,21 +258,19 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
                 ))}
               </SelectContent>
             </Select>
-            {themes.length > 0 && (
-              <Select value={themaFilter} onValueChange={setThemaFilter}>
-                <SelectTrigger className="w-[120px] h-8 text-xs">
-                  <SelectValue placeholder="Thema" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle thema's</SelectItem>
-                  {themes.map((thema) => (
-                    <SelectItem key={thema} value={thema}>
-                      {thema}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select value={themaFilter} onValueChange={setThemaFilter}>
+              <SelectTrigger className="w-[120px] h-8 text-xs">
+                <SelectValue placeholder="Thema" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle thema's</SelectItem>
+                {themes.map((thema) => (
+                  <SelectItem key={thema} value={thema}>
+                    {thema}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <span className="text-sm text-muted-foreground">
               {currentIndex + 1} / {words.length}
             </span>
