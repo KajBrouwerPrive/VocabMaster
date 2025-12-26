@@ -199,3 +199,72 @@ export async function incrementConjugationViewCount(conjugationId: string): Prom
     }
   );
 }
+
+export async function incrementConjugationQuizViewCount(conjugationId: string): Promise<void> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("User not authenticated");
+
+  const { data: existing } = await supabase
+    .from("user_conjugation_progress")
+    .select("quiz_view_count")
+    .eq("user_id", userData.user.id)
+    .eq("conjugation_id", conjugationId)
+    .maybeSingle();
+
+  await supabase.from("user_conjugation_progress").upsert(
+    {
+      user_id: userData.user.id,
+      conjugation_id: conjugationId,
+      quiz_view_count: (existing?.quiz_view_count || 0) + 1,
+    },
+    {
+      onConflict: "user_id,conjugation_id",
+    }
+  );
+}
+
+export async function incrementConjugationIncorrectCount(conjugationId: string): Promise<void> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("User not authenticated");
+
+  const { data: existing } = await supabase
+    .from("user_conjugation_progress")
+    .select("incorrect_count")
+    .eq("user_id", userData.user.id)
+    .eq("conjugation_id", conjugationId)
+    .maybeSingle();
+
+  await supabase.from("user_conjugation_progress").upsert(
+    {
+      user_id: userData.user.id,
+      conjugation_id: conjugationId,
+      incorrect_count: (existing?.incorrect_count || 0) + 1,
+    },
+    {
+      onConflict: "user_id,conjugation_id",
+    }
+  );
+}
+
+export async function incrementConjugationCorrectCount(conjugationId: string): Promise<void> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("User not authenticated");
+
+  const { data: existing } = await supabase
+    .from("user_conjugation_progress")
+    .select("correct_count")
+    .eq("user_id", userData.user.id)
+    .eq("conjugation_id", conjugationId)
+    .maybeSingle();
+
+  await supabase.from("user_conjugation_progress").upsert(
+    {
+      user_id: userData.user.id,
+      conjugation_id: conjugationId,
+      correct_count: (existing?.correct_count || 0) + 1,
+    },
+    {
+      onConflict: "user_id,conjugation_id",
+    }
+  );
+}
