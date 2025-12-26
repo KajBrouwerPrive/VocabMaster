@@ -370,7 +370,7 @@ export function QuizMode() {
                       <SelectValue placeholder={t.learn_filter_all} />
                     </SelectTrigger>
                     <SelectContent className="bg-background z-50">
-                      <SelectItem value="all">{t.learn_filter_all}</SelectItem>
+                      <SelectItem value="all">Niveau</SelectItem>
                       {NIVEAU_GROUPS.map((group) => (
                         <SelectItem key={group.value} value={group.value}>
                           {group.label}
