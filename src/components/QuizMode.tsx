@@ -59,6 +59,14 @@ export function QuizMode() {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("random");
   const [selectedWordIds, setSelectedWordIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
+
+  // Niveau order for filtering
+  const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
+  const getNiveauIndex = (niveau: string | null): number => {
+    if (!niveau) return -1;
+    return NIVEAU_ORDER.indexOf(niveau.toUpperCase());
+  };
 
   // Get unique word types from all seen words
   const wordTypes = useMemo(() => {
@@ -77,6 +85,13 @@ export function QuizMode() {
     if (wordTypeFilter !== "all") {
       words = words.filter(w => w.word_type === wordTypeFilter);
     }
+    if (minNiveauFilter !== "all") {
+      const minIndex = getNiveauIndex(minNiveauFilter);
+      words = words.filter(w => {
+        const wordIndex = getNiveauIndex(w.niveau);
+        return wordIndex >= minIndex;
+      });
+    }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       words = words.filter(w => 
@@ -85,16 +100,23 @@ export function QuizMode() {
       );
     }
     return words;
-  }, [allWords, wordTypeFilter, searchQuery]);
+  }, [allWords, wordTypeFilter, minNiveauFilter, searchQuery]);
 
   // Count available words based on filter
   const filteredAvailableCount = useMemo(() => {
-    const seenWords = allWords.filter(w => w.seen);
-    if (wordTypeFilter === "all") {
-      return seenWords.length;
+    let words = allWords.filter(w => w.seen);
+    if (wordTypeFilter !== "all") {
+      words = words.filter(w => w.word_type === wordTypeFilter);
     }
-    return seenWords.filter(w => w.word_type === wordTypeFilter).length;
-  }, [allWords, wordTypeFilter]);
+    if (minNiveauFilter !== "all") {
+      const minIndex = getNiveauIndex(minNiveauFilter);
+      words = words.filter(w => {
+        const wordIndex = getNiveauIndex(w.niveau);
+        return wordIndex >= minIndex;
+      });
+    }
+    return words.length;
+  }, [allWords, wordTypeFilter, minNiveauFilter]);
 
   useEffect(() => {
     checkAvailableWords();
@@ -110,7 +132,7 @@ export function QuizMode() {
   // Clear selection when switching modes or filters
   useEffect(() => {
     setSelectedWordIds(new Set());
-  }, [selectionMode, wordTypeFilter]);
+  }, [selectionMode, wordTypeFilter, minNiveauFilter]);
 
   const checkAvailableWords = async () => {
     try {
@@ -158,7 +180,7 @@ export function QuizMode() {
           .filter(w => selectedWordIds.has(w.id))
           .sort(() => Math.random() - 0.5);
       } else {
-        words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter);
+        words = await getQuizWords(wordCount, undefined, undefined, wordTypeFilter, minNiveauFilter);
       }
       
       if (words.length === 0) {
@@ -365,6 +387,26 @@ export function QuizMode() {
                     </Select>
                   </div>
                 )}
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    {t.learn_min_niveau}
+                  </label>
+                  <Select value={minNiveauFilter} onValueChange={setMinNiveauFilter}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder={t.learn_filter_all} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      <SelectItem value="all">{t.learn_filter_all}</SelectItem>
+                      {NIVEAU_ORDER.map((niveau) => (
+                        <SelectItem key={niveau} value={niveau}>
+                          {niveau}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 {selectionMode === "random" ? (
                   <div className="space-y-2">

@@ -425,7 +425,8 @@ export async function getQuizWords(
   count: number,
   sourceLanguage?: string,
   targetLanguage?: string,
-  wordType?: string
+  wordType?: string,
+  minNiveau?: string
 ): Promise<WordWithProgress[]> {
   const wordsWithProgress = await getWordsWithProgress(sourceLanguage, targetLanguage);
   
@@ -435,6 +436,19 @@ export async function getQuizWords(
   // Filter by word type
   if (wordType && wordType !== "all") {
     seenWords = seenWords.filter(w => w.word_type === wordType);
+  }
+
+  // Filter by minimum niveau
+  if (minNiveau && minNiveau !== "all") {
+    const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
+    const minIndex = NIVEAU_ORDER.indexOf(minNiveau.toUpperCase());
+    if (minIndex >= 0) {
+      seenWords = seenWords.filter(w => {
+        if (!w.niveau) return false;
+        const wordIndex = NIVEAU_ORDER.indexOf(w.niveau.toUpperCase());
+        return wordIndex >= minIndex;
+      });
+    }
   }
 
   // Shuffle and take requested count

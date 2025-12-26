@@ -59,6 +59,7 @@ interface Translations {
   learn_filter_all: string;
   learn_filter_learned: string;
   learn_filter_not_learned: string;
+  learn_min_niveau: string;
   
   // Quiz mode
   quiz_title: string;
@@ -164,6 +165,7 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_all: 'Alle woorden',
     learn_filter_learned: 'Geleerd',
     learn_filter_not_learned: 'Niet geleerd',
+    learn_min_niveau: 'Minimum niveau',
     quiz_title: 'Woorden toetsen',
     quiz_start: 'Start toets',
     quiz_check: 'Controleer',
@@ -257,6 +259,7 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_all: 'All words',
     learn_filter_learned: 'Learned',
     learn_filter_not_learned: 'Not learned',
+    learn_min_niveau: 'Minimum level',
     quiz_title: 'Quiz words',
     quiz_start: 'Start quiz',
     quiz_check: 'Check',
@@ -350,6 +353,7 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_all: 'Tous les mots',
     learn_filter_learned: 'Appris',
     learn_filter_not_learned: 'Non appris',
+    learn_min_niveau: 'Niveau minimum',
     quiz_title: 'Quiz de mots',
     quiz_start: 'Commencer le quiz',
     quiz_check: 'Vérifier',
@@ -443,6 +447,7 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_all: 'Todas las palabras',
     learn_filter_learned: 'Aprendidas',
     learn_filter_not_learned: 'No aprendidas',
+    learn_min_niveau: 'Nivel mínimo',
     quiz_title: 'Prueba de palabras',
     quiz_start: 'Iniciar prueba',
     quiz_check: 'Comprobar',
