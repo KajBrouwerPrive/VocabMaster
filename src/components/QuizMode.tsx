@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, getWordsWithProgress, incrementIncorrectCount, incrementCorrectCount, incrementQuizViewCount, type WordWithProgress } from "@/lib/api";
+import { getQuizWords, getWordsWithProgress, getAllThemes, incrementIncorrectCount, incrementCorrectCount, incrementQuizViewCount, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -55,10 +55,12 @@ export function QuizMode() {
   const [retryAnswer, setRetryAnswer] = useState("");
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
+  const [allThemes, setAllThemes] = useState<string[]>([]);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("random");
   const [selectedWordIds, setSelectedWordIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
+  const [themaFilter, setThemaFilter] = useState<string>("all");
 
   // Niveau order for filtering
   const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -77,6 +79,9 @@ export function QuizMode() {
         return wordIndex >= minIndex;
       });
     }
+    if (themaFilter !== "all") {
+      words = words.filter(w => w.thema === themaFilter);
+    }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       words = words.filter(w => 
@@ -85,7 +90,7 @@ export function QuizMode() {
       );
     }
     return words;
-  }, [allWords, minNiveauFilter, searchQuery]);
+  }, [allWords, minNiveauFilter, themaFilter, searchQuery]);
 
   // Count available words based on filter
   const filteredAvailableCount = useMemo(() => {
@@ -97,8 +102,11 @@ export function QuizMode() {
         return wordIndex >= minIndex;
       });
     }
+    if (themaFilter !== "all") {
+      words = words.filter(w => w.thema === themaFilter);
+    }
     return words.length;
-  }, [allWords, minNiveauFilter]);
+  }, [allWords, minNiveauFilter, themaFilter]);
 
   useEffect(() => {
     checkAvailableWords();
@@ -114,14 +122,18 @@ export function QuizMode() {
   // Clear selection when switching modes or filters
   useEffect(() => {
     setSelectedWordIds(new Set());
-  }, [selectionMode, minNiveauFilter]);
+  }, [selectionMode, minNiveauFilter, themaFilter]);
 
   const checkAvailableWords = async () => {
     try {
-      const words = await getWordsWithProgress();
+      const [words, themes] = await Promise.all([
+        getWordsWithProgress(),
+        getAllThemes(),
+      ]);
       setAllWords(words);
-      const seenWords = words.filter(w => w.seen);
-      setAvailableWordCount(seenWords.length);
+      setAllThemes(themes);
+      const seenWordsCount = words.filter(w => w.seen);
+      setAvailableWordCount(seenWordsCount.length);
     } catch (error) {
       console.error("Error checking available words:", error);
     }
@@ -162,7 +174,7 @@ export function QuizMode() {
           .filter(w => selectedWordIds.has(w.id))
           .sort(() => Math.random() - 0.5);
       } else {
-        words = await getQuizWords(wordCount, undefined, undefined, undefined, minNiveauFilter);
+        words = await getQuizWords(wordCount, undefined, undefined, undefined, minNiveauFilter, themaFilter);
       }
       
       if (words.length === 0) {
@@ -363,6 +375,23 @@ export function QuizMode() {
                       {NIVEAU_ORDER.map((niveau) => (
                         <SelectItem key={niveau} value={niveau}>
                           {niveau}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Thema</label>
+                  <Select value={themaFilter} onValueChange={setThemaFilter}>
+                    <SelectTrigger className="bg-background">
+                      <SelectValue placeholder="Alle thema's" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      <SelectItem value="all">Alle thema's</SelectItem>
+                      {allThemes.map((thema) => (
+                        <SelectItem key={thema} value={thema}>
+                          {thema}
                         </SelectItem>
                       ))}
                     </SelectContent>
