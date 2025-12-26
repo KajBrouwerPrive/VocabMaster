@@ -43,20 +43,8 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
   const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
   const [themaFilter, setThemaFilter] = useState<string>("all");
-
-  // Get unique word types from all words
-  const wordTypes = useMemo(() => {
-    const types = new Set<string>();
-    allWords.forEach((word) => {
-      if (word.word_type) {
-        types.add(word.word_type);
-      }
-    });
-    return Array.from(types).sort();
-  }, [allWords]);
 
   // Get unique themes from all words
   const themes = useMemo(() => {
@@ -69,14 +57,9 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     return Array.from(themaSet).sort();
   }, [allWords]);
 
-  // Filter words based on selected word type, minimum niveau, and theme
+  // Filter words based on minimum niveau and theme
   const words = useMemo(() => {
     let filtered = allWords;
-    
-    // Filter by word type
-    if (wordTypeFilter !== "all") {
-      filtered = filtered.filter((word) => word.word_type === wordTypeFilter);
-    }
     
     // Filter by minimum niveau
     if (minNiveauFilter !== "all") {
@@ -93,7 +76,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     }
     
     return filtered;
-  }, [allWords, wordTypeFilter, minNiveauFilter, themaFilter]);
+  }, [allWords, minNiveauFilter, themaFilter]);
 
   const shuffleWords = (wordsToShuffle: WordWithProgress[]) => {
     const shuffled = [...wordsToShuffle];
@@ -179,7 +162,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   useEffect(() => {
     setCurrentIndex(0);
     setShowTranslation(false);
-  }, [wordTypeFilter, minNiveauFilter, themaFilter]);
+  }, [minNiveauFilter, themaFilter]);
 
   const currentWord = words[currentIndex];
 
@@ -285,22 +268,6 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
                   {themes.map((thema) => (
                     <SelectItem key={thema} value={thema}>
                       {thema}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            {wordTypes.length > 0 && (
-              <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
-                <SelectTrigger className="w-[120px] h-8 text-xs">
-                  <Filter className="h-3 w-3 mr-1" />
-                  <SelectValue placeholder={t.common_filter} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t.learn_filter_all}</SelectItem>
-                  {wordTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
                     </SelectItem>
                   ))}
                 </SelectContent>
