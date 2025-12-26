@@ -7,6 +7,7 @@ export interface Word {
   translation: string;
   target_language: string;
   word_type: string | null;
+  niveau: string | null;
   user_id: string | null; // null = shared word, uuid = personal word
   shared: string; // "Yes" if added by admin, "No" otherwise
   created_at: string;
@@ -251,15 +252,25 @@ export async function getWordsWithProgress(
 
   // Merge words with progress
   return words.map((word) => {
-    const p = progressMap.get(word.id);
+    const p = progressMap.get(word.id!);
     return {
-      ...word,
+      id: word.id!,
+      source_word: word.source_word!,
+      source_language: word.source_language!,
+      translation: word.translation!,
+      target_language: word.target_language!,
+      word_type: word.word_type ?? null,
+      niveau: (word as { niveau?: string | null }).niveau ?? null,
+      user_id: word.user_id ?? null,
+      shared: word.shared!,
+      created_at: word.created_at!,
+      updated_at: word.updated_at!,
       seen: p?.seen ?? false,
       view_count: p?.view_count ?? 0,
       quiz_view_count: p?.quiz_view_count ?? 0,
       incorrect_count: p?.incorrect_count ?? 0,
       correct_count: p?.correct_count ?? 0,
-    };
+    } as WordWithProgress;
   });
 }
 
@@ -283,7 +294,19 @@ export async function getWords(
     throw new Error(error.message);
   }
 
-  return data;
+  return data.map((word) => ({
+    id: word.id!,
+    source_word: word.source_word!,
+    source_language: word.source_language!,
+    translation: word.translation!,
+    target_language: word.target_language!,
+    word_type: word.word_type ?? null,
+    niveau: (word as { niveau?: string | null }).niveau ?? null,
+    user_id: word.user_id ?? null,
+    shared: word.shared!,
+    created_at: word.created_at!,
+    updated_at: word.updated_at!,
+  })) as Word[];
 }
 
 // Mark a word as seen for the current user

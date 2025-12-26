@@ -29,6 +29,14 @@ interface LearnModeProps {
   refreshTrigger: number;
 }
 
+// Level order for filtering
+const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+const getNiveauIndex = (niveau: string | null | undefined): number => {
+  if (!niveau) return -1;
+  return NIVEAU_ORDER.indexOf(niveau.toUpperCase());
+};
+
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const { t } = useLanguage();
   const [allWords, setAllWords] = useState<WordWithProgress[]>([]);
@@ -36,6 +44,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
+  const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
 
   // Get unique word types from all words
   const wordTypes = useMemo(() => {
@@ -48,13 +57,26 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     return Array.from(types).sort();
   }, [allWords]);
 
-  // Filter words based on selected word type
+  // Filter words based on selected word type and minimum niveau
   const words = useMemo(() => {
-    if (wordTypeFilter === "all") {
-      return allWords;
+    let filtered = allWords;
+    
+    // Filter by word type
+    if (wordTypeFilter !== "all") {
+      filtered = filtered.filter((word) => word.word_type === wordTypeFilter);
     }
-    return allWords.filter((word) => word.word_type === wordTypeFilter);
-  }, [allWords, wordTypeFilter]);
+    
+    // Filter by minimum niveau
+    if (minNiveauFilter !== "all") {
+      const minIndex = getNiveauIndex(minNiveauFilter);
+      filtered = filtered.filter((word) => {
+        const wordIndex = getNiveauIndex(word.niveau);
+        return wordIndex >= minIndex;
+      });
+    }
+    
+    return filtered;
+  }, [allWords, wordTypeFilter, minNiveauFilter]);
 
   const shuffleWords = (wordsToShuffle: WordWithProgress[]) => {
     const shuffled = [...wordsToShuffle];
@@ -140,7 +162,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   useEffect(() => {
     setCurrentIndex(0);
     setShowTranslation(false);
-  }, [wordTypeFilter]);
+  }, [wordTypeFilter, minNiveauFilter]);
 
   const currentWord = words[currentIndex];
 
@@ -223,6 +245,19 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             {t.learn_title}
           </CardTitle>
           <div className="flex items-center gap-3">
+            <Select value={minNiveauFilter} onValueChange={setMinNiveauFilter}>
+              <SelectTrigger className="w-[100px] h-8 text-xs">
+                <SelectValue placeholder="Niveau" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle</SelectItem>
+                {NIVEAU_ORDER.map((niveau) => (
+                  <SelectItem key={niveau} value={niveau}>
+                    {niveau}+
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {wordTypes.length > 0 && (
               <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
                 <SelectTrigger className="w-[140px] h-8 text-xs">
