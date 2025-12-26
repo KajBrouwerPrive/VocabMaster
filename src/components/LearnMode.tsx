@@ -246,7 +246,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
                 <SelectValue placeholder="Niveau" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle</SelectItem>
+                <SelectItem value="all">Niveau</SelectItem>
                 {NIVEAU_GROUPS.map((group) => (
                   <SelectItem key={group.value} value={group.value}>
                     {group.label}
