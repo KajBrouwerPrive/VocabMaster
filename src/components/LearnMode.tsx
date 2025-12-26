@@ -45,6 +45,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [wordTypeFilter, setWordTypeFilter] = useState<string>("all");
   const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
+  const [themaFilter, setThemaFilter] = useState<string>("all");
 
   // Get unique word types from all words
   const wordTypes = useMemo(() => {
@@ -57,7 +58,18 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     return Array.from(types).sort();
   }, [allWords]);
 
-  // Filter words based on selected word type and minimum niveau
+  // Get unique themes from all words
+  const themes = useMemo(() => {
+    const themaSet = new Set<string>();
+    allWords.forEach((word) => {
+      if (word.thema) {
+        themaSet.add(word.thema);
+      }
+    });
+    return Array.from(themaSet).sort();
+  }, [allWords]);
+
+  // Filter words based on selected word type, minimum niveau, and theme
   const words = useMemo(() => {
     let filtered = allWords;
     
@@ -74,9 +86,14 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
         return wordIndex >= minIndex;
       });
     }
+
+    // Filter by theme
+    if (themaFilter !== "all") {
+      filtered = filtered.filter((word) => word.thema === themaFilter);
+    }
     
     return filtered;
-  }, [allWords, wordTypeFilter, minNiveauFilter]);
+  }, [allWords, wordTypeFilter, minNiveauFilter, themaFilter]);
 
   const shuffleWords = (wordsToShuffle: WordWithProgress[]) => {
     const shuffled = [...wordsToShuffle];
@@ -162,7 +179,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   useEffect(() => {
     setCurrentIndex(0);
     setShowTranslation(false);
-  }, [wordTypeFilter, minNiveauFilter]);
+  }, [wordTypeFilter, minNiveauFilter, themaFilter]);
 
   const currentWord = words[currentIndex];
 
@@ -239,14 +256,14 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   return (
     <Card className="animate-fade-in">
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">
             <Book className="h-5 w-5 text-primary" />
             {t.learn_title}
           </CardTitle>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
             <Select value={minNiveauFilter} onValueChange={setMinNiveauFilter}>
-              <SelectTrigger className="w-[100px] h-8 text-xs">
+              <SelectTrigger className="w-[90px] h-8 text-xs">
                 <SelectValue placeholder="Niveau" />
               </SelectTrigger>
               <SelectContent>
@@ -258,9 +275,24 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
                 ))}
               </SelectContent>
             </Select>
+            {themes.length > 0 && (
+              <Select value={themaFilter} onValueChange={setThemaFilter}>
+                <SelectTrigger className="w-[120px] h-8 text-xs">
+                  <SelectValue placeholder="Thema" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Alle thema's</SelectItem>
+                  {themes.map((thema) => (
+                    <SelectItem key={thema} value={thema}>
+                      {thema}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             {wordTypes.length > 0 && (
               <Select value={wordTypeFilter} onValueChange={setWordTypeFilter}>
-                <SelectTrigger className="w-[140px] h-8 text-xs">
+                <SelectTrigger className="w-[120px] h-8 text-xs">
                   <Filter className="h-3 w-3 mr-1" />
                   <SelectValue placeholder={t.common_filter} />
                 </SelectTrigger>
