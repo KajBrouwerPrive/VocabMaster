@@ -240,6 +240,9 @@ export async function getWordsWithProgress(
     throw new Error(wordsError.message);
   }
 
+  // Cast to include thema field that exists in database but not in generated types
+  const wordsWithThema = words as Array<typeof words[number] & { thema?: string | null }>;
+
   // Get all user progress
   const { data: progress } = await supabase
     .from("user_word_progress")
@@ -252,7 +255,7 @@ export async function getWordsWithProgress(
   });
 
   // Merge words with progress
-  return words.map((word) => {
+  return wordsWithThema.map((word) => {
     const p = progressMap.get(word.id!);
     return {
       id: word.id!,
@@ -261,8 +264,8 @@ export async function getWordsWithProgress(
       translation: word.translation!,
       target_language: word.target_language!,
       word_type: word.word_type ?? null,
-      niveau: (word as { niveau?: string | null }).niveau ?? null,
-      thema: (word as { thema?: string | null }).thema ?? null,
+      niveau: word.niveau ?? null,
+      thema: word.thema ?? null,
       user_id: word.user_id ?? null,
       shared: word.shared!,
       created_at: word.created_at!,
@@ -296,14 +299,18 @@ export async function getWords(
     throw new Error(error.message);
   }
 
-  return data.map((word) => ({
+  // Cast to include thema and niveau fields that exist in database but not in generated types
+  const dataWithExtras = data as Array<typeof data[number] & { thema?: string | null; niveau?: string | null }>;
+
+  return dataWithExtras.map((word) => ({
     id: word.id!,
     source_word: word.source_word!,
     source_language: word.source_language!,
     translation: word.translation!,
     target_language: word.target_language!,
     word_type: word.word_type ?? null,
-    niveau: (word as { niveau?: string | null }).niveau ?? null,
+    niveau: word.niveau ?? null,
+    thema: word.thema ?? null,
     user_id: word.user_id ?? null,
     shared: word.shared!,
     created_at: word.created_at!,
