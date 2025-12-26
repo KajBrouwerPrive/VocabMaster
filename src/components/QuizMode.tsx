@@ -59,25 +59,28 @@ export function QuizMode() {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("random");
   const [selectedWordIds, setSelectedWordIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-  const [minNiveauFilter, setMinNiveauFilter] = useState<string>("all");
+  const [niveauFilter, setNiveauFilter] = useState<string>("all");
   const [themaFilter, setThemaFilter] = useState<string>("all");
 
-  // Niveau order for filtering
-  const NIVEAU_ORDER = ["A1", "A2", "B1", "B2", "C1", "C2"];
-  const getNiveauIndex = (niveau: string | null): number => {
-    if (!niveau) return -1;
-    return NIVEAU_ORDER.indexOf(niveau.toUpperCase());
+  // Niveau groups for filtering
+  const NIVEAU_GROUPS = [
+    { value: "A", label: "A", levels: ["A1", "A2"] },
+    { value: "B", label: "B", levels: ["B1", "B2"] },
+    { value: "C", label: "C", levels: ["C1", "C2"] },
+  ];
+
+  const matchesNiveauGroup = (niveau: string | null, group: string): boolean => {
+    if (!niveau) return false;
+    const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
+    if (!niveauGroup) return false;
+    return niveauGroup.levels.includes(niveau.toUpperCase());
   };
 
   // Get seen words for manual selection
   const seenWords = useMemo(() => {
     let words = allWords.filter(w => w.seen);
-    if (minNiveauFilter !== "all") {
-      const minIndex = getNiveauIndex(minNiveauFilter);
-      words = words.filter(w => {
-        const wordIndex = getNiveauIndex(w.niveau);
-        return wordIndex >= minIndex;
-      });
+    if (niveauFilter !== "all") {
+      words = words.filter(w => matchesNiveauGroup(w.niveau, niveauFilter));
     }
     if (themaFilter !== "all") {
       words = words.filter(w => w.thema === themaFilter);
@@ -90,23 +93,19 @@ export function QuizMode() {
       );
     }
     return words;
-  }, [allWords, minNiveauFilter, themaFilter, searchQuery]);
+  }, [allWords, niveauFilter, themaFilter, searchQuery]);
 
   // Count available words based on filter
   const filteredAvailableCount = useMemo(() => {
     let words = allWords.filter(w => w.seen);
-    if (minNiveauFilter !== "all") {
-      const minIndex = getNiveauIndex(minNiveauFilter);
-      words = words.filter(w => {
-        const wordIndex = getNiveauIndex(w.niveau);
-        return wordIndex >= minIndex;
-      });
+    if (niveauFilter !== "all") {
+      words = words.filter(w => matchesNiveauGroup(w.niveau, niveauFilter));
     }
     if (themaFilter !== "all") {
       words = words.filter(w => w.thema === themaFilter);
     }
     return words.length;
-  }, [allWords, minNiveauFilter, themaFilter]);
+  }, [allWords, niveauFilter, themaFilter]);
 
   useEffect(() => {
     checkAvailableWords();
@@ -122,7 +121,7 @@ export function QuizMode() {
   // Clear selection when switching modes or filters
   useEffect(() => {
     setSelectedWordIds(new Set());
-  }, [selectionMode, minNiveauFilter, themaFilter]);
+  }, [selectionMode, niveauFilter, themaFilter]);
 
   const checkAvailableWords = async () => {
     try {
@@ -174,7 +173,7 @@ export function QuizMode() {
           .filter(w => selectedWordIds.has(w.id))
           .sort(() => Math.random() - 0.5);
       } else {
-        words = await getQuizWords(wordCount, undefined, undefined, undefined, minNiveauFilter, themaFilter);
+        words = await getQuizWords(wordCount, undefined, undefined, undefined, niveauFilter, themaFilter);
       }
       
       if (words.length === 0) {
@@ -364,17 +363,17 @@ export function QuizMode() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium flex items-center gap-2">
                     <Filter className="h-4 w-4" />
-                    {t.learn_min_niveau}
+                    Niveau
                   </label>
-                  <Select value={minNiveauFilter} onValueChange={setMinNiveauFilter}>
+                  <Select value={niveauFilter} onValueChange={setNiveauFilter}>
                     <SelectTrigger className="bg-background">
                       <SelectValue placeholder={t.learn_filter_all} />
                     </SelectTrigger>
                     <SelectContent className="bg-background z-50">
                       <SelectItem value="all">{t.learn_filter_all}</SelectItem>
-                      {NIVEAU_ORDER.map((niveau) => (
-                        <SelectItem key={niveau} value={niveau}>
-                          {niveau}
+                      {NIVEAU_GROUPS.map((group) => (
+                        <SelectItem key={group.value} value={group.value}>
+                          {group.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
