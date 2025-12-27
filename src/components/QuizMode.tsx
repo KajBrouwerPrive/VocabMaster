@@ -61,7 +61,18 @@ export function QuizMode() {
   const [searchQuery, setSearchQuery] = useState("");
   const [niveauFilter, setNiveauFilter] = useState<string>("all");
   const [themaFilter, setThemaFilter] = useState<string>("all");
+  const [ignoreAccents, setIgnoreAccents] = useState(false);
 
+  // Remove diacritics/accents from a string for comparison
+  const normalizeText = (text: string): string => {
+    if (!ignoreAccents) return text.toLowerCase().trim();
+    return text
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[~'`´¨^]/g, "");
+  };
   // Niveau groups for filtering
   const NIVEAU_GROUPS = [
     { value: "A", label: "A", levels: ["A1", "A2"] },
@@ -212,7 +223,7 @@ export function QuizMode() {
     if (!currentWord) return;
 
     const isCorrect =
-      userAnswer.toLowerCase().trim() === currentWord.translation.toLowerCase().trim();
+      normalizeText(userAnswer) === normalizeText(currentWord.translation);
 
     const result: QuizResult = {
       word: currentWord,
@@ -256,7 +267,7 @@ export function QuizMode() {
   const checkRetry = () => {
     if (!currentWord) return;
     const isCorrect =
-      retryAnswer.toLowerCase().trim() === currentWord.translation.toLowerCase().trim();
+      normalizeText(retryAnswer) === normalizeText(currentWord.translation);
     
     if (isCorrect) {
       toast.success(t.quiz_correct);
@@ -495,6 +506,17 @@ export function QuizMode() {
                     </ScrollArea>
                   </div>
                 )}
+
+                <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+                  <div>
+                    <p className="font-medium">{t.quiz_ignore_accents}</p>
+                    <p className="text-sm text-muted-foreground">ñ = n, é = e, etc.</p>
+                  </div>
+                  <Switch
+                    checked={ignoreAccents}
+                    onCheckedChange={setIgnoreAccents}
+                  />
+                </div>
 
                 <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
                   <div>
