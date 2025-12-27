@@ -67,20 +67,23 @@ export function QuizMode() {
     { value: "A", label: "A", levels: ["A1", "A2"] },
     { value: "B", label: "B", levels: ["B1", "B2"] },
     { value: "C", label: "C", levels: ["C1", "C2"] },
+    { value: "difficult", label: "Moeilijke woorden", levels: [] },
   ];
 
-  const matchesNiveauGroup = (niveau: string | null, group: string): boolean => {
-    if (!niveau) return false;
+  const matchesNiveauGroup = (word: WordWithProgress, group: string): boolean => {
+    if (group === "difficult") {
+      return (word.incorrect_count - (word.correct_count || 0)) > 2;
+    }
     const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
-    if (!niveauGroup) return false;
-    return niveauGroup.levels.includes(niveau.toUpperCase());
+    if (!niveauGroup || !word.niveau) return false;
+    return niveauGroup.levels.includes(word.niveau.toUpperCase());
   };
 
   // Get seen words for manual selection
   const seenWords = useMemo(() => {
     let words = allWords.filter(w => w.seen);
     if (niveauFilter !== "all") {
-      words = words.filter(w => matchesNiveauGroup(w.niveau, niveauFilter));
+      words = words.filter(w => matchesNiveauGroup(w, niveauFilter));
     }
     if (themaFilter !== "all") {
       words = words.filter(w => w.thema === themaFilter);
@@ -99,7 +102,7 @@ export function QuizMode() {
   const filteredAvailableCount = useMemo(() => {
     let words = allWords.filter(w => w.seen);
     if (niveauFilter !== "all") {
-      words = words.filter(w => matchesNiveauGroup(w.niveau, niveauFilter));
+      words = words.filter(w => matchesNiveauGroup(w, niveauFilter));
     }
     if (themaFilter !== "all") {
       words = words.filter(w => w.thema === themaFilter);
