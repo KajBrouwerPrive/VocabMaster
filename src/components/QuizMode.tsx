@@ -626,8 +626,11 @@ export function QuizMode() {
                     <X className="h-5 w-5" />
                     <span className="font-medium">{t.quiz_incorrect}</span>
                   </div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    {t.quiz_your_answer}: <span className="text-destructive font-medium">{userAnswer || "-"}</span>
+                  </p>
                   <p className="text-sm">
-                    <span className="font-medium">{currentWord?.translation}</span>
+                    <span className="text-success font-medium">{currentWord?.translation}</span>
                   </p>
                 </div>
               )}
