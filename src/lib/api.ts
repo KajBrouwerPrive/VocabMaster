@@ -436,11 +436,14 @@ const NIVEAU_GROUPS: Record<string, string[]> = {
   "C": ["C1", "C2"],
 };
 
-const matchesNiveauGroup = (niveau: string | null | undefined, group: string): boolean => {
-  if (!niveau) return false;
+const matchesNiveauGroup = (word: WordWithProgress, group: string): boolean => {
+  if (group === "difficult") {
+    return (word.incorrect_count - (word.correct_count || 0)) > 2;
+  }
+  if (!word.niveau) return false;
   const levels = NIVEAU_GROUPS[group];
   if (!levels) return false;
-  return levels.includes(niveau.toUpperCase());
+  return levels.includes(word.niveau.toUpperCase());
 };
 
 // Get random seen words for quiz (user-specific progress)
@@ -462,9 +465,9 @@ export async function getQuizWords(
     seenWords = seenWords.filter(w => w.word_type === wordType);
   }
 
-  // Filter by niveau group (A, B, or C)
+  // Filter by niveau group (A, B, C, or difficult)
   if (niveauGroup && niveauGroup !== "all") {
-    seenWords = seenWords.filter(w => matchesNiveauGroup(w.niveau, niveauGroup));
+    seenWords = seenWords.filter(w => matchesNiveauGroup(w, niveauGroup));
   }
 
   // Filter by thema
