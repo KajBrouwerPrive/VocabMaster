@@ -31,7 +31,7 @@
     --accent: 35 90% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 55%;
+    --destructive: 0 55% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Success green */
@@ -86,7 +86,7 @@
     --accent: 35 85% 55%;
     --accent-foreground: 200 40% 8%;
 
-    --destructive: 0 65% 50%;
+    --destructive: 0 50% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 150 55% 50%;
