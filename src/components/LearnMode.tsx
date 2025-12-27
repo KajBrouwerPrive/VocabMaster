@@ -2,18 +2,15 @@ import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { getWordsWithProgress, markWordAsSeen, deleteWord, incrementViewCount, getAllThemes, type WordWithProgress } from "@/lib/api";
+import { getWordsWithProgress, markWordAsSeen, incrementViewCount, getAllThemes, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Book,
-  Eye,
-  Trash2,
   ChevronLeft,
   ChevronRight,
   Loader2,
   CheckCircle,
   Shuffle,
-  Filter,
 } from "lucide-react";
 import { getLanguageName } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -178,20 +175,6 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     }
   };
 
-  const handleDelete = async () => {
-    if (!currentWord) return;
-
-    try {
-      await deleteWord(currentWord.id);
-      setAllWords((prev) => prev.filter((w) => w.id !== currentWord.id));
-      if (currentIndex >= words.length - 1) {
-        setCurrentIndex(Math.max(0, currentIndex - 1));
-      }
-      setShowTranslation(false);
-    } catch (error) {
-      toast.error(t.common_error);
-    }
-  };
 
   const goNext = () => {
     if (currentIndex < words.length - 1) {
@@ -405,9 +388,6 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             >
               <ChevronRight className="h-4 w-4" />
               {t.common_next}
-            </Button>
-            <Button variant="destructive" size="icon" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
 
