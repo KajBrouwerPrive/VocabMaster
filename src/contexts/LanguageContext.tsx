@@ -74,6 +74,7 @@ interface Translations {
   quiz_restart: string;
   quiz_question_count: string;
   quiz_ignore_accents: string;
+  quiz_accent_hint: string;
   
   // Add word
   add_word_title: string;
@@ -180,6 +181,7 @@ const translations: Record<AppLanguage, Translations> = {
     quiz_restart: 'Opnieuw',
     quiz_question_count: 'Aantal vragen',
     quiz_ignore_accents: 'Leestekens negeren',
+    quiz_accent_hint: 'Let op de leestekens:',
     add_word_title: 'Woord toevoegen',
     add_word_placeholder: 'Voer een woord in',
     add_word_success: 'Woord toegevoegd!',
@@ -276,6 +278,7 @@ const translations: Record<AppLanguage, Translations> = {
     quiz_restart: 'Restart',
     quiz_question_count: 'Number of questions',
     quiz_ignore_accents: 'Ignore accents',
+    quiz_accent_hint: 'Note the accents:',
     add_word_title: 'Add word',
     add_word_placeholder: 'Enter a word',
     add_word_success: 'Word added!',
@@ -372,6 +375,7 @@ const translations: Record<AppLanguage, Translations> = {
     quiz_restart: 'Recommencer',
     quiz_question_count: 'Nombre de questions',
     quiz_ignore_accents: 'Ignorer les accents',
+    quiz_accent_hint: 'Notez les accents :',
     add_word_title: 'Ajouter un mot',
     add_word_placeholder: 'Entrez un mot',
     add_word_success: 'Mot ajouté !',
@@ -468,6 +472,7 @@ const translations: Record<AppLanguage, Translations> = {
     quiz_restart: 'Reiniciar',
     quiz_question_count: 'Número de preguntas',
     quiz_ignore_accents: 'Ignorar acentos',
+    quiz_accent_hint: 'Fíjate en los acentos:',
     add_word_title: 'Añadir palabra',
     add_word_placeholder: 'Introduce una palabra',
     add_word_success: '¡Palabra añadida!',

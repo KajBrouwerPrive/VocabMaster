@@ -638,9 +638,16 @@ export function QuizMode() {
               }`}
             >
               {lastCorrect ? (
-                <div className="flex items-center justify-center gap-2 text-success">
-                  <Check className="h-5 w-5" />
-                  <span className="font-medium">{t.quiz_correct}</span>
+                <div>
+                  <div className="flex items-center justify-center gap-2 text-success">
+                    <Check className="h-5 w-5" />
+                    <span className="font-medium">{t.quiz_correct}</span>
+                  </div>
+                  {ignoreAccents && userAnswer.trim() !== currentWord?.translation && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t.quiz_accent_hint} <span className="font-medium text-foreground">{currentWord?.translation}</span>
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div>
