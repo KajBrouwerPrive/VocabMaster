@@ -62,6 +62,11 @@ interface Translations {
   learn_filter_not_learned: string;
   learn_min_niveau: string;
   
+  // Filters
+  filter_niveau: string;
+  filter_thema: string;
+  filter_difficult_words: string;
+  
   // Quiz mode
   quiz_title: string;
   quiz_start: string;
@@ -171,6 +176,9 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Geleerd',
     learn_filter_not_learned: 'Niet geleerd',
     learn_min_niveau: 'Minimum niveau',
+    filter_niveau: 'Niveau',
+    filter_thema: 'Thema',
+    filter_difficult_words: 'Moeilijke woorden',
     quiz_title: 'Woorden toetsen',
     quiz_start: 'Start toets',
     quiz_check: 'Controleer',
@@ -269,6 +277,9 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Learned',
     learn_filter_not_learned: 'Not learned',
     learn_min_niveau: 'Minimum level',
+    filter_niveau: 'Level',
+    filter_thema: 'Theme',
+    filter_difficult_words: 'Difficult words',
     quiz_title: 'Quiz words',
     quiz_start: 'Start quiz',
     quiz_check: 'Check',
@@ -367,6 +378,9 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Appris',
     learn_filter_not_learned: 'Non appris',
     learn_min_niveau: 'Niveau minimum',
+    filter_niveau: 'Niveau',
+    filter_thema: 'Thème',
+    filter_difficult_words: 'Mots difficiles',
     quiz_title: 'Quiz de mots',
     quiz_start: 'Commencer le quiz',
     quiz_check: 'Vérifier',
@@ -465,6 +479,9 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Aprendidas',
     learn_filter_not_learned: 'No aprendidas',
     learn_min_niveau: 'Nivel mínimo',
+    filter_niveau: 'Nivel',
+    filter_thema: 'Tema',
+    filter_difficult_words: 'Palabras difíciles',
     quiz_title: 'Prueba de palabras',
     quiz_start: 'Iniciar prueba',
     quiz_check: 'Comprobar',
