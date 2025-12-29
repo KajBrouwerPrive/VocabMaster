@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, getWordsWithProgress, getAllThemes, incrementIncorrectCount, incrementCorrectCount, incrementQuizViewCount, saveQuizResult, type WordWithProgress } from "@/lib/api";
+import { getQuizWords, getWordsWithProgress, getAllThemes, incrementIncorrectCount, incrementCorrectCount, incrementQuizViewCount, saveQuizResult, matchesNiveauGroups, matchesThemas, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -12,22 +12,15 @@ import {
   RotateCcw,
   Trophy,
   ArrowRight,
-  Filter,
   ListChecks,
   Shuffle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { getLanguageName } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { MultiSelectFilter } from "@/components/MultiSelectFilter";
 
 interface QuizResult {
   word: WordWithProgress;
@@ -36,6 +29,14 @@ interface QuizResult {
 }
 
 type SelectionMode = "random" | "manual";
+
+// Niveau groups for filtering
+const NIVEAU_GROUPS = [
+  { value: "A", label: "A", levels: ["A1", "A2"] },
+  { value: "B", label: "B", levels: ["B1", "B2"] },
+  { value: "C", label: "C", levels: ["C1", "C2"] },
+  { value: "difficult", label: "Moeilijke woorden", levels: [] },
+];
 
 export function QuizMode() {
   const { t } = useLanguage();
@@ -59,8 +60,8 @@ export function QuizMode() {
   const [selectionMode, setSelectionMode] = useState<SelectionMode>("random");
   const [selectedWordIds, setSelectedWordIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-  const [niveauFilter, setNiveauFilter] = useState<string>("all");
-  const [themaFilter, setThemaFilter] = useState<string>("all");
+  const [selectedNiveaus, setSelectedNiveaus] = useState<Set<string>>(new Set());
+  const [selectedThemas, setSelectedThemas] = useState<Set<string>>(new Set());
   const [ignoreAccents, setIgnoreAccents] = useState(false);
 
   // Remove diacritics/accents from a string for comparison
@@ -73,31 +74,15 @@ export function QuizMode() {
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[~'`´¨^]/g, "");
   };
-  // Niveau groups for filtering
-  const NIVEAU_GROUPS = [
-    { value: "A", label: "A", levels: ["A1", "A2"] },
-    { value: "B", label: "B", levels: ["B1", "B2"] },
-    { value: "C", label: "C", levels: ["C1", "C2"] },
-    { value: "difficult", label: "Moeilijke woorden", levels: [] },
-  ];
-
-  const matchesNiveauGroup = (word: WordWithProgress, group: string): boolean => {
-    if (group === "difficult") {
-      return (word.incorrect_count - (word.correct_count || 0)) > 2;
-    }
-    const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
-    if (!niveauGroup || !word.niveau) return false;
-    return niveauGroup.levels.includes(word.niveau.toUpperCase());
-  };
 
   // Get seen words for manual selection
   const seenWords = useMemo(() => {
     let words = allWords.filter(w => w.seen);
-    if (niveauFilter !== "all") {
-      words = words.filter(w => matchesNiveauGroup(w, niveauFilter));
+    if (selectedNiveaus.size > 0) {
+      words = words.filter(w => matchesNiveauGroups(w, Array.from(selectedNiveaus)));
     }
-    if (themaFilter !== "all") {
-      words = words.filter(w => w.thema === themaFilter);
+    if (selectedThemas.size > 0) {
+      words = words.filter(w => matchesThemas(w, Array.from(selectedThemas)));
     }
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
@@ -107,19 +92,19 @@ export function QuizMode() {
       );
     }
     return words;
-  }, [allWords, niveauFilter, themaFilter, searchQuery]);
+  }, [allWords, selectedNiveaus, selectedThemas, searchQuery]);
 
   // Count available words based on filter
   const filteredAvailableCount = useMemo(() => {
     let words = allWords.filter(w => w.seen);
-    if (niveauFilter !== "all") {
-      words = words.filter(w => matchesNiveauGroup(w, niveauFilter));
+    if (selectedNiveaus.size > 0) {
+      words = words.filter(w => matchesNiveauGroups(w, Array.from(selectedNiveaus)));
     }
-    if (themaFilter !== "all") {
-      words = words.filter(w => w.thema === themaFilter);
+    if (selectedThemas.size > 0) {
+      words = words.filter(w => matchesThemas(w, Array.from(selectedThemas)));
     }
     return words.length;
-  }, [allWords, niveauFilter, themaFilter]);
+  }, [allWords, selectedNiveaus, selectedThemas]);
 
   useEffect(() => {
     checkAvailableWords();
@@ -135,7 +120,7 @@ export function QuizMode() {
   // Clear selection when switching modes or filters
   useEffect(() => {
     setSelectedWordIds(new Set());
-  }, [selectionMode, niveauFilter, themaFilter]);
+  }, [selectionMode, selectedNiveaus, selectedThemas]);
 
   const checkAvailableWords = async () => {
     try {
@@ -187,7 +172,9 @@ export function QuizMode() {
           .filter(w => selectedWordIds.has(w.id))
           .sort(() => Math.random() - 0.5);
       } else {
-        words = await getQuizWords(wordCount, undefined, undefined, undefined, niveauFilter, themaFilter);
+        const niveauArray = Array.from(selectedNiveaus);
+        const themaArray = Array.from(selectedThemas);
+        words = await getQuizWords(wordCount, undefined, undefined, undefined, niveauArray, themaArray);
       }
       
       if (words.length === 0) {
@@ -302,13 +289,17 @@ export function QuizMode() {
       const correctAnswers = finalResults.filter(r => r.correct).length;
       const scorePercentage = Math.round((correctAnswers / quizWords.length) * 100);
       
+      // Convert selected values to string for storage
+      const niveauStr = selectedNiveaus.size > 0 ? Array.from(selectedNiveaus).join(',') : null;
+      const themaStr = selectedThemas.size > 0 ? Array.from(selectedThemas).join(',') : null;
+      
       saveQuizResult({
         quiz_type: 'words',
         score_percentage: scorePercentage,
         total_questions: quizWords.length,
         correct_answers: correctAnswers,
-        niveau: niveauFilter !== 'all' ? niveauFilter : null,
-        thema: themaFilter !== 'all' ? themaFilter : null,
+        niveau: niveauStr,
+        thema: themaStr,
         ignore_accents: ignoreAccents,
       }).catch(() => {});
       
@@ -343,6 +334,9 @@ export function QuizMode() {
 
   const correctCount = results.filter((r) => r.correct).length;
   const percentage = quizWords.length > 0 ? Math.round((correctCount / quizWords.length) * 100) : 0;
+
+  const niveauOptions = NIVEAU_GROUPS.map(g => ({ value: g.value, label: g.label }));
+  const themaOptions = allThemes.map(t => ({ value: t, label: t }));
 
   // Quiz Setup
   if (!quizStarted) {
@@ -393,42 +387,19 @@ export function QuizMode() {
                   </div>
                 </div>
 
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Filter className="h-4 w-4" />
-                    Niveau
-                  </label>
-                  <Select value={niveauFilter} onValueChange={setNiveauFilter}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder={t.learn_filter_all} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      <SelectItem value="all">Niveau</SelectItem>
-                      {NIVEAU_GROUPS.map((group) => (
-                        <SelectItem key={group.value} value={group.value}>
-                          {group.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Thema</label>
-                  <Select value={themaFilter} onValueChange={setThemaFilter}>
-                    <SelectTrigger className="bg-background">
-                      <SelectValue placeholder="Alle thema's" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      <SelectItem value="all">Alle thema's</SelectItem>
-                      {allThemes.map((thema) => (
-                        <SelectItem key={thema} value={thema}>
-                          {thema}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <MultiSelectFilter
+                    options={niveauOptions}
+                    selectedValues={selectedNiveaus}
+                    onSelectionChange={setSelectedNiveaus}
+                    placeholder="Niveau"
+                  />
+                  <MultiSelectFilter
+                    options={themaOptions}
+                    selectedValues={selectedThemas}
+                    onSelectionChange={setSelectedThemas}
+                    placeholder="Thema"
+                  />
                 </div>
 
                 {selectionMode === "random" ? (
