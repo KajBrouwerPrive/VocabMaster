@@ -15,6 +15,7 @@ interface MultiSelectFilterProps {
   onSelectionChange: (values: Set<string>) => void;
   placeholder: string;
   className?: string;
+  minWidth?: string;
 }
 
 export function MultiSelectFilter({
@@ -23,6 +24,7 @@ export function MultiSelectFilter({
   onSelectionChange,
   placeholder,
   className,
+  minWidth = "100px",
 }: MultiSelectFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,15 +51,15 @@ export function MultiSelectFilter({
     onSelectionChange(newSet);
   };
 
-  const getDisplayText = () => {
-    if (selectedValues.size === 0) return placeholder;
-    if (selectedValues.size === 1) {
-      const selectedValue = Array.from(selectedValues)[0];
-      const option = options.find(o => o.value === selectedValue);
-      return option?.label || selectedValue;
-    }
-    return `${selectedValues.size} geselecteerd`;
+  const selectAll = () => {
+    onSelectionChange(new Set(options.map(o => o.value)));
   };
+
+  const clearAll = () => {
+    onSelectionChange(new Set());
+  };
+
+  const allSelected = options.length > 0 && selectedValues.size === options.length;
 
   return (
     <div ref={containerRef} className={cn("relative", className)}>
@@ -66,35 +68,58 @@ export function MultiSelectFilter({
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-8 text-xs justify-between min-w-[90px] font-normal"
+        className="h-8 text-xs justify-between font-normal"
+        style={{ minWidth }}
       >
-        <span className="truncate">{getDisplayText()}</span>
+        <span className="truncate">
+          {selectedValues.size === 0 ? placeholder : `${placeholder} (${selectedValues.size})`}
+        </span>
         <ChevronDown className={cn("h-3 w-3 ml-1 shrink-0 transition-transform", isOpen && "rotate-180")} />
       </Button>
       
       {isOpen && (
-        <div className="absolute top-full left-0 z-50 mt-1 min-w-[140px] bg-popover border rounded-md shadow-md p-2 space-y-1">
-          {options.map((option) => (
-            <label
-              key={option.value}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-sm hover:bg-accent cursor-pointer text-sm"
-            >
-              <Checkbox
-                checked={selectedValues.has(option.value)}
-                onCheckedChange={() => toggleOption(option.value)}
-              />
-              <span>{option.label}</span>
-            </label>
-          ))}
-          {selectedValues.size > 0 && (
+        <div className="absolute top-full left-0 z-50 mt-1 min-w-[160px] bg-popover border rounded-md shadow-md p-2">
+          {/* Select all / Clear all buttons */}
+          <div className="flex gap-1 mb-2 pb-2 border-b">
             <button
               type="button"
-              onClick={() => onSelectionChange(new Set())}
-              className="w-full text-left px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={selectAll}
+              disabled={allSelected}
+              className={cn(
+                "flex-1 text-xs py-1 px-2 rounded hover:bg-accent",
+                allSelected ? "text-muted-foreground/50" : "text-primary"
+              )}
             >
-              Wis selectie
+              Alles
             </button>
-          )}
+            <button
+              type="button"
+              onClick={clearAll}
+              disabled={selectedValues.size === 0}
+              className={cn(
+                "flex-1 text-xs py-1 px-2 rounded hover:bg-accent",
+                selectedValues.size === 0 ? "text-muted-foreground/50" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Wissen
+            </button>
+          </div>
+          
+          {/* Options */}
+          <div className="space-y-1 max-h-48 overflow-y-auto">
+            {options.map((option) => (
+              <label
+                key={option.value}
+                className="flex items-center gap-2 px-2 py-1.5 rounded-sm hover:bg-accent cursor-pointer text-sm"
+              >
+                <Checkbox
+                  checked={selectedValues.has(option.value)}
+                  onCheckedChange={() => toggleOption(option.value)}
+                />
+                <span>{option.label}</span>
+              </label>
+            ))}
+          </div>
         </div>
       )}
     </div>
