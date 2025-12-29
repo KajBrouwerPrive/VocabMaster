@@ -76,6 +76,7 @@ export type Database = {
           correct_answers: number
           created_at: string
           id: string
+          ignore_accents: boolean | null
           niveau: string | null
           quiz_type: string
           score_percentage: number
@@ -88,6 +89,7 @@ export type Database = {
           correct_answers: number
           created_at?: string
           id?: string
+          ignore_accents?: boolean | null
           niveau?: string | null
           quiz_type: string
           score_percentage: number
@@ -100,6 +102,7 @@ export type Database = {
           correct_answers?: number
           created_at?: string
           id?: string
+          ignore_accents?: boolean | null
           niveau?: string | null
           quiz_type?: string
           score_percentage?: number

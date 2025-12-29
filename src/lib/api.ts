@@ -47,12 +47,14 @@ export interface QuizResultData {
   niveau?: string | null;
   thema?: string | null;
   tenses?: string[] | null;
+  ignore_accents?: boolean;
 }
 
 export interface QuizResultRecord extends QuizResultData {
   id: string;
   user_id: string;
   created_at: string;
+  ignore_accents: boolean;
 }
 
 // Save quiz result to database
@@ -71,6 +73,7 @@ export async function saveQuizResult(result: QuizResultData): Promise<QuizResult
       niveau: result.niveau || null,
       thema: result.thema || null,
       tenses: result.tenses || null,
+      ignore_accents: result.ignore_accents ?? false,
     })
     .select()
     .single();

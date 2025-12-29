@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getQuizResults, getQuizStatistics, type QuizResultRecord } from "@/lib/api";
-import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages } from "lucide-react";
+import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -222,6 +222,15 @@ export function QuizStatistics() {
                         <>
                           <span>•</span>
                           <span>{result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}</span>
+                        </>
+                      )}
+                      {result.quiz_type === 'words' && result.ignore_accents && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Type className="h-3 w-3" />
+                            Accenten genegeerd
+                          </span>
                         </>
                       )}
                     </div>
