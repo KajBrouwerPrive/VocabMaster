@@ -326,7 +326,7 @@ export async function getWordsWithProgress(
     .from("words_secure")
     .select("*")
     .order("created_at", { ascending: false })
-    .range(0, 49999); // Remove default 1000 limit
+    .range(0, 99999); // Fetch all words without default 1000 limit
 
   if (sourceLanguage) {
     query = query.eq("source_language", sourceLanguage);
@@ -349,7 +349,7 @@ export async function getWordsWithProgress(
     .from("user_word_progress")
     .select("*")
     .eq("user_id", user.id)
-    .range(0, 49999);
+    .range(0, 99999); // Fetch all progress without default 1000 limit
 
   const progressMap = new Map<string, UserWordProgress>();
   (progress || []).forEach((p) => {
