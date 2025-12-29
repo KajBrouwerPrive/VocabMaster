@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { BarChart3, AlertTriangle, Loader2, GraduationCap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Progress } from "@/components/ui/progress";
+import { QuizStatistics } from "@/components/QuizStatistics";
 
 
 export function Statistics() {
@@ -82,6 +83,8 @@ export function Statistics() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Quiz Statistics */}
+      <QuizStatistics />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

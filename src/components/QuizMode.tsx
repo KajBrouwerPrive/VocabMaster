@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getQuizWords, getWordsWithProgress, getAllThemes, incrementIncorrectCount, incrementCorrectCount, incrementQuizViewCount, type WordWithProgress } from "@/lib/api";
+import { getQuizWords, getWordsWithProgress, getAllThemes, incrementIncorrectCount, incrementCorrectCount, incrementQuizViewCount, saveQuizResult, type WordWithProgress } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -292,6 +292,25 @@ export function QuizMode() {
       // Increment quiz view count for next word
       incrementQuizViewCount(quizWords[nextIndex].id).catch(() => {});
     } else {
+      // Save quiz result before finishing
+      const finalResults = [...results];
+      if (!finalResults.some(r => r.word.id === currentWord?.id)) {
+        // Add current result if not already added
+        const isCorrect = normalizeText(userAnswer) === normalizeText(currentWord?.translation || "");
+        finalResults.push({ word: currentWord!, userAnswer: userAnswer.trim(), correct: isCorrect });
+      }
+      const correctAnswers = finalResults.filter(r => r.correct).length;
+      const scorePercentage = Math.round((correctAnswers / quizWords.length) * 100);
+      
+      saveQuizResult({
+        quiz_type: 'words',
+        score_percentage: scorePercentage,
+        total_questions: quizWords.length,
+        correct_answers: correctAnswers,
+        niveau: niveauFilter !== 'all' ? niveauFilter : null,
+        thema: themaFilter !== 'all' ? themaFilter : null,
+      }).catch(() => {});
+      
       setQuizFinished(true);
     }
   };
