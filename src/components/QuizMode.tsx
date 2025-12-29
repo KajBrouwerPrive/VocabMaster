@@ -358,7 +358,7 @@ export function QuizMode() {
           ) : (
             <>
               <p className="text-muted-foreground">
-                {filteredAvailableCount} {t.common_word}
+                {filteredAvailableCount} {filteredAvailableCount === 1 ? t.common_word : t.common_words}
               </p>
 
               <div className="space-y-4">
@@ -436,7 +436,7 @@ export function QuizMode() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-medium">
-                        {selectedWordIds.size} {t.common_word}
+                        {selectedWordIds.size} {selectedWordIds.size === 1 ? t.common_word : t.common_words}
                       </label>
                       <div className="flex gap-2">
                         <Button
