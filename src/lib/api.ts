@@ -348,7 +348,8 @@ export async function getWordsWithProgress(
   const { data: progress } = await supabase
     .from("user_word_progress")
     .select("*")
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .range(0, 49999);
 
   const progressMap = new Map<string, UserWordProgress>();
   (progress || []).forEach((p) => {
@@ -385,7 +386,7 @@ export async function getWords(
   sourceLanguage?: string,
   targetLanguage?: string
 ): Promise<Word[]> {
-  let query = supabase.from("words_secure").select("*").order("created_at", { ascending: false });
+  let query = supabase.from("words_secure").select("*").order("created_at", { ascending: false }).range(0, 49999);
 
   if (sourceLanguage) {
     query = query.eq("source_language", sourceLanguage);
