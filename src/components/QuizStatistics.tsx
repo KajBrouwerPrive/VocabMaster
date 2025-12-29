@@ -19,6 +19,14 @@ const TENSE_LABELS: Record<string, string> = {
   subjuntivo_imperfecto: "Subj. Imperf.",
 };
 
+const NIVEAU_LABELS: Record<string, string> = {
+  A: "A (A1/A2)",
+  B: "B (B1/B2)",
+  C: "C (C1/C2)",
+  difficult: "Moeilijke woorden",
+  all: "Alle",
+};
+
 export function QuizStatistics() {
   const { t } = useLanguage();
   const [results, setResults] = useState<QuizResultRecord[]>([]);
@@ -201,7 +209,7 @@ export function QuizStatistics() {
                       {result.niveau && (
                         <>
                           <span>•</span>
-                          <span>Niveau {result.niveau}</span>
+                          <span>{NIVEAU_LABELS[result.niveau] || `Niveau ${result.niveau}`}</span>
                         </>
                       )}
                       {result.thema && (
