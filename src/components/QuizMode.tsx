@@ -30,12 +30,12 @@ interface QuizResult {
 
 type SelectionMode = "random" | "manual";
 
-// Niveau groups for filtering
-const NIVEAU_GROUPS = [
-  { value: "A", label: "A", levels: ["A1", "A2"] },
-  { value: "B", label: "B", levels: ["B1", "B2"] },
-  { value: "C", label: "C", levels: ["C1", "C2"] },
-  { value: "difficult", label: "Moeilijke woorden", levels: [] },
+// Niveau group values for filtering (labels will be translated)
+const NIVEAU_GROUP_VALUES = [
+  { value: "A", levels: ["A1", "A2"] },
+  { value: "B", levels: ["B1", "B2"] },
+  { value: "C", levels: ["C1", "C2"] },
+  { value: "difficult", levels: [] },
 ];
 
 export function QuizMode() {
@@ -335,8 +335,11 @@ export function QuizMode() {
   const correctCount = results.filter((r) => r.correct).length;
   const percentage = quizWords.length > 0 ? Math.round((correctCount / quizWords.length) * 100) : 0;
 
-  const niveauOptions = NIVEAU_GROUPS.map(g => ({ value: g.value, label: g.label }));
-  const themaOptions = allThemes.map(t => ({ value: t, label: t }));
+  const niveauOptions = NIVEAU_GROUP_VALUES.map(g => ({ 
+    value: g.value, 
+    label: g.value === "difficult" ? t.filter_difficult_words : g.value 
+  }));
+  const themaOptions = allThemes.map(theme => ({ value: theme, label: theme }));
 
   // Quiz Setup
   if (!quizStarted) {
@@ -392,13 +395,13 @@ export function QuizMode() {
                     options={niveauOptions}
                     selectedValues={selectedNiveaus}
                     onSelectionChange={setSelectedNiveaus}
-                    placeholder="Niveau"
+                    placeholder={t.filter_niveau}
                   />
                   <MultiSelectFilter
                     options={themaOptions}
                     selectedValues={selectedThemas}
                     onSelectionChange={setSelectedThemas}
-                    placeholder="Thema"
+                    placeholder={t.filter_thema}
                   />
                 </div>
 

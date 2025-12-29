@@ -20,12 +20,12 @@ interface LearnModeProps {
   refreshTrigger: number;
 }
 
-// Niveau groups for filtering
-const NIVEAU_GROUPS = [
-  { value: "A", label: "A", levels: ["A1", "A2"] },
-  { value: "B", label: "B", levels: ["B1", "B2"] },
-  { value: "C", label: "C", levels: ["C1", "C2"] },
-  { value: "difficult", label: "Moeilijke woorden", levels: [] },
+// Niveau group values for filtering (labels will be translated)
+const NIVEAU_GROUP_VALUES = [
+  { value: "A", levels: ["A1", "A2"] },
+  { value: "B", levels: ["B1", "B2"] },
+  { value: "C", levels: ["C1", "C2"] },
+  { value: "difficult", levels: [] },
 ];
 
 const matchesNiveauGroups = (word: WordWithProgress, selectedGroups: Set<string>): boolean => {
@@ -35,7 +35,7 @@ const matchesNiveauGroups = (word: WordWithProgress, selectedGroups: Set<string>
     if (group === "difficult") {
       if ((word.incorrect_count - (word.correct_count || 0)) > 2) return true;
     } else {
-      const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
+      const niveauGroup = NIVEAU_GROUP_VALUES.find(g => g.value === group);
       if (niveauGroup && word.niveau && niveauGroup.levels.includes(word.niveau.toUpperCase())) {
         return true;
       }
@@ -187,8 +187,11 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     }
   };
 
-  const niveauOptions = NIVEAU_GROUPS.map(g => ({ value: g.value, label: g.label }));
-  const themaOptions = allThemes.map(t => ({ value: t, label: t }));
+  const niveauOptions = NIVEAU_GROUP_VALUES.map(g => ({ 
+    value: g.value, 
+    label: g.value === "difficult" ? t.filter_difficult_words : g.value 
+  }));
+  const themaOptions = allThemes.map(theme => ({ value: theme, label: theme }));
 
   if (isLoading) {
     return (
@@ -215,13 +218,13 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               options={niveauOptions}
               selectedValues={selectedNiveaus}
               onSelectionChange={setSelectedNiveaus}
-              placeholder="Niveau"
+              placeholder={t.filter_niveau}
             />
             <MultiSelectFilter
               options={themaOptions}
               selectedValues={selectedThemas}
               onSelectionChange={setSelectedThemas}
-              placeholder="Thema"
+              placeholder={t.filter_thema}
             />
           </div>
           <p className="text-muted-foreground text-center py-8">
@@ -245,13 +248,13 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               options={niveauOptions}
               selectedValues={selectedNiveaus}
               onSelectionChange={setSelectedNiveaus}
-              placeholder="Niveau"
+              placeholder={t.filter_niveau}
             />
             <MultiSelectFilter
               options={themaOptions}
               selectedValues={selectedThemas}
               onSelectionChange={setSelectedThemas}
-              placeholder="Thema"
+              placeholder={t.filter_thema}
             />
             <span className="text-sm text-muted-foreground">
               {currentIndex + 1} / {words.length}
