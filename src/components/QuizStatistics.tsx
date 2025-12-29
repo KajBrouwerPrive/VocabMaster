@@ -89,72 +89,72 @@ export function QuizStatistics() {
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardContent className="pt-6">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+        <Card className="bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-950/30 dark:to-teal-900/20 border-teal-200/50 dark:border-teal-800/30 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <BookOpen className="h-5 w-5 text-primary" />
+              <div className="p-2.5 bg-teal-500/15 rounded-xl">
+                <BookOpen className="h-5 w-5 text-teal-600 dark:text-teal-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.totalQuizzes}</p>
-                <p className="text-sm text-muted-foreground">Totaal toetsen</p>
+                <p className="text-2xl font-bold text-teal-700 dark:text-teal-300">{stats.totalQuizzes}</p>
+                <p className="text-xs text-teal-600/70 dark:text-teal-400/70">Totaal toetsen</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/20 border-emerald-200/50 dark:border-emerald-800/30 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-primary" />
+              <div className="p-2.5 bg-emerald-500/15 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.averageScore}%</p>
-                <p className="text-sm text-muted-foreground">Gemiddelde score</p>
+                <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{stats.averageScore}%</p>
+                <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Gemiddelde score</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/20 border-green-200/50 dark:border-green-800/30 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/10 rounded-lg">
-                <Target className="h-5 w-5 text-green-500" />
+              <div className="p-2.5 bg-green-500/15 rounded-xl">
+                <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.above80Count}</p>
-                <p className="text-sm text-muted-foreground">Boven 80%</p>
+                <p className="text-2xl font-bold text-green-700 dark:text-green-300">{stats.above80Count}</p>
+                <p className="text-xs text-green-600/70 dark:text-green-400/70">Boven 80%</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/20 border-amber-200/50 dark:border-amber-800/30 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-500/10 rounded-lg">
-                <Award className="h-5 w-5 text-yellow-500" />
+              <div className="p-2.5 bg-amber-500/15 rounded-xl">
+                <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.above90Count}</p>
-                <p className="text-sm text-muted-foreground">Boven 90%</p>
+                <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">{stats.above90Count}</p>
+                <p className="text-xs text-amber-600/70 dark:text-amber-400/70">Boven 90%</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/20 border-orange-200/50 dark:border-orange-800/30 shadow-sm hover:shadow-md transition-shadow col-span-2 sm:col-span-1">
+          <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/10 rounded-lg">
-                <Trophy className="h-5 w-5 text-amber-500" />
+              <div className="p-2.5 bg-orange-500/15 rounded-xl">
+                <Trophy className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.perfectCount}</p>
-                <p className="text-sm text-muted-foreground">100% scores</p>
+                <p className="text-2xl font-bold text-orange-700 dark:text-orange-300">{stats.perfectCount}</p>
+                <p className="text-xs text-orange-600/70 dark:text-orange-400/70">100% scores</p>
               </div>
             </div>
           </CardContent>
