@@ -86,15 +86,21 @@ export async function saveQuizResult(result: QuizResultData): Promise<QuizResult
 }
 
 // Get quiz results for current user
-export async function getQuizResults(): Promise<QuizResultRecord[]> {
+export async function getQuizResults(limit?: number): Promise<QuizResultRecord[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn");
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("quiz_results")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
+  if (limit) {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw new Error(error.message);
@@ -113,10 +119,13 @@ export async function getQuizStatistics(): Promise<{
 }> {
   const results = await getQuizResults();
   
+  // Only quizzes with 10+ questions count for bronze/silver/gold
+  const qualifyingResults = results.filter(r => r.total_questions >= 10);
+  
   const totalQuizzes = results.length;
-  const above80Count = results.filter(r => r.score_percentage >= 80).length;
-  const above90Count = results.filter(r => r.score_percentage >= 90).length;
-  const perfectCount = results.filter(r => r.score_percentage === 100).length;
+  const above80Count = qualifyingResults.filter(r => r.score_percentage >= 80).length;
+  const above90Count = qualifyingResults.filter(r => r.score_percentage >= 90).length;
+  const perfectCount = qualifyingResults.filter(r => r.score_percentage === 100).length;
   const averageScore = totalQuizzes > 0 
     ? results.reduce((sum, r) => sum + Number(r.score_percentage), 0) / totalQuizzes 
     : 0;
