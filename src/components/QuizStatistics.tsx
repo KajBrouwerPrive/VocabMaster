@@ -46,7 +46,7 @@ export function QuizStatistics() {
   const loadData = async () => {
     try {
       const [resultsData, statsData] = await Promise.all([
-        getQuizResults(),
+        getQuizResults(5), // Only show last 5 quizzes
         getQuizStatistics(),
       ]);
       setResults(resultsData);
@@ -173,8 +173,8 @@ export function QuizStatistics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {results.slice(0, 50).map((result) => (
+          <div className="space-y-3">
+            {results.map((result) => (
               <div
                 key={result.id}
                 className={`flex items-center justify-between p-3 rounded-lg border ${
