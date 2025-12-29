@@ -41,6 +41,7 @@ interface Translations {
   common_hide: string;
   common_translate: string;
   common_word: string;
+  common_words: string;
   common_translation: string;
   common_word_type: string;
   common_source_language: string;
@@ -152,6 +153,7 @@ const translations: Record<AppLanguage, Translations> = {
     common_hide: 'Verbergen',
     common_translate: 'Vertaal',
     common_word: 'Woord',
+    common_words: 'Woorden',
     common_translation: 'Vertaling',
     common_word_type: 'Woordsoort',
     common_source_language: 'Brontaal',
@@ -249,6 +251,7 @@ const translations: Record<AppLanguage, Translations> = {
     common_hide: 'Hide',
     common_translate: 'Translate',
     common_word: 'Word',
+    common_words: 'Words',
     common_translation: 'Translation',
     common_word_type: 'Word type',
     common_source_language: 'Source language',
@@ -346,6 +349,7 @@ const translations: Record<AppLanguage, Translations> = {
     common_hide: 'Masquer',
     common_translate: 'Traduire',
     common_word: 'Mot',
+    common_words: 'Mots',
     common_translation: 'Traduction',
     common_word_type: 'Type de mot',
     common_source_language: 'Langue source',
@@ -443,6 +447,7 @@ const translations: Record<AppLanguage, Translations> = {
     common_hide: 'Ocultar',
     common_translate: 'Traducir',
     common_word: 'Palabra',
+    common_words: 'Palabras',
     common_translation: 'Traducción',
     common_word_type: 'Tipo de palabra',
     common_source_language: 'Idioma de origen',
