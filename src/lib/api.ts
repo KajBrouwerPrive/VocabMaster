@@ -39,6 +39,94 @@ export interface WordSuggestion {
   translation: string;
 }
 
+export interface QuizResultData {
+  quiz_type: 'words' | 'conjugations';
+  score_percentage: number;
+  total_questions: number;
+  correct_answers: number;
+  niveau?: string | null;
+  thema?: string | null;
+  tenses?: string[] | null;
+}
+
+export interface QuizResultRecord extends QuizResultData {
+  id: string;
+  user_id: string;
+  created_at: string;
+}
+
+// Save quiz result to database
+export async function saveQuizResult(result: QuizResultData): Promise<QuizResultRecord> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Je moet ingelogd zijn");
+
+  const { data, error } = await supabase
+    .from("quiz_results")
+    .insert({
+      user_id: user.id,
+      quiz_type: result.quiz_type,
+      score_percentage: result.score_percentage,
+      total_questions: result.total_questions,
+      correct_answers: result.correct_answers,
+      niveau: result.niveau || null,
+      thema: result.thema || null,
+      tenses: result.tenses || null,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as QuizResultRecord;
+}
+
+// Get quiz results for current user
+export async function getQuizResults(): Promise<QuizResultRecord[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Je moet ingelogd zijn");
+
+  const { data, error } = await supabase
+    .from("quiz_results")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data as QuizResultRecord[];
+}
+
+// Get quiz statistics for current user
+export async function getQuizStatistics(): Promise<{
+  totalQuizzes: number;
+  above80Count: number;
+  above90Count: number;
+  perfectCount: number;
+  averageScore: number;
+}> {
+  const results = await getQuizResults();
+  
+  const totalQuizzes = results.length;
+  const above80Count = results.filter(r => r.score_percentage >= 80).length;
+  const above90Count = results.filter(r => r.score_percentage >= 90).length;
+  const perfectCount = results.filter(r => r.score_percentage === 100).length;
+  const averageScore = totalQuizzes > 0 
+    ? results.reduce((sum, r) => sum + Number(r.score_percentage), 0) / totalQuizzes 
+    : 0;
+
+  return {
+    totalQuizzes,
+    above80Count,
+    above90Count,
+    perfectCount,
+    averageScore: Math.round(averageScore * 10) / 10,
+  };
+}
+
 // Translate a word using AI
 export async function translateWord(
   word: string,

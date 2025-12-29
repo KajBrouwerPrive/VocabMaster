@@ -71,6 +71,45 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_results: {
+        Row: {
+          correct_answers: number
+          created_at: string
+          id: string
+          niveau: string | null
+          quiz_type: string
+          score_percentage: number
+          tenses: string[] | null
+          thema: string | null
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          correct_answers: number
+          created_at?: string
+          id?: string
+          niveau?: string | null
+          quiz_type: string
+          score_percentage: number
+          tenses?: string[] | null
+          thema?: string | null
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          correct_answers?: number
+          created_at?: string
+          id?: string
+          niveau?: string | null
+          quiz_type?: string
+          score_percentage?: number
+          tenses?: string[] | null
+          thema?: string | null
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_conjugation_progress: {
         Row: {
           conjugation_id: string

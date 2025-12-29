@@ -9,6 +9,7 @@ import {
   incrementConjugationQuizViewCount,
   VerbConjugationWithProgress,
 } from "@/lib/conjugationApi";
+import { saveQuizResult } from "@/lib/api";
 import { toast } from "sonner";
 import {
   GraduationCap,
@@ -259,6 +260,27 @@ export function ConjugationQuizMode() {
       setCurrentIndex(nextIndex);
       incrementConjugationQuizViewCount(questions[nextIndex].conjugation.id).catch(() => {});
     } else {
+      // Save quiz result before finishing
+      const finalResults = [...results];
+      if (!finalResults.some(r => 
+        r.question.conjugation.id === currentQuestion?.conjugation.id &&
+        r.question.tense === currentQuestion?.tense &&
+        r.question.pronounIndex === currentQuestion?.pronounIndex
+      )) {
+        const isCorrect = userAnswer.toLowerCase().trim() === currentQuestion?.correctAnswer.toLowerCase().trim();
+        finalResults.push({ question: currentQuestion!, userAnswer: userAnswer.trim(), correct: isCorrect });
+      }
+      const correctAnswers = finalResults.filter(r => r.correct).length;
+      const scorePercentage = Math.round((correctAnswers / questions.length) * 100);
+      
+      saveQuizResult({
+        quiz_type: 'conjugations',
+        score_percentage: scorePercentage,
+        total_questions: questions.length,
+        correct_answers: correctAnswers,
+        tenses: selectedTenses,
+      }).catch(() => {});
+      
       setQuizFinished(true);
     }
   };
