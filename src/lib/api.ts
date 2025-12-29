@@ -135,7 +135,7 @@ export async function getQuizStatistics(): Promise<{
     above80Count,
     above90Count,
     perfectCount,
-    averageScore: Math.round(averageScore * 10) / 10,
+    averageScore: Math.round(averageScore),
   };
 }
 
