@@ -123,9 +123,10 @@ export async function getQuizStatistics(): Promise<{
   const qualifyingResults = results.filter(r => r.total_questions >= 10);
   
   const totalQuizzes = results.length;
-  const above80Count = qualifyingResults.filter(r => r.score_percentage >= 80).length;
-  const above90Count = qualifyingResults.filter(r => r.score_percentage >= 90).length;
+  // Exclusive counting: bronze 80-89%, silver 90-99%, gold 100%
   const perfectCount = qualifyingResults.filter(r => r.score_percentage === 100).length;
+  const above90Count = qualifyingResults.filter(r => r.score_percentage >= 90 && r.score_percentage < 100).length;
+  const above80Count = qualifyingResults.filter(r => r.score_percentage >= 80 && r.score_percentage < 90).length;
   const averageScore = totalQuizzes > 0 
     ? results.reduce((sum, r) => sum + Number(r.score_percentage), 0) / totalQuizzes 
     : 0;
