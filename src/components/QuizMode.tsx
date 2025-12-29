@@ -309,6 +309,7 @@ export function QuizMode() {
         correct_answers: correctAnswers,
         niveau: niveauFilter !== 'all' ? niveauFilter : null,
         thema: themaFilter !== 'all' ? themaFilter : null,
+        ignore_accents: ignoreAccents,
       }).catch(() => {});
       
       setQuizFinished(true);
