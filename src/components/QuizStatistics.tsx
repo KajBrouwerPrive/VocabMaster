@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getQuizResults, getQuizStatistics, type QuizResultRecord } from "@/lib/api";
-import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type } from "lucide-react";
+import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type, Hash, Layers } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -202,36 +202,36 @@ export function QuizStatistics() {
                     <p className="font-medium">
                       {result.quiz_type === 'words' ? 'Woordentoets' : 'Vervoegingentoets'}
                     </p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{format(new Date(result.created_at), "d MMM yyyy HH:mm", { locale: nl })}</span>
-                      <span>•</span>
-                      <span>{result.total_questions} vragen</span>
-                      {result.niveau && (
-                        <>
-                          <span>•</span>
-                          <span>{NIVEAU_LABELS[result.niveau] || `Niveau ${result.niveau}`}</span>
-                        </>
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1" title="Datum">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date(result.created_at), "d MMM yyyy", { locale: nl })}
+                      </span>
+                      <span className="flex items-center gap-1" title="Aantal vragen">
+                        <Hash className="h-3 w-3" />
+                        {result.total_questions}
+                      </span>
+                      {result.quiz_type === 'words' && (
+                        <span className="flex items-center gap-1" title="Niveau">
+                          <Layers className="h-3 w-3" />
+                          {result.niveau === 'difficult' ? 'MW' : result.niveau === 'all' || !result.niveau ? 'All' : result.niveau}
+                        </span>
                       )}
                       {result.thema && (
-                        <>
-                          <span>•</span>
-                          <span>{result.thema}</span>
-                        </>
+                        <span className="truncate max-w-[100px]" title={result.thema}>
+                          {result.thema}
+                        </span>
                       )}
                       {result.tenses && result.tenses.length > 0 && (
-                        <>
-                          <span>•</span>
-                          <span>{result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}</span>
-                        </>
+                        <span className="truncate max-w-[150px]" title={result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}>
+                          {result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}
+                        </span>
                       )}
-                      {result.quiz_type === 'words' && result.ignore_accents && (
-                        <>
-                          <span>•</span>
-                          <span className="flex items-center gap-1">
-                            <Type className="h-3 w-3" />
-                            Accenten genegeerd
-                          </span>
-                        </>
+                      {result.quiz_type === 'words' && (
+                        <span className="flex items-center gap-1" title={result.ignore_accents ? "Accenten genegeerd" : "Met accenten"}>
+                          <Type className={`h-3 w-3 ${result.ignore_accents ? 'text-primary' : 'text-muted-foreground/50'}`} />
+                          {result.ignore_accents ? 'Á→A' : 'Á=Á'}
+                        </span>
                       )}
                     </div>
                   </div>
