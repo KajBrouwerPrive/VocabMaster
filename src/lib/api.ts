@@ -547,14 +547,26 @@ const matchesNiveauGroup = (word: WordWithProgress, group: string): boolean => {
   return levels.includes(word.niveau.toUpperCase());
 };
 
+// Check if word matches any of the selected niveau groups
+export const matchesNiveauGroups = (word: WordWithProgress, selectedGroups: string[]): boolean => {
+  if (selectedGroups.length === 0) return true;
+  return selectedGroups.some(group => matchesNiveauGroup(word, group));
+};
+
+// Check if word matches any of the selected themes
+export const matchesThemas = (word: WordWithProgress, selectedThemas: string[]): boolean => {
+  if (selectedThemas.length === 0) return true;
+  return word.thema ? selectedThemas.includes(word.thema) : false;
+};
+
 // Get random seen words for quiz (user-specific progress)
 export async function getQuizWords(
   count: number,
   sourceLanguage?: string,
   targetLanguage?: string,
   wordType?: string,
-  niveauGroup?: string,
-  thema?: string
+  niveauGroups?: string[],
+  themas?: string[]
 ): Promise<WordWithProgress[]> {
   const wordsWithProgress = await getWordsWithProgress(sourceLanguage, targetLanguage);
   
@@ -566,14 +578,14 @@ export async function getQuizWords(
     seenWords = seenWords.filter(w => w.word_type === wordType);
   }
 
-  // Filter by niveau group (A, B, C, or difficult)
-  if (niveauGroup && niveauGroup !== "all") {
-    seenWords = seenWords.filter(w => matchesNiveauGroup(w, niveauGroup));
+  // Filter by niveau groups (multi-select)
+  if (niveauGroups && niveauGroups.length > 0) {
+    seenWords = seenWords.filter(w => matchesNiveauGroups(w, niveauGroups));
   }
 
-  // Filter by thema
-  if (thema && thema !== "all") {
-    seenWords = seenWords.filter(w => w.thema === thema);
+  // Filter by themes (multi-select)
+  if (themas && themas.length > 0) {
+    seenWords = seenWords.filter(w => matchesThemas(w, themas));
   }
 
   // Shuffle and take requested count

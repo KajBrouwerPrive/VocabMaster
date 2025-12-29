@@ -14,13 +14,7 @@ import {
 } from "lucide-react";
 import { getLanguageName } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { MultiSelectFilter } from "@/components/MultiSelectFilter";
 
 interface LearnModeProps {
   refreshTrigger: number;
@@ -34,13 +28,25 @@ const NIVEAU_GROUPS = [
   { value: "difficult", label: "Moeilijke woorden", levels: [] },
 ];
 
-const matchesNiveauGroup = (word: WordWithProgress, group: string): boolean => {
-  if (group === "difficult") {
-    return (word.incorrect_count - (word.correct_count || 0)) > 2;
+const matchesNiveauGroups = (word: WordWithProgress, selectedGroups: Set<string>): boolean => {
+  if (selectedGroups.size === 0) return true;
+  
+  for (const group of selectedGroups) {
+    if (group === "difficult") {
+      if ((word.incorrect_count - (word.correct_count || 0)) > 2) return true;
+    } else {
+      const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
+      if (niveauGroup && word.niveau && niveauGroup.levels.includes(word.niveau.toUpperCase())) {
+        return true;
+      }
+    }
   }
-  const niveauGroup = NIVEAU_GROUPS.find(g => g.value === group);
-  if (!niveauGroup || !word.niveau) return false;
-  return niveauGroup.levels.includes(word.niveau.toUpperCase());
+  return false;
+};
+
+const matchesThemas = (word: WordWithProgress, selectedThemas: Set<string>): boolean => {
+  if (selectedThemas.size === 0) return true;
+  return word.thema ? selectedThemas.has(word.thema) : false;
 };
 
 export function LearnMode({ refreshTrigger }: LearnModeProps) {
@@ -50,25 +56,16 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showTranslation, setShowTranslation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [niveauFilter, setNiveauFilter] = useState<string>("all");
-  const [themaFilter, setThemaFilter] = useState<string>("all");
+  const [selectedNiveaus, setSelectedNiveaus] = useState<Set<string>>(new Set());
+  const [selectedThemas, setSelectedThemas] = useState<Set<string>>(new Set());
 
-  // Filter words based on minimum niveau and theme
+  // Filter words based on selected niveaus and themes
   const words = useMemo(() => {
-    let filtered = allWords;
-    
-    // Filter by niveau group
-    if (niveauFilter !== "all") {
-      filtered = filtered.filter((word) => matchesNiveauGroup(word, niveauFilter));
-    }
-
-    // Filter by theme
-    if (themaFilter !== "all") {
-      filtered = filtered.filter((word) => word.thema === themaFilter);
-    }
-    
-    return filtered;
-  }, [allWords, niveauFilter, themaFilter]);
+    return allWords.filter((word) => 
+      matchesNiveauGroups(word, selectedNiveaus) && 
+      matchesThemas(word, selectedThemas)
+    );
+  }, [allWords, selectedNiveaus, selectedThemas]);
 
   const shuffleWords = (wordsToShuffle: WordWithProgress[]) => {
     const shuffled = [...wordsToShuffle];
@@ -158,7 +155,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
   useEffect(() => {
     setCurrentIndex(0);
     setShowTranslation(false);
-  }, [niveauFilter, themaFilter]);
+  }, [selectedNiveaus, selectedThemas]);
 
   const currentWord = words[currentIndex];
 
@@ -190,6 +187,9 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
     }
   };
 
+  const niveauOptions = NIVEAU_GROUPS.map(g => ({ value: g.value, label: g.label }));
+  const themaOptions = allThemes.map(t => ({ value: t, label: t }));
+
   if (isLoading) {
     return (
       <Card className="animate-fade-in">
@@ -209,8 +209,22 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             {t.learn_title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-muted-foreground">
+        <CardContent>
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
+            <MultiSelectFilter
+              options={niveauOptions}
+              selectedValues={selectedNiveaus}
+              onSelectionChange={setSelectedNiveaus}
+              placeholder="Niveau"
+            />
+            <MultiSelectFilter
+              options={themaOptions}
+              selectedValues={selectedThemas}
+              onSelectionChange={setSelectedThemas}
+              placeholder="Thema"
+            />
+          </div>
+          <p className="text-muted-foreground text-center py-8">
             {t.learn_no_words}
           </p>
         </CardContent>
@@ -227,32 +241,18 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
             {t.learn_title}
           </CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
-            <Select value={niveauFilter} onValueChange={setNiveauFilter}>
-              <SelectTrigger className="w-[90px] h-8 text-xs">
-                <SelectValue placeholder="Niveau" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Niveau</SelectItem>
-                {NIVEAU_GROUPS.map((group) => (
-                  <SelectItem key={group.value} value={group.value}>
-                    {group.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={themaFilter} onValueChange={setThemaFilter}>
-              <SelectTrigger className="w-[120px] h-8 text-xs">
-                <SelectValue placeholder="Thema" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle thema's</SelectItem>
-                {allThemes.map((thema) => (
-                  <SelectItem key={thema} value={thema}>
-                    {thema}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelectFilter
+              options={niveauOptions}
+              selectedValues={selectedNiveaus}
+              onSelectionChange={setSelectedNiveaus}
+              placeholder="Niveau"
+            />
+            <MultiSelectFilter
+              options={themaOptions}
+              selectedValues={selectedThemas}
+              onSelectionChange={setSelectedThemas}
+              placeholder="Thema"
+            />
             <span className="text-sm text-muted-foreground">
               {currentIndex + 1} / {words.length}
             </span>
