@@ -193,7 +193,7 @@ export async function incrementConjugationViewCount(conjugationId: string): Prom
   // Get current progress or create new
   const { data: existing } = await supabase
     .from("user_conjugation_progress")
-    .select("view_count")
+    .select("view_count, seen")
     .eq("user_id", userData.user.id)
     .eq("conjugation_id", conjugationId)
     .maybeSingle();
@@ -203,6 +203,7 @@ export async function incrementConjugationViewCount(conjugationId: string): Prom
       user_id: userData.user.id,
       conjugation_id: conjugationId,
       view_count: (existing?.view_count || 0) + 1,
+      seen: true, // Mark as seen when viewed
     },
     {
       onConflict: "user_id,conjugation_id",

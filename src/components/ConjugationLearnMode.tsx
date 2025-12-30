@@ -170,6 +170,14 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     if (currentConjugation) {
       try {
         await incrementConjugationViewCount(currentConjugation.id);
+        // Update local state to mark as seen
+        setAllConjugations((prev) =>
+          prev.map((c) =>
+            c.id === currentConjugation.id
+              ? { ...c, progress: { ...c.progress!, seen: true, view_count: (c.progress?.view_count || 0) + 1 } }
+              : c
+          )
+        );
       } catch (error) {
         console.error("Failed to increment view count:", error);
       }
