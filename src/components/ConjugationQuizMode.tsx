@@ -197,7 +197,12 @@ export function ConjugationQuizMode() {
     let normalized = answer.toLowerCase().trim();
     // Remove pronoun prefix if user typed it or if it's in the correct answer
     // Handle combined pronouns first (e.g., "él/ella viaja" -> "viaja")
-    const combinedPronounPrefixes = ["él/ella ", "el/ella ", "ellos/ellas "];
+    const combinedPronounPrefixes = [
+      "él/ella/usted ", "el/ella/usted ",
+      "ellos/ellas/ustedes ", 
+      "él/ella ", "el/ella ", 
+      "ellos/ellas "
+    ];
     for (const prefix of combinedPronounPrefixes) {
       if (normalized.startsWith(prefix)) {
         normalized = normalized.slice(prefix.length).trim();

@@ -149,12 +149,29 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     setShowConjugations(false);
   };
 
-  const goNext = useCallback(() => {
+  const goNext = useCallback(async () => {
     if (currentIndex < conjugations.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setShowConjugations(false);
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
+      setShowConjugations(true);
+      // Increment view count for the next conjugation
+      const nextConjugation = conjugations[nextIndex];
+      if (nextConjugation) {
+        try {
+          await incrementConjugationViewCount(nextConjugation.id);
+          setAllConjugations((prev) =>
+            prev.map((c) =>
+              c.id === nextConjugation.id
+                ? { ...c, progress: { ...c.progress!, seen: true, view_count: (c.progress?.view_count || 0) + 1 } }
+                : c
+            )
+          );
+        } catch (error) {
+          console.error("Failed to increment view count:", error);
+        }
+      }
     }
-  }, [currentIndex, conjugations.length]);
+  }, [currentIndex, conjugations]);
 
   const goPrevious = useCallback(() => {
     if (currentIndex > 0) {
