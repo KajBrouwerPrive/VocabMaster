@@ -19,6 +19,7 @@ import {
   VerbConjugationWithProgress,
 } from "@/lib/conjugationApi";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ConjugationLearnModeProps {
@@ -71,11 +72,15 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [showConjugations, setShowConjugations] = useState(false);
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnlyUnseen, setShowOnlyUnseen] = useState(false);
   const { toast } = useToast();
 
   const conjugations = useMemo(() => {
-    return allConjugations.filter((c) => !c.progress?.seen);
-  }, [allConjugations]);
+    if (showOnlyUnseen) {
+      return allConjugations.filter((c) => !c.progress?.seen);
+    }
+    return allConjugations;
+  }, [allConjugations, showOnlyUnseen]);
 
   const currentConjugation = conjugations[currentIndex];
 
@@ -255,9 +260,22 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       {/* Tense Selection with Checkboxes */}
       <Card>
         <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground mb-3">
-            {t.common_filter}:
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm text-muted-foreground">
+              {t.common_filter}:
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Alleen nieuwe</span>
+              <Switch
+                checked={showOnlyUnseen}
+                onCheckedChange={(checked) => {
+                  setShowOnlyUnseen(checked);
+                  setCurrentIndex(0);
+                  setShowConjugations(false);
+                }}
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
             {ALL_TENSES.map((tense) => (
               <label
