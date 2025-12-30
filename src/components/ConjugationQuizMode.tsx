@@ -193,10 +193,25 @@ export function ConjugationQuizMode() {
 
   const currentQuestion = questions[currentIndex];
 
+  const normalizeAnswer = (answer: string): string => {
+    let normalized = answer.toLowerCase().trim();
+    // Remove pronoun prefix if user typed it (e.g., "yo hablo" -> "hablo")
+    const pronounPrefixes = ["yo ", "tú ", "tu ", "él ", "el ", "ella ", "usted ", "nosotros ", "nosotras ", "vosotros ", "vosotras ", "ellos ", "ellas ", "ustedes "];
+    for (const prefix of pronounPrefixes) {
+      if (normalized.startsWith(prefix)) {
+        normalized = normalized.slice(prefix.length).trim();
+        break;
+      }
+    }
+    return normalized;
+  };
+
   const checkAnswer = () => {
     if (!currentQuestion) return;
 
-    const isCorrect = userAnswer.toLowerCase().trim() === currentQuestion.correctAnswer.toLowerCase().trim();
+    const normalizedUserAnswer = normalizeAnswer(userAnswer);
+    const normalizedCorrectAnswer = currentQuestion.correctAnswer.toLowerCase().trim();
+    const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
 
     const result: QuizResult = {
       question: currentQuestion,
@@ -237,7 +252,7 @@ export function ConjugationQuizMode() {
 
   const checkRetry = () => {
     if (!currentQuestion) return;
-    const isCorrect = retryAnswer.toLowerCase().trim() === currentQuestion.correctAnswer.toLowerCase().trim();
+    const isCorrect = normalizeAnswer(retryAnswer) === currentQuestion.correctAnswer.toLowerCase().trim();
     
     if (isCorrect) {
       toast.success(t.quiz_correct);
@@ -267,7 +282,7 @@ export function ConjugationQuizMode() {
         r.question.tense === currentQuestion?.tense &&
         r.question.pronounIndex === currentQuestion?.pronounIndex
       )) {
-        const isCorrect = userAnswer.toLowerCase().trim() === currentQuestion?.correctAnswer.toLowerCase().trim();
+        const isCorrect = normalizeAnswer(userAnswer) === currentQuestion?.correctAnswer.toLowerCase().trim();
         finalResults.push({ question: currentQuestion!, userAnswer: userAnswer.trim(), correct: isCorrect });
       }
       const correctAnswers = finalResults.filter(r => r.correct).length;
