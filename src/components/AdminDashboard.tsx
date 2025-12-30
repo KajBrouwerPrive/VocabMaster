@@ -46,6 +46,8 @@ export function AdminDashboard() {
     niveau: "",
     thema: ""
   });
+  const [niveauPromptWord, setNiveauPromptWord] = useState<UserWord | null>(null);
+  const [selectedNiveau, setSelectedNiveau] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -102,12 +104,28 @@ export function AdminDashboard() {
     }
   };
 
-  const handleMakeShared = async (wordId: string) => {
+  const handleMakeShared = async (wordId: string, niveau?: string) => {
+    const word = userWords.find(w => w.id === wordId);
+    if (!word) return;
+
+    // If niveau is not provided and word doesn't have one, prompt for it
+    const finalNiveau = niveau || word.niveau;
+    if (!finalNiveau) {
+      setNiveauPromptWord(word);
+      setSelectedNiveau("");
+      return;
+    }
+
     setProcessingId(wordId);
     try {
       const { error } = await supabase
         .from("words")
-        .update({ shared: "Yes" })
+        .update({ 
+          shared: "Yes",
+          source_word: word.source_word.toLowerCase(),
+          translation: word.translation.toLowerCase(),
+          niveau: finalNiveau
+        })
         .eq("id", wordId);
 
       if (error) throw error;
@@ -120,6 +138,13 @@ export function AdminDashboard() {
     } finally {
       setProcessingId(null);
     }
+  };
+
+  const handleNiveauPromptConfirm = () => {
+    if (!niveauPromptWord || !selectedNiveau) return;
+    handleMakeShared(niveauPromptWord.id, selectedNiveau);
+    setNiveauPromptWord(null);
+    setSelectedNiveau("");
   };
 
   const handleDeleteWord = async (wordId: string) => {
@@ -189,16 +214,22 @@ export function AdminDashboard() {
   const handleApproveAfterEdit = async () => {
     if (!editingWord) return;
     
+    // If niveau is not filled, prompt for it
+    if (!editForm.niveau) {
+      toast.error("Selecteer eerst een niveau");
+      return;
+    }
+    
     setProcessingId(editingWord.id);
     try {
       const { error } = await supabase
         .from("words")
         .update({
-          source_word: editForm.source_word,
-          translation: editForm.translation,
-          word_type: editForm.word_type || null,
-          niveau: editForm.niveau || null,
-          thema: editForm.thema || null,
+          source_word: editForm.source_word.toLowerCase(),
+          translation: editForm.translation.toLowerCase(),
+          word_type: editForm.word_type ? editForm.word_type.toLowerCase() : null,
+          niveau: editForm.niveau,
+          thema: editForm.thema ? editForm.thema.toLowerCase() : null,
           shared: "Yes"
         })
         .eq("id", editingWord.id);
@@ -438,6 +469,54 @@ export function AdminDashboard() {
                 <Check className="h-4 w-4 mr-2" />
               )}
               Opslaan & Goedkeuren
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Niveau prompt dialog */}
+      <Dialog open={!!niveauPromptWord} onOpenChange={(open) => !open && setNiveauPromptWord(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Selecteer niveau</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              Dit woord heeft nog geen niveau. Selecteer een niveau om door te gaan.
+            </p>
+            <p className="font-medium mb-2">
+              {niveauPromptWord?.source_word} → {niveauPromptWord?.translation}
+            </p>
+            <Select
+              value={selectedNiveau}
+              onValueChange={setSelectedNiveau}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecteer niveau" />
+              </SelectTrigger>
+              <SelectContent>
+                {NIVEAU_OPTIONS.map((niveau) => (
+                  <SelectItem key={niveau} value={niveau}>
+                    {niveau}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setNiveauPromptWord(null)}
+            >
+              Annuleren
+            </Button>
+            <Button
+              onClick={handleNiveauPromptConfirm}
+              disabled={!selectedNiveau}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Check className="h-4 w-4 mr-2" />
+              Goedkeuren
             </Button>
           </DialogFooter>
         </DialogContent>
