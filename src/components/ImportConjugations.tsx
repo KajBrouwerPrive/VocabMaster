@@ -29,51 +29,61 @@ interface ParsedConjugation {
   present_hij_zij: string;
   present_wij: string;
   present_jullie: string;
+  present_zij: string;
   past_ik: string;
   past_jij: string;
   past_hij_zij: string;
   past_wij: string;
   past_jullie: string;
+  past_zij: string;
   perfect_ik: string;
   perfect_jij: string;
   perfect_hij_zij: string;
   perfect_wij: string;
   perfect_jullie: string;
+  perfect_zij: string;
   indefinido_ik: string;
   indefinido_jij: string;
   indefinido_hij_zij: string;
   indefinido_wij: string;
   indefinido_jullie: string;
+  indefinido_zij: string;
   futuro_ik: string;
   futuro_jij: string;
   futuro_hij_zij: string;
   futuro_wij: string;
   futuro_jullie: string;
+  futuro_zij: string;
   futuro_perfecto_ik: string;
   futuro_perfecto_jij: string;
   futuro_perfecto_hij_zij: string;
   futuro_perfecto_wij: string;
   futuro_perfecto_jullie: string;
+  futuro_perfecto_zij: string;
   condicional_ik: string;
   condicional_jij: string;
   condicional_hij_zij: string;
   condicional_wij: string;
   condicional_jullie: string;
+  condicional_zij: string;
   pluscuamperfecto_ik: string;
   pluscuamperfecto_jij: string;
   pluscuamperfecto_hij_zij: string;
   pluscuamperfecto_wij: string;
   pluscuamperfecto_jullie: string;
+  pluscuamperfecto_zij: string;
   subjuntivo_presente_ik: string;
   subjuntivo_presente_jij: string;
   subjuntivo_presente_hij_zij: string;
   subjuntivo_presente_wij: string;
   subjuntivo_presente_jullie: string;
+  subjuntivo_presente_zij: string;
   subjuntivo_imperfecto_ik: string;
   subjuntivo_imperfecto_jij: string;
   subjuntivo_imperfecto_hij_zij: string;
   subjuntivo_imperfecto_wij: string;
   subjuntivo_imperfecto_jullie: string;
+  subjuntivo_imperfecto_zij: string;
 }
 
 // Map Excel tense names to our database tense prefixes
@@ -111,21 +121,22 @@ const PERSON_MAP: Record<string, string> = {
   "hij/zij": "hij_zij",
   "wij": "wij",
   "jullie": "jullie",
+  "zij": "zij",
 };
 
 const createEmptyConjugation = (infinitive: string, translation: string): ParsedConjugation => ({
   infinitive,
   translation,
-  present_ik: "", present_jij: "", present_hij_zij: "", present_wij: "", present_jullie: "",
-  past_ik: "", past_jij: "", past_hij_zij: "", past_wij: "", past_jullie: "",
-  perfect_ik: "", perfect_jij: "", perfect_hij_zij: "", perfect_wij: "", perfect_jullie: "",
-  indefinido_ik: "", indefinido_jij: "", indefinido_hij_zij: "", indefinido_wij: "", indefinido_jullie: "",
-  futuro_ik: "", futuro_jij: "", futuro_hij_zij: "", futuro_wij: "", futuro_jullie: "",
-  futuro_perfecto_ik: "", futuro_perfecto_jij: "", futuro_perfecto_hij_zij: "", futuro_perfecto_wij: "", futuro_perfecto_jullie: "",
-  condicional_ik: "", condicional_jij: "", condicional_hij_zij: "", condicional_wij: "", condicional_jullie: "",
-  pluscuamperfecto_ik: "", pluscuamperfecto_jij: "", pluscuamperfecto_hij_zij: "", pluscuamperfecto_wij: "", pluscuamperfecto_jullie: "",
-  subjuntivo_presente_ik: "", subjuntivo_presente_jij: "", subjuntivo_presente_hij_zij: "", subjuntivo_presente_wij: "", subjuntivo_presente_jullie: "",
-  subjuntivo_imperfecto_ik: "", subjuntivo_imperfecto_jij: "", subjuntivo_imperfecto_hij_zij: "", subjuntivo_imperfecto_wij: "", subjuntivo_imperfecto_jullie: "",
+  present_ik: "", present_jij: "", present_hij_zij: "", present_wij: "", present_jullie: "", present_zij: "",
+  past_ik: "", past_jij: "", past_hij_zij: "", past_wij: "", past_jullie: "", past_zij: "",
+  perfect_ik: "", perfect_jij: "", perfect_hij_zij: "", perfect_wij: "", perfect_jullie: "", perfect_zij: "",
+  indefinido_ik: "", indefinido_jij: "", indefinido_hij_zij: "", indefinido_wij: "", indefinido_jullie: "", indefinido_zij: "",
+  futuro_ik: "", futuro_jij: "", futuro_hij_zij: "", futuro_wij: "", futuro_jullie: "", futuro_zij: "",
+  futuro_perfecto_ik: "", futuro_perfecto_jij: "", futuro_perfecto_hij_zij: "", futuro_perfecto_wij: "", futuro_perfecto_jullie: "", futuro_perfecto_zij: "",
+  condicional_ik: "", condicional_jij: "", condicional_hij_zij: "", condicional_wij: "", condicional_jullie: "", condicional_zij: "",
+  pluscuamperfecto_ik: "", pluscuamperfecto_jij: "", pluscuamperfecto_hij_zij: "", pluscuamperfecto_wij: "", pluscuamperfecto_jullie: "", pluscuamperfecto_zij: "",
+  subjuntivo_presente_ik: "", subjuntivo_presente_jij: "", subjuntivo_presente_hij_zij: "", subjuntivo_presente_wij: "", subjuntivo_presente_jullie: "", subjuntivo_presente_zij: "",
+  subjuntivo_imperfecto_ik: "", subjuntivo_imperfecto_jij: "", subjuntivo_imperfecto_hij_zij: "", subjuntivo_imperfecto_wij: "", subjuntivo_imperfecto_jullie: "", subjuntivo_imperfecto_zij: "",
 });
 
 export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsProps) {
