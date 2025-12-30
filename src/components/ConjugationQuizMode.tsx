@@ -195,7 +195,16 @@ export function ConjugationQuizMode() {
 
   const normalizeAnswer = (answer: string): string => {
     let normalized = answer.toLowerCase().trim();
-    // Remove pronoun prefix if user typed it (e.g., "yo hablo" -> "hablo")
+    // Remove pronoun prefix if user typed it or if it's in the correct answer
+    // Handle combined pronouns first (e.g., "él/ella viaja" -> "viaja")
+    const combinedPronounPrefixes = ["él/ella ", "el/ella ", "ellos/ellas "];
+    for (const prefix of combinedPronounPrefixes) {
+      if (normalized.startsWith(prefix)) {
+        normalized = normalized.slice(prefix.length).trim();
+        return normalized;
+      }
+    }
+    // Handle single pronouns
     const pronounPrefixes = ["yo ", "tú ", "tu ", "él ", "el ", "ella ", "usted ", "nosotros ", "nosotras ", "vosotros ", "vosotras ", "ellos ", "ellas ", "ustedes "];
     for (const prefix of pronounPrefixes) {
       if (normalized.startsWith(prefix)) {
