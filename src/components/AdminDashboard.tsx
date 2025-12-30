@@ -118,7 +118,7 @@ export function AdminDashboard() {
 
     setProcessingId(wordId);
     try {
-      const { error } = await supabase
+      const { data, error, count } = await supabase
         .from("words")
         .update({ 
           shared: "Yes",
@@ -126,9 +126,21 @@ export function AdminDashboard() {
           translation: word.translation.toLowerCase(),
           niveau: finalNiveau
         })
-        .eq("id", wordId);
+        .eq("id", wordId)
+        .select();
 
-      if (error) throw error;
+      console.log("Update result:", { data, error, count, wordId });
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.error("No rows updated - RLS policy may be blocking the update");
+        toast.error("Update mislukt - geen rechten om dit woord bij te werken");
+        return;
+      }
 
       toast.success("Woord goedgekeurd en beschikbaar voor iedereen");
       setUserWords(userWords.filter(w => w.id !== wordId));
