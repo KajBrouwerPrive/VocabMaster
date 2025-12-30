@@ -13,60 +13,70 @@ export interface VerbConjugation {
   present_hij_zij: string;
   present_wij: string;
   present_jullie: string;
+  present_zij: string;
   // Imperfecto (verleden tijd onvoltooid)
   past_ik: string;
   past_jij: string;
   past_hij_zij: string;
   past_wij: string;
   past_jullie: string;
+  past_zij: string;
   // Perfecto compuesto (voltooide tijd)
   perfect_ik: string;
   perfect_jij: string;
   perfect_hij_zij: string;
   perfect_wij: string;
   perfect_jullie: string;
+  perfect_zij: string;
   // Pretérito indefinido (verleden tijd voltooid)
   indefinido_ik: string;
   indefinido_jij: string;
   indefinido_hij_zij: string;
   indefinido_wij: string;
   indefinido_jullie: string;
+  indefinido_zij: string;
   // Futuro simple (zal-vorm)
   futuro_ik: string;
   futuro_jij: string;
   futuro_hij_zij: string;
   futuro_wij: string;
   futuro_jullie: string;
+  futuro_zij: string;
   // Futuro perfecto (zal hebben-vorm)
   futuro_perfecto_ik: string;
   futuro_perfecto_jij: string;
   futuro_perfecto_hij_zij: string;
   futuro_perfecto_wij: string;
   futuro_perfecto_jullie: string;
+  futuro_perfecto_zij: string;
   // Condicional (zou-vorm)
   condicional_ik: string;
   condicional_jij: string;
   condicional_hij_zij: string;
   condicional_wij: string;
   condicional_jullie: string;
+  condicional_zij: string;
   // Pluscuamperfecto (had-vorm)
   pluscuamperfecto_ik: string;
   pluscuamperfecto_jij: string;
   pluscuamperfecto_hij_zij: string;
   pluscuamperfecto_wij: string;
   pluscuamperfecto_jullie: string;
+  pluscuamperfecto_zij: string;
   // Subjuntivo presente
   subjuntivo_presente_ik: string;
   subjuntivo_presente_jij: string;
   subjuntivo_presente_hij_zij: string;
   subjuntivo_presente_wij: string;
   subjuntivo_presente_jullie: string;
+  subjuntivo_presente_zij: string;
   // Subjuntivo imperfecto
   subjuntivo_imperfecto_ik: string;
   subjuntivo_imperfecto_jij: string;
   subjuntivo_imperfecto_hij_zij: string;
   subjuntivo_imperfecto_wij: string;
   subjuntivo_imperfecto_jullie: string;
+  subjuntivo_imperfecto_zij: string;
   shared: string;
   created_at: string;
   updated_at: string;

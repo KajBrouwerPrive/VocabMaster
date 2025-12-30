@@ -25,6 +25,7 @@ const PRONOUNS = [
   { key: "hij_zij", label: "hij/zij" },
   { key: "wij", label: "wij" },
   { key: "jullie", label: "jullie" },
+  { key: "zij", label: "zij" },
 ];
 
 const TENSES = [
@@ -41,7 +42,7 @@ const TENSES = [
 ];
 
 type TenseKey = typeof TENSES[number]["key"];
-type PronounKey = "ik" | "jij" | "hij_zij" | "wij" | "jullie";
+type PronounKey = "ik" | "jij" | "hij_zij" | "wij" | "jullie" | "zij";
 type TenseForms = Record<PronounKey, string>;
 type AllTenseForms = Record<TenseKey, TenseForms>;
 
@@ -51,6 +52,7 @@ const createEmptyForms = (): TenseForms => ({
   hij_zij: "",
   wij: "",
   jullie: "",
+  zij: "",
 });
 
 const createAllEmptyForms = (): AllTenseForms => {
@@ -124,60 +126,70 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
         present_hij_zij: allForms.present.hij_zij.trim(),
         present_wij: allForms.present.wij.trim(),
         present_jullie: allForms.present.jullie.trim(),
+        present_zij: allForms.present.zij.trim(),
         // Past (Imperfecto)
         past_ik: allForms.past.ik.trim(),
         past_jij: allForms.past.jij.trim(),
         past_hij_zij: allForms.past.hij_zij.trim(),
         past_wij: allForms.past.wij.trim(),
         past_jullie: allForms.past.jullie.trim(),
+        past_zij: allForms.past.zij.trim(),
         // Perfect
         perfect_ik: allForms.perfect.ik.trim(),
         perfect_jij: allForms.perfect.jij.trim(),
         perfect_hij_zij: allForms.perfect.hij_zij.trim(),
         perfect_wij: allForms.perfect.wij.trim(),
         perfect_jullie: allForms.perfect.jullie.trim(),
+        perfect_zij: allForms.perfect.zij.trim(),
         // Indefinido
         indefinido_ik: allForms.indefinido.ik.trim(),
         indefinido_jij: allForms.indefinido.jij.trim(),
         indefinido_hij_zij: allForms.indefinido.hij_zij.trim(),
         indefinido_wij: allForms.indefinido.wij.trim(),
         indefinido_jullie: allForms.indefinido.jullie.trim(),
+        indefinido_zij: allForms.indefinido.zij.trim(),
         // Futuro
         futuro_ik: allForms.futuro.ik.trim(),
         futuro_jij: allForms.futuro.jij.trim(),
         futuro_hij_zij: allForms.futuro.hij_zij.trim(),
         futuro_wij: allForms.futuro.wij.trim(),
         futuro_jullie: allForms.futuro.jullie.trim(),
+        futuro_zij: allForms.futuro.zij.trim(),
         // Futuro Perfecto
         futuro_perfecto_ik: allForms.futuro_perfecto.ik.trim(),
         futuro_perfecto_jij: allForms.futuro_perfecto.jij.trim(),
         futuro_perfecto_hij_zij: allForms.futuro_perfecto.hij_zij.trim(),
         futuro_perfecto_wij: allForms.futuro_perfecto.wij.trim(),
         futuro_perfecto_jullie: allForms.futuro_perfecto.jullie.trim(),
+        futuro_perfecto_zij: allForms.futuro_perfecto.zij.trim(),
         // Condicional
         condicional_ik: allForms.condicional.ik.trim(),
         condicional_jij: allForms.condicional.jij.trim(),
         condicional_hij_zij: allForms.condicional.hij_zij.trim(),
         condicional_wij: allForms.condicional.wij.trim(),
         condicional_jullie: allForms.condicional.jullie.trim(),
+        condicional_zij: allForms.condicional.zij.trim(),
         // Pluscuamperfecto
         pluscuamperfecto_ik: allForms.pluscuamperfecto.ik.trim(),
         pluscuamperfecto_jij: allForms.pluscuamperfecto.jij.trim(),
         pluscuamperfecto_hij_zij: allForms.pluscuamperfecto.hij_zij.trim(),
         pluscuamperfecto_wij: allForms.pluscuamperfecto.wij.trim(),
         pluscuamperfecto_jullie: allForms.pluscuamperfecto.jullie.trim(),
+        pluscuamperfecto_zij: allForms.pluscuamperfecto.zij.trim(),
         // Subjuntivo Presente
         subjuntivo_presente_ik: allForms.subjuntivo_presente.ik.trim(),
         subjuntivo_presente_jij: allForms.subjuntivo_presente.jij.trim(),
         subjuntivo_presente_hij_zij: allForms.subjuntivo_presente.hij_zij.trim(),
         subjuntivo_presente_wij: allForms.subjuntivo_presente.wij.trim(),
         subjuntivo_presente_jullie: allForms.subjuntivo_presente.jullie.trim(),
+        subjuntivo_presente_zij: allForms.subjuntivo_presente.zij.trim(),
         // Subjuntivo Imperfecto
         subjuntivo_imperfecto_ik: allForms.subjuntivo_imperfecto.ik.trim(),
         subjuntivo_imperfecto_jij: allForms.subjuntivo_imperfecto.jij.trim(),
         subjuntivo_imperfecto_hij_zij: allForms.subjuntivo_imperfecto.hij_zij.trim(),
         subjuntivo_imperfecto_wij: allForms.subjuntivo_imperfecto.wij.trim(),
         subjuntivo_imperfecto_jullie: allForms.subjuntivo_imperfecto.jullie.trim(),
+        subjuntivo_imperfecto_zij: allForms.subjuntivo_imperfecto.zij.trim(),
         shared: shared ? "Yes" : "No",
       });
 

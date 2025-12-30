@@ -37,7 +37,7 @@ type TenseType =
   | "subjuntivo_presente" 
   | "subjuntivo_imperfecto";
 
-const PRONOUNS = ["ik", "jij", "hij/zij", "wij", "jullie"];
+const PRONOUNS = ["ik", "jij", "hij/zij", "wij", "jullie", "zij"];
 const TENSE_LABELS: Record<TenseType, string> = {
   present: "Presente",
   past: "Imperfecto",
@@ -125,6 +125,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       conj[`${prefix}_hij_zij` as keyof VerbConjugationWithProgress] as string,
       conj[`${prefix}_wij` as keyof VerbConjugationWithProgress] as string,
       conj[`${prefix}_jullie` as keyof VerbConjugationWithProgress] as string,
+      conj[`${prefix}_zij` as keyof VerbConjugationWithProgress] as string,
     ];
   };
 

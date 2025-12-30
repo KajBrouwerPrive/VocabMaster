@@ -37,8 +37,8 @@ type TenseType =
   | "subjuntivo_presente" 
   | "subjuntivo_imperfecto";
 
-const PRONOUNS = ["ik", "jij", "hij/zij", "wij", "jullie"];
-const PRONOUN_KEYS = ["ik", "jij", "hij_zij", "wij", "jullie"];
+const PRONOUNS = ["ik", "jij", "hij/zij", "wij", "jullie", "zij"];
+const PRONOUN_KEYS = ["ik", "jij", "hij_zij", "wij", "jullie", "zij"];
 
 const TENSE_LABELS: Record<TenseType, string> = {
   present: "Presente",

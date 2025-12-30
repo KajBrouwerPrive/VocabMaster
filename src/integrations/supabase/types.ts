@@ -158,6 +158,13 @@ export type Database = {
             referencedRelation: "verb_conjugations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_conjugation_progress_conjugation_id_fkey"
+            columns: ["conjugation_id"]
+            isOneToOne: false
+            referencedRelation: "verb_conjugations_secure"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -242,6 +249,7 @@ export type Database = {
           condicional_jij: string
           condicional_jullie: string
           condicional_wij: string
+          condicional_zij: string
           created_at: string
           futuro_hij_zij: string
           futuro_ik: string
@@ -252,34 +260,41 @@ export type Database = {
           futuro_perfecto_jij: string
           futuro_perfecto_jullie: string
           futuro_perfecto_wij: string
+          futuro_perfecto_zij: string
           futuro_wij: string
+          futuro_zij: string
           id: string
           indefinido_hij_zij: string
           indefinido_ik: string
           indefinido_jij: string
           indefinido_jullie: string
           indefinido_wij: string
+          indefinido_zij: string
           infinitive: string
           past_hij_zij: string
           past_ik: string
           past_jij: string
           past_jullie: string
           past_wij: string
+          past_zij: string
           perfect_hij_zij: string
           perfect_ik: string
           perfect_jij: string
           perfect_jullie: string
           perfect_wij: string
+          perfect_zij: string
           pluscuamperfecto_hij_zij: string
           pluscuamperfecto_ik: string
           pluscuamperfecto_jij: string
           pluscuamperfecto_jullie: string
           pluscuamperfecto_wij: string
+          pluscuamperfecto_zij: string
           present_hij_zij: string
           present_ik: string
           present_jij: string
           present_jullie: string
           present_wij: string
+          present_zij: string
           shared: string
           source_language: string
           subjuntivo_imperfecto_hij_zij: string
@@ -287,11 +302,13 @@ export type Database = {
           subjuntivo_imperfecto_jij: string
           subjuntivo_imperfecto_jullie: string
           subjuntivo_imperfecto_wij: string
+          subjuntivo_imperfecto_zij: string
           subjuntivo_presente_hij_zij: string
           subjuntivo_presente_ik: string
           subjuntivo_presente_jij: string
           subjuntivo_presente_jullie: string
           subjuntivo_presente_wij: string
+          subjuntivo_presente_zij: string
           target_language: string
           translation: string
           updated_at: string
@@ -303,6 +320,7 @@ export type Database = {
           condicional_jij?: string
           condicional_jullie?: string
           condicional_wij?: string
+          condicional_zij?: string
           created_at?: string
           futuro_hij_zij?: string
           futuro_ik?: string
@@ -313,34 +331,41 @@ export type Database = {
           futuro_perfecto_jij?: string
           futuro_perfecto_jullie?: string
           futuro_perfecto_wij?: string
+          futuro_perfecto_zij?: string
           futuro_wij?: string
+          futuro_zij?: string
           id?: string
           indefinido_hij_zij?: string
           indefinido_ik?: string
           indefinido_jij?: string
           indefinido_jullie?: string
           indefinido_wij?: string
+          indefinido_zij?: string
           infinitive: string
           past_hij_zij: string
           past_ik: string
           past_jij: string
           past_jullie: string
           past_wij: string
+          past_zij?: string
           perfect_hij_zij: string
           perfect_ik: string
           perfect_jij: string
           perfect_jullie: string
           perfect_wij: string
+          perfect_zij?: string
           pluscuamperfecto_hij_zij?: string
           pluscuamperfecto_ik?: string
           pluscuamperfecto_jij?: string
           pluscuamperfecto_jullie?: string
           pluscuamperfecto_wij?: string
+          pluscuamperfecto_zij?: string
           present_hij_zij: string
           present_ik: string
           present_jij: string
           present_jullie: string
           present_wij: string
+          present_zij?: string
           shared?: string
           source_language?: string
           subjuntivo_imperfecto_hij_zij?: string
@@ -348,11 +373,13 @@ export type Database = {
           subjuntivo_imperfecto_jij?: string
           subjuntivo_imperfecto_jullie?: string
           subjuntivo_imperfecto_wij?: string
+          subjuntivo_imperfecto_zij?: string
           subjuntivo_presente_hij_zij?: string
           subjuntivo_presente_ik?: string
           subjuntivo_presente_jij?: string
           subjuntivo_presente_jullie?: string
           subjuntivo_presente_wij?: string
+          subjuntivo_presente_zij?: string
           target_language?: string
           translation: string
           updated_at?: string
@@ -364,6 +391,7 @@ export type Database = {
           condicional_jij?: string
           condicional_jullie?: string
           condicional_wij?: string
+          condicional_zij?: string
           created_at?: string
           futuro_hij_zij?: string
           futuro_ik?: string
@@ -374,34 +402,41 @@ export type Database = {
           futuro_perfecto_jij?: string
           futuro_perfecto_jullie?: string
           futuro_perfecto_wij?: string
+          futuro_perfecto_zij?: string
           futuro_wij?: string
+          futuro_zij?: string
           id?: string
           indefinido_hij_zij?: string
           indefinido_ik?: string
           indefinido_jij?: string
           indefinido_jullie?: string
           indefinido_wij?: string
+          indefinido_zij?: string
           infinitive?: string
           past_hij_zij?: string
           past_ik?: string
           past_jij?: string
           past_jullie?: string
           past_wij?: string
+          past_zij?: string
           perfect_hij_zij?: string
           perfect_ik?: string
           perfect_jij?: string
           perfect_jullie?: string
           perfect_wij?: string
+          perfect_zij?: string
           pluscuamperfecto_hij_zij?: string
           pluscuamperfecto_ik?: string
           pluscuamperfecto_jij?: string
           pluscuamperfecto_jullie?: string
           pluscuamperfecto_wij?: string
+          pluscuamperfecto_zij?: string
           present_hij_zij?: string
           present_ik?: string
           present_jij?: string
           present_jullie?: string
           present_wij?: string
+          present_zij?: string
           shared?: string
           source_language?: string
           subjuntivo_imperfecto_hij_zij?: string
@@ -409,11 +444,13 @@ export type Database = {
           subjuntivo_imperfecto_jij?: string
           subjuntivo_imperfecto_jullie?: string
           subjuntivo_imperfecto_wij?: string
+          subjuntivo_imperfecto_zij?: string
           subjuntivo_presente_hij_zij?: string
           subjuntivo_presente_ik?: string
           subjuntivo_presente_jij?: string
           subjuntivo_presente_jullie?: string
           subjuntivo_presente_wij?: string
+          subjuntivo_presente_zij?: string
           target_language?: string
           translation?: string
           updated_at?: string
@@ -490,6 +527,7 @@ export type Database = {
           condicional_jij: string | null
           condicional_jullie: string | null
           condicional_wij: string | null
+          condicional_zij: string | null
           created_at: string | null
           futuro_hij_zij: string | null
           futuro_ik: string | null
@@ -500,34 +538,41 @@ export type Database = {
           futuro_perfecto_jij: string | null
           futuro_perfecto_jullie: string | null
           futuro_perfecto_wij: string | null
+          futuro_perfecto_zij: string | null
           futuro_wij: string | null
+          futuro_zij: string | null
           id: string | null
           indefinido_hij_zij: string | null
           indefinido_ik: string | null
           indefinido_jij: string | null
           indefinido_jullie: string | null
           indefinido_wij: string | null
+          indefinido_zij: string | null
           infinitive: string | null
           past_hij_zij: string | null
           past_ik: string | null
           past_jij: string | null
           past_jullie: string | null
           past_wij: string | null
+          past_zij: string | null
           perfect_hij_zij: string | null
           perfect_ik: string | null
           perfect_jij: string | null
           perfect_jullie: string | null
           perfect_wij: string | null
+          perfect_zij: string | null
           pluscuamperfecto_hij_zij: string | null
           pluscuamperfecto_ik: string | null
           pluscuamperfecto_jij: string | null
           pluscuamperfecto_jullie: string | null
           pluscuamperfecto_wij: string | null
+          pluscuamperfecto_zij: string | null
           present_hij_zij: string | null
           present_ik: string | null
           present_jij: string | null
           present_jullie: string | null
           present_wij: string | null
+          present_zij: string | null
           shared: string | null
           source_language: string | null
           subjuntivo_imperfecto_hij_zij: string | null
@@ -535,15 +580,159 @@ export type Database = {
           subjuntivo_imperfecto_jij: string | null
           subjuntivo_imperfecto_jullie: string | null
           subjuntivo_imperfecto_wij: string | null
+          subjuntivo_imperfecto_zij: string | null
           subjuntivo_presente_hij_zij: string | null
           subjuntivo_presente_ik: string | null
           subjuntivo_presente_jij: string | null
           subjuntivo_presente_jullie: string | null
           subjuntivo_presente_wij: string | null
+          subjuntivo_presente_zij: string | null
           target_language: string | null
           translation: string | null
           updated_at: string | null
           user_id: string | null
+        }
+        Insert: {
+          condicional_hij_zij?: string | null
+          condicional_ik?: string | null
+          condicional_jij?: string | null
+          condicional_jullie?: string | null
+          condicional_wij?: string | null
+          condicional_zij?: string | null
+          created_at?: string | null
+          futuro_hij_zij?: string | null
+          futuro_ik?: string | null
+          futuro_jij?: string | null
+          futuro_jullie?: string | null
+          futuro_perfecto_hij_zij?: string | null
+          futuro_perfecto_ik?: string | null
+          futuro_perfecto_jij?: string | null
+          futuro_perfecto_jullie?: string | null
+          futuro_perfecto_wij?: string | null
+          futuro_perfecto_zij?: string | null
+          futuro_wij?: string | null
+          futuro_zij?: string | null
+          id?: string | null
+          indefinido_hij_zij?: string | null
+          indefinido_ik?: string | null
+          indefinido_jij?: string | null
+          indefinido_jullie?: string | null
+          indefinido_wij?: string | null
+          indefinido_zij?: string | null
+          infinitive?: string | null
+          past_hij_zij?: string | null
+          past_ik?: string | null
+          past_jij?: string | null
+          past_jullie?: string | null
+          past_wij?: string | null
+          past_zij?: string | null
+          perfect_hij_zij?: string | null
+          perfect_ik?: string | null
+          perfect_jij?: string | null
+          perfect_jullie?: string | null
+          perfect_wij?: string | null
+          perfect_zij?: string | null
+          pluscuamperfecto_hij_zij?: string | null
+          pluscuamperfecto_ik?: string | null
+          pluscuamperfecto_jij?: string | null
+          pluscuamperfecto_jullie?: string | null
+          pluscuamperfecto_wij?: string | null
+          pluscuamperfecto_zij?: string | null
+          present_hij_zij?: string | null
+          present_ik?: string | null
+          present_jij?: string | null
+          present_jullie?: string | null
+          present_wij?: string | null
+          present_zij?: string | null
+          shared?: string | null
+          source_language?: string | null
+          subjuntivo_imperfecto_hij_zij?: string | null
+          subjuntivo_imperfecto_ik?: string | null
+          subjuntivo_imperfecto_jij?: string | null
+          subjuntivo_imperfecto_jullie?: string | null
+          subjuntivo_imperfecto_wij?: string | null
+          subjuntivo_imperfecto_zij?: string | null
+          subjuntivo_presente_hij_zij?: string | null
+          subjuntivo_presente_ik?: string | null
+          subjuntivo_presente_jij?: string | null
+          subjuntivo_presente_jullie?: string | null
+          subjuntivo_presente_wij?: string | null
+          subjuntivo_presente_zij?: string | null
+          target_language?: string | null
+          translation?: string | null
+          updated_at?: string | null
+          user_id?: never
+        }
+        Update: {
+          condicional_hij_zij?: string | null
+          condicional_ik?: string | null
+          condicional_jij?: string | null
+          condicional_jullie?: string | null
+          condicional_wij?: string | null
+          condicional_zij?: string | null
+          created_at?: string | null
+          futuro_hij_zij?: string | null
+          futuro_ik?: string | null
+          futuro_jij?: string | null
+          futuro_jullie?: string | null
+          futuro_perfecto_hij_zij?: string | null
+          futuro_perfecto_ik?: string | null
+          futuro_perfecto_jij?: string | null
+          futuro_perfecto_jullie?: string | null
+          futuro_perfecto_wij?: string | null
+          futuro_perfecto_zij?: string | null
+          futuro_wij?: string | null
+          futuro_zij?: string | null
+          id?: string | null
+          indefinido_hij_zij?: string | null
+          indefinido_ik?: string | null
+          indefinido_jij?: string | null
+          indefinido_jullie?: string | null
+          indefinido_wij?: string | null
+          indefinido_zij?: string | null
+          infinitive?: string | null
+          past_hij_zij?: string | null
+          past_ik?: string | null
+          past_jij?: string | null
+          past_jullie?: string | null
+          past_wij?: string | null
+          past_zij?: string | null
+          perfect_hij_zij?: string | null
+          perfect_ik?: string | null
+          perfect_jij?: string | null
+          perfect_jullie?: string | null
+          perfect_wij?: string | null
+          perfect_zij?: string | null
+          pluscuamperfecto_hij_zij?: string | null
+          pluscuamperfecto_ik?: string | null
+          pluscuamperfecto_jij?: string | null
+          pluscuamperfecto_jullie?: string | null
+          pluscuamperfecto_wij?: string | null
+          pluscuamperfecto_zij?: string | null
+          present_hij_zij?: string | null
+          present_ik?: string | null
+          present_jij?: string | null
+          present_jullie?: string | null
+          present_wij?: string | null
+          present_zij?: string | null
+          shared?: string | null
+          source_language?: string | null
+          subjuntivo_imperfecto_hij_zij?: string | null
+          subjuntivo_imperfecto_ik?: string | null
+          subjuntivo_imperfecto_jij?: string | null
+          subjuntivo_imperfecto_jullie?: string | null
+          subjuntivo_imperfecto_wij?: string | null
+          subjuntivo_imperfecto_zij?: string | null
+          subjuntivo_presente_hij_zij?: string | null
+          subjuntivo_presente_ik?: string | null
+          subjuntivo_presente_jij?: string | null
+          subjuntivo_presente_jullie?: string | null
+          subjuntivo_presente_wij?: string | null
+          subjuntivo_presente_zij?: string | null
+          target_language?: string | null
+          translation?: string | null
+          updated_at?: string | null
+          user_id?: never
         }
         Relationships: []
       }
@@ -617,6 +806,7 @@ export type Database = {
           condicional_jij: string
           condicional_jullie: string
           condicional_wij: string
+          condicional_zij: string
           created_at: string
           futuro_hij_zij: string
           futuro_ik: string
@@ -627,34 +817,41 @@ export type Database = {
           futuro_perfecto_jij: string
           futuro_perfecto_jullie: string
           futuro_perfecto_wij: string
+          futuro_perfecto_zij: string
           futuro_wij: string
+          futuro_zij: string
           id: string
           indefinido_hij_zij: string
           indefinido_ik: string
           indefinido_jij: string
           indefinido_jullie: string
           indefinido_wij: string
+          indefinido_zij: string
           infinitive: string
           past_hij_zij: string
           past_ik: string
           past_jij: string
           past_jullie: string
           past_wij: string
+          past_zij: string
           perfect_hij_zij: string
           perfect_ik: string
           perfect_jij: string
           perfect_jullie: string
           perfect_wij: string
+          perfect_zij: string
           pluscuamperfecto_hij_zij: string
           pluscuamperfecto_ik: string
           pluscuamperfecto_jij: string
           pluscuamperfecto_jullie: string
           pluscuamperfecto_wij: string
+          pluscuamperfecto_zij: string
           present_hij_zij: string
           present_ik: string
           present_jij: string
           present_jullie: string
           present_wij: string
+          present_zij: string
           shared: string
           source_language: string
           subjuntivo_imperfecto_hij_zij: string
@@ -662,11 +859,13 @@ export type Database = {
           subjuntivo_imperfecto_jij: string
           subjuntivo_imperfecto_jullie: string
           subjuntivo_imperfecto_wij: string
+          subjuntivo_imperfecto_zij: string
           subjuntivo_presente_hij_zij: string
           subjuntivo_presente_ik: string
           subjuntivo_presente_jij: string
           subjuntivo_presente_jullie: string
           subjuntivo_presente_wij: string
+          subjuntivo_presente_zij: string
           target_language: string
           translation: string
           updated_at: string
