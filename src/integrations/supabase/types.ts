@@ -416,6 +416,7 @@ export type Database = {
       }
       words: {
         Row: {
+          context: string | null
           created_at: string
           id: string
           incorrect_count: number
@@ -434,6 +435,7 @@ export type Database = {
           word_type: string | null
         }
         Insert: {
+          context?: string | null
           created_at?: string
           id?: string
           incorrect_count?: number
@@ -452,6 +454,7 @@ export type Database = {
           word_type?: string | null
         }
         Update: {
+          context?: string | null
           created_at?: string
           id?: string
           incorrect_count?: number
