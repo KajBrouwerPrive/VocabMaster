@@ -31,6 +31,7 @@ interface UserWord {
   word_type: string | null;
   niveau: string | null;
   thema: string | null;
+  context: string | null;
 }
 
 export function AdminDashboard() {
@@ -44,7 +45,8 @@ export function AdminDashboard() {
     translation: "",
     word_type: "",
     niveau: "",
-    thema: ""
+    thema: "",
+    context: ""
   });
   const [niveauPromptWord, setNiveauPromptWord] = useState<UserWord | null>(null);
   const [selectedNiveau, setSelectedNiveau] = useState("");
@@ -186,7 +188,8 @@ export function AdminDashboard() {
       translation: word.translation,
       word_type: word.word_type || "",
       niveau: word.niveau || "",
-      thema: word.thema || ""
+      thema: word.thema || "",
+      context: word.context || ""
     });
   };
 
@@ -202,7 +205,8 @@ export function AdminDashboard() {
           translation: editForm.translation,
           word_type: editForm.word_type || null,
           niveau: editForm.niveau || null,
-          thema: editForm.thema || null
+          thema: editForm.thema || null,
+          context: editForm.context || null
         })
         .eq("id", editingWord.id);
 
@@ -242,6 +246,7 @@ export function AdminDashboard() {
           word_type: editForm.word_type ? editForm.word_type.toLowerCase() : null,
           niveau: editForm.niveau,
           thema: editForm.thema ? editForm.thema.toLowerCase() : null,
+          context: editForm.context || null,
           shared: "Yes"
         })
         .eq("id", editingWord.id);
@@ -453,6 +458,15 @@ export function AdminDashboard() {
                 value={editForm.thema}
                 onChange={(e) => setEditForm({ ...editForm, thema: e.target.value })}
                 placeholder="bijv. eten, reizen"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="context">Context</Label>
+              <Input
+                id="context"
+                value={editForm.context}
+                onChange={(e) => setEditForm({ ...editForm, context: e.target.value })}
+                placeholder="bijv. gebruikscontext of voorbeeld"
               />
             </div>
           </div>
