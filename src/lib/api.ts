@@ -323,27 +323,30 @@ export async function getWordsWithProgress(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn");
 
-  let query = supabase
-    .from("words_secure")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .range(0, 99999); // Fetch all words without default 1000 limit
-
-  if (sourceLanguage) {
-    query = query.eq("source_language", sourceLanguage);
-  }
-  if (targetLanguage) {
-    query = query.eq("target_language", targetLanguage);
-  }
-
-  const { data: words, error: wordsError } = await query;
+  // Use the SECURITY DEFINER function to get all shared words + user's own words
+  const { data: words, error: wordsError } = await supabase
+    .rpc("get_words_with_shared")
+    .order("created_at", { ascending: false });
 
   if (wordsError) {
     throw new Error(wordsError.message);
   }
 
-  // Cast to include thema and context fields that exist in database but not in generated types
-  const wordsWithExtras = words as Array<typeof words[number] & { thema?: string | null; context?: string | null }>;
+  // Filter by language if specified
+  let filteredWords = words || [];
+  if (sourceLanguage) {
+    filteredWords = filteredWords.filter(w => w.source_language === sourceLanguage);
+  }
+  if (targetLanguage) {
+    filteredWords = filteredWords.filter(w => w.target_language === targetLanguage);
+  }
+
+  if (wordsError) {
+    throw new Error(wordsError.message);
+  }
+
+  // Cast to include context field that exists in database
+  const wordsWithExtras = filteredWords as Array<typeof filteredWords[number] & { context?: string | null }>;
 
   // Get all user progress
   const { data: progress } = await supabase
