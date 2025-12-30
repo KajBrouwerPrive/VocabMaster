@@ -695,6 +695,7 @@ export type Database = {
       get_words_with_shared: {
         Args: never
         Returns: {
+          context: string
           created_at: string
           id: string
           incorrect_count: number
