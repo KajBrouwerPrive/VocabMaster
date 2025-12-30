@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Check, X, Share2, Trash2, MessageSquare, Pencil } from "lucide-react";
+
+const NIVEAU_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
 interface ConjugationRequest {
   id: string;
@@ -384,12 +387,21 @@ export function AdminDashboard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="niveau">Niveau</Label>
-              <Input
-                id="niveau"
+              <Select
                 value={editForm.niveau}
-                onChange={(e) => setEditForm({ ...editForm, niveau: e.target.value })}
-                placeholder="bijv. A1, B1"
-              />
+                onValueChange={(value) => setEditForm({ ...editForm, niveau: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecteer niveau" />
+                </SelectTrigger>
+                <SelectContent>
+                  {NIVEAU_OPTIONS.map((niveau) => (
+                    <SelectItem key={niveau} value={niveau}>
+                      {niveau}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="thema">Thema</Label>
