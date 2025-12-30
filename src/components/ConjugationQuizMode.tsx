@@ -210,7 +210,7 @@ export function ConjugationQuizMode() {
     if (!currentQuestion) return;
 
     const normalizedUserAnswer = normalizeAnswer(userAnswer);
-    const normalizedCorrectAnswer = currentQuestion.correctAnswer.toLowerCase().trim();
+    const normalizedCorrectAnswer = normalizeAnswer(currentQuestion.correctAnswer);
     const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
 
     const result: QuizResult = {
@@ -252,7 +252,7 @@ export function ConjugationQuizMode() {
 
   const checkRetry = () => {
     if (!currentQuestion) return;
-    const isCorrect = normalizeAnswer(retryAnswer) === currentQuestion.correctAnswer.toLowerCase().trim();
+    const isCorrect = normalizeAnswer(retryAnswer) === normalizeAnswer(currentQuestion.correctAnswer);
     
     if (isCorrect) {
       toast.success(t.quiz_correct);
@@ -282,7 +282,7 @@ export function ConjugationQuizMode() {
         r.question.tense === currentQuestion?.tense &&
         r.question.pronounIndex === currentQuestion?.pronounIndex
       )) {
-        const isCorrect = normalizeAnswer(userAnswer) === currentQuestion?.correctAnswer.toLowerCase().trim();
+        const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(currentQuestion?.correctAnswer || "");
         finalResults.push({ question: currentQuestion!, userAnswer: userAnswer.trim(), correct: isCorrect });
       }
       const correctAnswers = finalResults.filter(r => r.correct).length;
