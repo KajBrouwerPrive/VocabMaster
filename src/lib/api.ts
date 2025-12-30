@@ -342,8 +342,8 @@ export async function getWordsWithProgress(
     throw new Error(wordsError.message);
   }
 
-  // Cast to include thema field that exists in database but not in generated types
-  const wordsWithThema = words as Array<typeof words[number] & { thema?: string | null }>;
+  // Cast to include thema and context fields that exist in database but not in generated types
+  const wordsWithExtras = words as Array<typeof words[number] & { thema?: string | null; context?: string | null }>;
 
   // Get all user progress
   const { data: progress } = await supabase
@@ -358,7 +358,7 @@ export async function getWordsWithProgress(
   });
 
   // Merge words with progress
-  return wordsWithThema.map((word) => {
+  return wordsWithExtras.map((word) => {
     const p = progressMap.get(word.id!);
     return {
       id: word.id!,
@@ -369,6 +369,7 @@ export async function getWordsWithProgress(
       word_type: word.word_type ?? null,
       niveau: word.niveau ?? null,
       thema: word.thema ?? null,
+      context: word.context ?? null,
       user_id: word.user_id ?? null,
       shared: word.shared!,
       created_at: word.created_at!,
