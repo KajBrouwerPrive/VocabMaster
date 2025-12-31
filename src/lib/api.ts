@@ -610,23 +610,17 @@ export async function deleteWord(wordId: string): Promise<void> {
 
 // Get all unique themes from shared words
 export async function getAllThemes(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from("words_secure")
-    .select("thema")
-    .eq("shared", "Yes")
-    .not("thema", "is", null);
+  // Use the SECURITY DEFINER function which properly returns all shared words
+  const { data, error } = await supabase.rpc("get_words_with_shared");
 
   if (error) {
     throw new Error(error.message);
   }
 
-  // Cast to include thema field
-  const dataWithThema = data as Array<{ thema?: string | null }>;
-  
-  // Get unique themes
+  // Get unique themes from shared words only
   const themaSet = new Set<string>();
-  dataWithThema.forEach((word) => {
-    if (word.thema) {
+  (data || []).forEach((word: { thema?: string | null; shared?: string }) => {
+    if (word.thema && word.shared === "Yes") {
       themaSet.add(word.thema);
     }
   });
