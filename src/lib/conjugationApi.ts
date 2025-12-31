@@ -90,6 +90,7 @@ export interface ConjugationProgress {
   view_count: number;
   quiz_view_count: number;
   incorrect_count: number;
+  correct_count: number;
 }
 
 export interface VerbConjugationWithProgress extends VerbConjugation {
