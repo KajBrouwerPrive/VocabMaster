@@ -179,11 +179,11 @@ export function QuizStatistics() {
                 key={result.id}
                 className={`flex items-center justify-between p-3 rounded-lg border ${
                   result.score_percentage === 100
-                    ? "bg-amber-500/5 border-amber-500/20"
+                    ? "bg-gradient-to-r from-yellow-100/50 to-amber-200/30 dark:from-yellow-900/20 dark:to-amber-800/15 border-yellow-400/50 dark:border-yellow-600/40"
                     : result.score_percentage >= 90
-                    ? "bg-yellow-500/5 border-yellow-500/20"
+                    ? "bg-gradient-to-r from-slate-100/50 to-gray-200/30 dark:from-slate-800/30 dark:to-gray-700/20 border-slate-300/60 dark:border-slate-600/40"
                     : result.score_percentage >= 80
-                    ? "bg-green-500/5 border-green-500/20"
+                    ? "bg-gradient-to-r from-orange-100/50 to-amber-100/30 dark:from-orange-950/20 dark:to-amber-900/15 border-orange-300/50 dark:border-orange-700/40"
                     : "bg-secondary/30 border-border"
                 }`}
               >
@@ -245,11 +245,11 @@ export function QuizStatistics() {
                   </span>
                   <span className={`text-lg font-bold ${
                     result.score_percentage === 100
-                      ? "text-amber-500"
+                      ? "text-yellow-700 dark:text-yellow-300"
                       : result.score_percentage >= 90
-                      ? "text-yellow-500"
+                      ? "text-slate-700 dark:text-slate-200"
                       : result.score_percentage >= 80
-                      ? "text-green-500"
+                      ? "text-orange-800 dark:text-orange-300"
                       : "text-foreground"
                   }`}>
                     {result.score_percentage}%
