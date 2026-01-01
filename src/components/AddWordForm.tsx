@@ -92,7 +92,12 @@ export function AddWordForm({
 
         if (error) throw error;
 
-        setSearchResults(data || []);
+        // Map data to include thema and theme_id
+        setSearchResults((data || []).map(d => ({
+          ...d,
+          thema: null,
+          theme_id: d.theme_id ?? null,
+        })));
         setShowDropdown((data || []).length > 0);
       } catch (error) {
         console.error("Search error:", error);

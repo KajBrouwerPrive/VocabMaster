@@ -489,7 +489,6 @@ export type Database = {
           source_language: string
           source_word: string
           target_language: string
-          thema: string | null
           theme_id: string | null
           translation: string
           updated_at: string
@@ -509,7 +508,6 @@ export type Database = {
           source_language?: string
           source_word: string
           target_language: string
-          thema?: string | null
           theme_id?: string | null
           translation: string
           updated_at?: string
@@ -529,7 +527,6 @@ export type Database = {
           source_language?: string
           source_word?: string
           target_language?: string
-          thema?: string | null
           theme_id?: string | null
           translation?: string
           updated_at?: string
@@ -778,7 +775,7 @@ export type Database = {
           source_language: string | null
           source_word: string | null
           target_language: string | null
-          thema: string | null
+          theme_id: string | null
           translation: string | null
           updated_at: string | null
           user_id: string | null
@@ -797,7 +794,7 @@ export type Database = {
           source_language?: string | null
           source_word?: string | null
           target_language?: string | null
-          thema?: string | null
+          theme_id?: string | null
           translation?: string | null
           updated_at?: string | null
           user_id?: never
@@ -816,14 +813,22 @@ export type Database = {
           source_language?: string | null
           source_word?: string | null
           target_language?: string | null
-          thema?: string | null
+          theme_id?: string | null
           translation?: string | null
           updated_at?: string | null
           user_id?: never
           view_count?: number | null
           word_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "words_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
