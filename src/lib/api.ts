@@ -8,7 +8,8 @@ export interface Word {
   target_language: string;
   word_type: string | null;
   niveau: string | null;
-  thema: string | null;
+  thema: string | null; // Resolved from theme_id via get_words_with_shared
+  theme_id: string | null;
   context: string | null;
   user_id: string | null; // null = shared word, uuid = personal word
   shared: string; // "Yes" if added by admin, "No" otherwise
@@ -243,7 +244,10 @@ export async function addWord(
     throw new Error(error.message);
   }
 
-  return data;
+  return {
+    ...data,
+    thema: null, // Will be resolved via theme_id
+  };
 }
 
 // Add multiple words at once
@@ -276,7 +280,10 @@ export async function addWords(
     throw new Error(error.message);
   }
 
-  return data;
+  return (data || []).map(d => ({
+    ...d,
+    thema: null, // Will be resolved via theme_id
+  }));
 }
 
 // Get or create user word progress
@@ -372,6 +379,7 @@ export async function getWordsWithProgress(
       word_type: word.word_type ?? null,
       niveau: word.niveau ?? null,
       thema: word.thema ?? null,
+      theme_id: word.theme_id ?? null,
       context: word.context ?? null,
       user_id: word.user_id ?? null,
       shared: word.shared!,
@@ -406,8 +414,8 @@ export async function getWords(
     throw new Error(error.message);
   }
 
-  // Cast to include thema and niveau fields that exist in database but not in generated types
-  const dataWithExtras = data as Array<typeof data[number] & { thema?: string | null; niveau?: string | null }>;
+  // Cast to include theme_id field that exists in database but not in generated types
+  const dataWithExtras = data as Array<typeof data[number] & { theme_id?: string | null }>;
 
   return dataWithExtras.map((word) => ({
     id: word.id!,
@@ -417,7 +425,8 @@ export async function getWords(
     target_language: word.target_language!,
     word_type: word.word_type ?? null,
     niveau: word.niveau ?? null,
-    thema: word.thema ?? null,
+    thema: null, // Not available from words_secure, use get_words_with_shared for thema
+    theme_id: word.theme_id ?? null,
     user_id: word.user_id ?? null,
     shared: word.shared!,
     created_at: word.created_at!,

@@ -31,7 +31,8 @@ interface UserWord {
   user_id: string | null;
   word_type: string | null;
   niveau: string | null;
-  thema: string | null;
+  thema?: string | null;
+  theme_id: string | null;
   context: string | null;
 }
 
@@ -85,7 +86,12 @@ export function AdminDashboard() {
         .order("created_at", { ascending: false });
 
       if (wordsError) throw wordsError;
-      setUserWords(wordsData || []);
+      // Map words to include thema from themes
+      const wordsWithThema = (wordsData || []).map(w => ({
+        ...w,
+        thema: themes.find(t => t.id === w.theme_id)?.name || null,
+      })) as UserWord[];
+      setUserWords(wordsWithThema);
 
       // Fetch themes
       const themesData = await getThemes();
