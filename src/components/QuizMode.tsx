@@ -620,6 +620,9 @@ export function QuizMode() {
         <div className="text-center py-8">
           <p className="text-sm text-muted-foreground mb-2">{t.common_translate} → {getLanguageName(currentWord?.target_language || "")}:</p>
           <h2 className="text-3xl font-bold">{currentWord?.source_word}</h2>
+          {currentWord?.context && (
+            <p className="text-sm text-muted-foreground mt-2">({currentWord.context})</p>
+          )}
         </div>
 
         {showFeedback ? (
