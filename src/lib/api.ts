@@ -608,22 +608,86 @@ export async function deleteWord(wordId: string): Promise<void> {
   }
 }
 
-// Get all unique themes from shared words
+// Theme interface
+export interface Theme {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+// Get all themes from themes table
 export async function getAllThemes(): Promise<string[]> {
-  // Use the SECURITY DEFINER function which properly returns all shared words
-  const { data, error } = await supabase.rpc("get_words_with_shared");
+  const { data, error } = await supabase
+    .from("themes")
+    .select("name")
+    .order("name");
 
   if (error) {
     throw new Error(error.message);
   }
 
-  // Get unique themes from shared words only
-  const themaSet = new Set<string>();
-  (data || []).forEach((word: { thema?: string | null; shared?: string }) => {
-    if (word.thema && word.shared === "Yes") {
-      themaSet.add(word.thema);
-    }
-  });
+  return (data || []).map((t) => t.name);
+}
 
-  return Array.from(themaSet).sort();
+// Get all themes with full data
+export async function getThemes(): Promise<Theme[]> {
+  const { data, error } = await supabase
+    .from("themes")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data || [];
+}
+
+// Add a new theme (admin only)
+export async function addTheme(name: string): Promise<Theme> {
+  const { data, error } = await supabase
+    .from("themes")
+    .insert({ name: name.toLowerCase() })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error("Dit thema bestaat al");
+    }
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Update a theme (admin only)
+export async function updateTheme(id: string, name: string): Promise<Theme> {
+  const { data, error } = await supabase
+    .from("themes")
+    .update({ name: name.toLowerCase() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error("Dit thema bestaat al");
+    }
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+// Delete a theme (admin only)
+export async function deleteTheme(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("themes")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }

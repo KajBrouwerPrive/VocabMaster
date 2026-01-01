@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Check, X, Share2, Trash2, MessageSquare, Pencil } from "lucide-react";
+import { Loader2, Check, X, Share2, Trash2, MessageSquare, Pencil, Tag, Plus } from "lucide-react";
+import { getThemes, addTheme, updateTheme, deleteTheme, Theme } from "@/lib/api";
 
 const NIVEAU_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
 
@@ -37,6 +38,7 @@ interface UserWord {
 export function AdminDashboard() {
   const [requests, setRequests] = useState<ConjugationRequest[]>([]);
   const [userWords, setUserWords] = useState<UserWord[]>([]);
+  const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [editingWord, setEditingWord] = useState<UserWord | null>(null);
@@ -50,6 +52,12 @@ export function AdminDashboard() {
   });
   const [niveauPromptWord, setNiveauPromptWord] = useState<UserWord | null>(null);
   const [selectedNiveau, setSelectedNiveau] = useState("");
+  
+  // Theme management state
+  const [newThemeName, setNewThemeName] = useState("");
+  const [editingTheme, setEditingTheme] = useState<Theme | null>(null);
+  const [editThemeName, setEditThemeName] = useState("");
+  const [isAddingTheme, setIsAddingTheme] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -78,6 +86,10 @@ export function AdminDashboard() {
 
       if (wordsError) throw wordsError;
       setUserWords(wordsData || []);
+
+      // Fetch themes
+      const themesData = await getThemes();
+      setThemes(themesData);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Kon gegevens niet laden");
@@ -198,6 +210,9 @@ export function AdminDashboard() {
     
     setProcessingId(editingWord.id);
     try {
+      // Find theme_id if thema is selected
+      const selectedTheme = themes.find(t => t.name === editForm.thema);
+      
       const { error } = await supabase
         .from("words")
         .update({
@@ -206,6 +221,7 @@ export function AdminDashboard() {
           word_type: editForm.word_type || null,
           niveau: editForm.niveau || null,
           thema: editForm.thema || null,
+          theme_id: selectedTheme?.id || null,
           context: editForm.context || null
         })
         .eq("id", editingWord.id);
@@ -238,6 +254,9 @@ export function AdminDashboard() {
     
     setProcessingId(editingWord.id);
     try {
+      // Find theme_id if thema is selected
+      const selectedTheme = themes.find(t => t.name === editForm.thema);
+      
       const { error } = await supabase
         .from("words")
         .update({
@@ -246,6 +265,7 @@ export function AdminDashboard() {
           word_type: editForm.word_type ? editForm.word_type.toLowerCase() : null,
           niveau: editForm.niveau,
           thema: editForm.thema ? editForm.thema.toLowerCase() : null,
+          theme_id: selectedTheme?.id || null,
           context: editForm.context || null,
           shared: "Yes"
         })
@@ -259,6 +279,53 @@ export function AdminDashboard() {
     } catch (error) {
       console.error("Error updating word:", error);
       toast.error("Kon woord niet bijwerken");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  // Theme management handlers
+  const handleAddTheme = async () => {
+    if (!newThemeName.trim()) return;
+    
+    setIsAddingTheme(true);
+    try {
+      const newTheme = await addTheme(newThemeName.trim());
+      setThemes([...themes, newTheme].sort((a, b) => a.name.localeCompare(b.name)));
+      setNewThemeName("");
+      toast.success("Thema toegevoegd");
+    } catch (error: any) {
+      toast.error(error.message || "Kon thema niet toevoegen");
+    } finally {
+      setIsAddingTheme(false);
+    }
+  };
+
+  const handleUpdateTheme = async () => {
+    if (!editingTheme || !editThemeName.trim()) return;
+    
+    setProcessingId(editingTheme.id);
+    try {
+      const updated = await updateTheme(editingTheme.id, editThemeName.trim());
+      setThemes(themes.map(t => t.id === updated.id ? updated : t).sort((a, b) => a.name.localeCompare(b.name)));
+      setEditingTheme(null);
+      setEditThemeName("");
+      toast.success("Thema bijgewerkt");
+    } catch (error: any) {
+      toast.error(error.message || "Kon thema niet bijwerken");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleDeleteTheme = async (id: string) => {
+    setProcessingId(id);
+    try {
+      await deleteTheme(id);
+      setThemes(themes.filter(t => t.id !== id));
+      toast.success("Thema verwijderd");
+    } catch (error: any) {
+      toast.error(error.message || "Kon thema niet verwijderen");
     } finally {
       setProcessingId(null);
     }
@@ -280,14 +347,18 @@ export function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="requests">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="requests" className="gap-2">
                 <MessageSquare className="h-4 w-4" />
                 Verzoeken ({requests.length})
               </TabsTrigger>
               <TabsTrigger value="words" className="gap-2">
                 <Share2 className="h-4 w-4" />
-                Gebruiker Woorden ({userWords.length})
+                Woorden ({userWords.length})
+              </TabsTrigger>
+              <TabsTrigger value="themes" className="gap-2">
+                <Tag className="h-4 w-4" />
+                Thema's ({themes.length})
               </TabsTrigger>
             </TabsList>
 
@@ -398,10 +469,78 @@ export function AdminDashboard() {
                 ))
               )}
             </TabsContent>
+
+            <TabsContent value="themes" className="mt-4 space-y-4">
+              {/* Add new theme */}
+              <div className="flex gap-2">
+                <Input
+                  value={newThemeName}
+                  onChange={(e) => setNewThemeName(e.target.value)}
+                  placeholder="Nieuw thema toevoegen..."
+                  onKeyDown={(e) => e.key === "Enter" && handleAddTheme()}
+                />
+                <Button
+                  onClick={handleAddTheme}
+                  disabled={isAddingTheme || !newThemeName.trim()}
+                >
+                  {isAddingTheme ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
+                  Toevoegen
+                </Button>
+              </div>
+
+              {/* Theme list */}
+              {themes.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">
+                  Geen thema's gevonden
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {themes.map((theme) => (
+                    <div
+                      key={theme.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 border"
+                    >
+                      <span className="font-medium capitalize">{theme.name}</span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingTheme(theme);
+                            setEditThemeName(theme.name);
+                          }}
+                          disabled={processingId === theme.id}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteTheme(theme.id)}
+                          disabled={processingId === theme.id}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          {processingId === theme.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
 
+      {/* Edit word dialog */}
       <Dialog open={!!editingWord} onOpenChange={(open) => !open && setEditingWord(null)}>
         <DialogContent>
           <DialogHeader>
@@ -453,12 +592,21 @@ export function AdminDashboard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="thema">Thema</Label>
-              <Input
-                id="thema"
+              <Select
                 value={editForm.thema}
-                onChange={(e) => setEditForm({ ...editForm, thema: e.target.value })}
-                placeholder="bijv. eten, reizen"
-              />
+                onValueChange={(value) => setEditForm({ ...editForm, thema: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecteer thema" />
+                </SelectTrigger>
+                <SelectContent>
+                  {themes.map((theme) => (
+                    <SelectItem key={theme.id} value={theme.name}>
+                      {theme.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="context">Context</Label>
@@ -543,6 +691,43 @@ export function AdminDashboard() {
             >
               <Check className="h-4 w-4 mr-2" />
               Goedkeuren
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit theme dialog */}
+      <Dialog open={!!editingTheme} onOpenChange={(open) => !open && setEditingTheme(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Thema bewerken</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="edit_theme_name">Thema naam</Label>
+            <Input
+              id="edit_theme_name"
+              value={editThemeName}
+              onChange={(e) => setEditThemeName(e.target.value)}
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditingTheme(null)}
+            >
+              Annuleren
+            </Button>
+            <Button
+              onClick={handleUpdateTheme}
+              disabled={processingId === editingTheme?.id || !editThemeName.trim()}
+            >
+              {processingId === editingTheme?.id ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              Opslaan
             </Button>
           </DialogFooter>
         </DialogContent>
