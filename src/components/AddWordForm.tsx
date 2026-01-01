@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { translateWord, addWord, Word } from "@/lib/api";
+import { translateWord, addWord, Word, getAllThemes, addTheme } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Plus, Sparkles, Check } from "lucide-react";
@@ -39,6 +39,11 @@ export function AddWordForm({
   const [word, setWord] = useState("");
   const [translation, setTranslation] = useState("");
   const [wordType, setWordType] = useState<string>("");
+  const [selectedThema, setSelectedThema] = useState<string>("");
+  const [themes, setThemes] = useState<string[]>([]);
+  const [newThemeName, setNewThemeName] = useState("");
+  const [showAddTheme, setShowAddTheme] = useState(false);
+  const [isAddingTheme, setIsAddingTheme] = useState(false);
   const [sourceLanguage, setSourceLanguage] = useState(defaultSourceLanguage);
   const [targetLanguage, setTargetLanguage] = useState("es");
   const [isTranslating, setIsTranslating] = useState(false);
@@ -49,6 +54,19 @@ export function AddWordForm({
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Load themes on mount
+  useEffect(() => {
+    const loadThemes = async () => {
+      try {
+        const themesData = await getAllThemes();
+        setThemes(themesData);
+      } catch (error) {
+        console.error("Error loading themes:", error);
+      }
+    };
+    loadThemes();
+  }, []);
 
   // Search for existing words when typing 3+ characters
   useEffect(() => {
@@ -134,6 +152,25 @@ export function AddWordForm({
     }
   };
 
+  const handleAddTheme = async () => {
+    if (!newThemeName.trim()) return;
+    
+    setIsAddingTheme(true);
+    try {
+      await addTheme(newThemeName.trim());
+      const updatedThemes = await getAllThemes();
+      setThemes(updatedThemes);
+      setSelectedThema(newThemeName.trim().toLowerCase());
+      setNewThemeName("");
+      setShowAddTheme(false);
+      toast.success("Thema toegevoegd");
+    } catch (error: any) {
+      toast.error(error.message || "Kon thema niet toevoegen");
+    } finally {
+      setIsAddingTheme(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -143,6 +180,7 @@ export function AddWordForm({
       setWord("");
       setTranslation("");
       setWordType("");
+      setSelectedThema("");
       setSelectedWord(null);
       onWordAdded();
       return;
@@ -165,6 +203,7 @@ export function AddWordForm({
       setWord("");
       setTranslation("");
       setWordType("");
+      setSelectedThema("");
       setSelectedWord(null);
       onWordAdded();
     } catch (error) {
@@ -304,6 +343,60 @@ export function AddWordForm({
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Theme selector - only for admins */}
+              {isAdmin && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Thema</label>
+                  <div className="flex gap-2">
+                    <Select value={selectedThema} onValueChange={setSelectedThema}>
+                      <SelectTrigger className="w-full bg-background">
+                        <SelectValue placeholder="Selecteer thema" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background z-50">
+                        {themes.map((theme) => (
+                          <SelectItem key={theme} value={theme}>
+                            {theme}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowAddTheme(!showAddTheme)}
+                      title="Nieuw thema toevoegen"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Add new theme inline */}
+                  {showAddTheme && (
+                    <div className="flex gap-2 mt-2">
+                      <Input
+                        value={newThemeName}
+                        onChange={(e) => setNewThemeName(e.target.value)}
+                        placeholder="Nieuw thema..."
+                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTheme())}
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={handleAddTheme}
+                        disabled={isAddingTheme || !newThemeName.trim()}
+                      >
+                        {isAddingTheme ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <Button
                 type="submit"
