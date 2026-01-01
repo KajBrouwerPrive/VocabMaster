@@ -113,6 +113,24 @@ export type Database = {
         }
         Relationships: []
       }
+      themes: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       user_conjugation_progress: {
         Row: {
           conjugation_id: string
@@ -472,6 +490,7 @@ export type Database = {
           source_word: string
           target_language: string
           thema: string | null
+          theme_id: string | null
           translation: string
           updated_at: string
           user_id: string | null
@@ -491,6 +510,7 @@ export type Database = {
           source_word: string
           target_language: string
           thema?: string | null
+          theme_id?: string | null
           translation: string
           updated_at?: string
           user_id?: string | null
@@ -510,13 +530,22 @@ export type Database = {
           source_word?: string
           target_language?: string
           thema?: string | null
+          theme_id?: string | null
           translation?: string
           updated_at?: string
           user_id?: string | null
           view_count?: number
           word_type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "words_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -906,6 +935,7 @@ export type Database = {
           source_word: string
           target_language: string
           thema: string
+          theme_id: string
           translation: string
           updated_at: string
           user_id: string
