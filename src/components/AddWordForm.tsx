@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LanguageSelector } from "@/components/LanguageSelector";
-import { translateWord, addWord, Word, getAllThemes, addTheme } from "@/lib/api";
+import { translateWord, addWord, Word, getAllThemes, addTheme, getThemes, Theme } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Plus, Sparkles, Check } from "lucide-react";
@@ -50,8 +50,8 @@ export function AddWordForm({
   const [wordType, setWordType] = useState<string>("");
   const [niveau, setNiveau] = useState<string>("");
   const [context, setContext] = useState("");
-  const [selectedThema, setSelectedThema] = useState<string>("");
-  const [themes, setThemes] = useState<string[]>([]);
+  const [selectedThemeId, setSelectedThemeId] = useState<string>("");
+  const [themes, setThemes] = useState<Theme[]>([]);
   const [newThemeName, setNewThemeName] = useState("");
   const [showAddTheme, setShowAddTheme] = useState(false);
   const [isAddingTheme, setIsAddingTheme] = useState(false);
@@ -70,7 +70,7 @@ export function AddWordForm({
   useEffect(() => {
     const loadThemes = async () => {
       try {
-        const themesData = await getAllThemes();
+        const themesData = await getThemes();
         setThemes(themesData);
       } catch (error) {
         console.error("Error loading themes:", error);
@@ -173,10 +173,10 @@ export function AddWordForm({
     
     setIsAddingTheme(true);
     try {
-      await addTheme(newThemeName.trim());
-      const updatedThemes = await getAllThemes();
+      const newTheme = await addTheme(newThemeName.trim());
+      const updatedThemes = await getThemes();
       setThemes(updatedThemes);
-      setSelectedThema(newThemeName.trim().toLowerCase());
+      setSelectedThemeId(newTheme.id);
       setNewThemeName("");
       setShowAddTheme(false);
       toast.success("Thema toegevoegd");
@@ -198,7 +198,7 @@ export function AddWordForm({
       setWordType("");
       setNiveau("");
       setContext("");
-      setSelectedThema("");
+      setSelectedThemeId("");
       setSelectedWord(null);
       onWordAdded();
       return;
@@ -221,14 +221,14 @@ export function AddWordForm({
 
     setIsAdding(true);
     try {
-      await addWord(word, sourceLanguage, translation, targetLanguage, false, wordType, niveau, context.trim() || undefined);
+      await addWord(word, sourceLanguage, translation, targetLanguage, false, wordType, niveau, context.trim() || undefined, selectedThemeId || undefined);
       toast.success(t.add_word_success);
       setWord("");
       setTranslation("");
       setWordType("");
       setNiveau("");
       setContext("");
-      setSelectedThema("");
+      setSelectedThemeId("");
       setSelectedWord(null);
       onWordAdded();
     } catch (error) {
@@ -394,23 +394,24 @@ export function AddWordForm({
                 />
               </div>
 
-              {/* Theme selector - only for admins */}
-              {isAdmin && (
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Thema</label>
-                  <div className="flex gap-2">
-                    <Select value={selectedThema} onValueChange={setSelectedThema}>
-                      <SelectTrigger className="w-full bg-background">
-                        <SelectValue placeholder="Selecteer thema" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background z-50">
-                        {themes.map((theme) => (
-                          <SelectItem key={theme} value={theme}>
-                            {theme}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              {/* Theme selector - for all users */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Thema</label>
+                <div className="flex gap-2">
+                  <Select value={selectedThemeId} onValueChange={setSelectedThemeId}>
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="Selecteer thema" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      {themes.map((theme) => (
+                        <SelectItem key={theme.id} value={theme.id}>
+                          {theme.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {/* Only admins can add new themes */}
+                  {isAdmin && (
                     <Button
                       type="button"
                       variant="outline"
@@ -420,33 +421,33 @@ export function AddWordForm({
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
-                  </div>
-                  
-                  {/* Add new theme inline */}
-                  {showAddTheme && (
-                    <div className="flex gap-2 mt-2">
-                      <Input
-                        value={newThemeName}
-                        onChange={(e) => setNewThemeName(e.target.value)}
-                        placeholder="Nieuw thema..."
-                        onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTheme())}
-                      />
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={handleAddTheme}
-                        disabled={isAddingTheme || !newThemeName.trim()}
-                      >
-                        {isAddingTheme ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Check className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </div>
                   )}
                 </div>
-              )}
+                
+                {/* Add new theme inline - only for admins */}
+                {isAdmin && showAddTheme && (
+                  <div className="flex gap-2 mt-2">
+                    <Input
+                      value={newThemeName}
+                      onChange={(e) => setNewThemeName(e.target.value)}
+                      placeholder="Nieuw thema..."
+                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTheme())}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={handleAddTheme}
+                      disabled={isAddingTheme || !newThemeName.trim()}
+                    >
+                      {isAddingTheme ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               <Button
                 type="submit"
