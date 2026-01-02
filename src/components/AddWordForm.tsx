@@ -23,6 +23,15 @@ const WORD_TYPES = [
   { value: "overig", label: "overig" },
 ];
 
+const NIVEAU_OPTIONS = [
+  { value: "A1", label: "A1" },
+  { value: "A2", label: "A2" },
+  { value: "B1", label: "B1" },
+  { value: "B2", label: "B2" },
+  { value: "C1", label: "C1" },
+  { value: "C2", label: "C2" },
+];
+
 interface AddWordFormProps {
   onWordAdded: () => void;
   defaultSourceLanguage: string;
@@ -39,6 +48,8 @@ export function AddWordForm({
   const [word, setWord] = useState("");
   const [translation, setTranslation] = useState("");
   const [wordType, setWordType] = useState<string>("");
+  const [niveau, setNiveau] = useState<string>("");
+  const [context, setContext] = useState("");
   const [selectedThema, setSelectedThema] = useState<string>("");
   const [themes, setThemes] = useState<string[]>([]);
   const [newThemeName, setNewThemeName] = useState("");
@@ -185,6 +196,8 @@ export function AddWordForm({
       setWord("");
       setTranslation("");
       setWordType("");
+      setNiveau("");
+      setContext("");
       setSelectedThema("");
       setSelectedWord(null);
       onWordAdded();
@@ -201,13 +214,20 @@ export function AddWordForm({
       return;
     }
 
+    if (!niveau) {
+      toast.error("Niveau is verplicht");
+      return;
+    }
+
     setIsAdding(true);
     try {
-      await addWord(word, sourceLanguage, translation, targetLanguage, false, wordType);
+      await addWord(word, sourceLanguage, translation, targetLanguage, false, wordType, niveau, context.trim() || undefined);
       toast.success(t.add_word_success);
       setWord("");
       setTranslation("");
       setWordType("");
+      setNiveau("");
+      setContext("");
       setSelectedThema("");
       setSelectedWord(null);
       onWordAdded();
@@ -349,6 +369,31 @@ export function AddWordForm({
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Niveau *</label>
+                <Select value={niveau} onValueChange={setNiveau}>
+                  <SelectTrigger className="w-full bg-background">
+                    <SelectValue placeholder="Selecteer niveau" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {NIVEAU_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Context (optioneel)</label>
+                <Input
+                  value={context}
+                  onChange={(e) => setContext(e.target.value)}
+                  placeholder="Bijv. formeel, informeel, zakelijk..."
+                />
+              </div>
+
               {/* Theme selector - only for admins */}
               {isAdmin && (
                 <div className="space-y-2">
@@ -407,7 +452,7 @@ export function AddWordForm({
                 type="submit"
                 variant="hero"
                 className="w-full"
-                disabled={isAdding || !word.trim() || !translation.trim() || !wordType}
+                disabled={isAdding || !word.trim() || !translation.trim() || !wordType || !niveau}
               >
                 {isAdding ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

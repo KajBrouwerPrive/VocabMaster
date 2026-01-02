@@ -216,7 +216,9 @@ export async function addWord(
   translation: string,
   targetLanguage: string,
   asShared: boolean = false,
-  wordType?: string
+  wordType?: string,
+  niveau?: string,
+  context?: string
 ): Promise<Word> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn om woorden toe te voegen");
@@ -233,6 +235,8 @@ export async function addWord(
       user_id: asShared ? null : user.id,
       shared: isAdmin ? "Yes" : "No",
       word_type: wordType || null,
+      niveau: niveau || null,
+      context: context || null,
     })
     .select()
     .single();
