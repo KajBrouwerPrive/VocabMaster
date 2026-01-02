@@ -226,7 +226,6 @@ export function AdminDashboard() {
           translation: editForm.translation,
           word_type: editForm.word_type || null,
           niveau: editForm.niveau || null,
-          thema: editForm.thema || null,
           theme_id: selectedTheme?.id || null,
           context: editForm.context || null
         })
@@ -270,7 +269,6 @@ export function AdminDashboard() {
           translation: editForm.translation.toLowerCase(),
           word_type: editForm.word_type ? editForm.word_type.toLowerCase() : null,
           niveau: editForm.niveau,
-          thema: editForm.thema ? editForm.thema.toLowerCase() : null,
           theme_id: selectedTheme?.id || null,
           context: editForm.context || null,
           shared: "Yes"
