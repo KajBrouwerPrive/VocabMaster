@@ -271,7 +271,9 @@ export function QuizStatistics() {
                     ? "bg-gradient-to-r from-slate-100/50 to-gray-200/30 dark:from-slate-800/30 dark:to-gray-700/20 border-slate-300/60 dark:border-slate-600/40"
                     : result.score_percentage >= 80
                     ? "bg-gradient-to-r from-orange-100/50 to-amber-100/30 dark:from-orange-950/20 dark:to-amber-900/15 border-orange-300/50 dark:border-orange-700/40"
-                    : "bg-secondary/30 border-border"
+                    : result.score_percentage >= 50
+                    ? "bg-gradient-to-r from-emerald-100/50 to-green-100/30 dark:from-emerald-950/20 dark:to-green-900/15 border-emerald-300/50 dark:border-emerald-700/40"
+                    : "bg-gradient-to-r from-red-100/50 to-rose-100/30 dark:from-red-950/20 dark:to-rose-900/15 border-red-300/50 dark:border-red-700/40"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -337,7 +339,9 @@ export function QuizStatistics() {
                       ? "text-slate-700 dark:text-slate-200"
                       : result.score_percentage >= 80
                       ? "text-orange-800 dark:text-orange-300"
-                      : "text-foreground"
+                      : result.score_percentage >= 50
+                      ? "text-emerald-700 dark:text-emerald-300"
+                      : "text-red-700 dark:text-red-300"
                   }`}>
                     {result.score_percentage}%
                   </span>
