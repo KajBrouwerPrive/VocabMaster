@@ -119,6 +119,20 @@ interface Translations {
   auth_register_button: string;
   auth_no_account: string;
   auth_has_account: string;
+  
+  // Request form
+  request_title: string;
+  request_verb_label: string;
+  request_verb_placeholder: string;
+  request_notes_label: string;
+  request_notes_placeholder: string;
+  request_submit: string;
+  request_submitting: string;
+  request_success: string;
+  request_error: string;
+  request_login_required: string;
+  request_fill_verb: string;
+  request_info: string;
 }
 
 const translations: Record<AppLanguage, Translations> = {
@@ -222,6 +236,18 @@ const translations: Record<AppLanguage, Translations> = {
     auth_register_button: 'Registreren',
     auth_no_account: 'Nog geen account?',
     auth_has_account: 'Al een account?',
+    request_title: 'Verzoek Indienen',
+    request_verb_label: 'Verzoek (infinitief)',
+    request_verb_placeholder: 'bijv. hablar, comer, vivir',
+    request_notes_label: 'Opmerkingen (optioneel)',
+    request_notes_placeholder: 'Eventuele opmerkingen of context',
+    request_submit: 'Verzoek Indienen',
+    request_submitting: 'Indienen...',
+    request_success: 'Verzoek ingediend!',
+    request_error: 'Kon verzoek niet indienen',
+    request_login_required: 'Je moet ingelogd zijn',
+    request_fill_verb: 'Vul een verzoek in',
+    request_info: 'Je verzoek wordt beoordeeld door een beheerder. Als het werkwoord wordt toegevoegd, is het voor iedereen beschikbaar.',
   },
   en: {
     nav_learn: 'Learn',
@@ -323,6 +349,18 @@ const translations: Record<AppLanguage, Translations> = {
     auth_register_button: 'Register',
     auth_no_account: "Don't have an account?",
     auth_has_account: 'Already have an account?',
+    request_title: 'Submit Request',
+    request_verb_label: 'Request (infinitive)',
+    request_verb_placeholder: 'e.g. hablar, comer, vivir',
+    request_notes_label: 'Notes (optional)',
+    request_notes_placeholder: 'Any notes or context',
+    request_submit: 'Submit Request',
+    request_submitting: 'Submitting...',
+    request_success: 'Request submitted!',
+    request_error: 'Could not submit request',
+    request_login_required: 'You must be logged in',
+    request_fill_verb: 'Please enter a request',
+    request_info: 'Your request will be reviewed by an administrator. If the verb is added, it will be available for everyone.',
   },
   fr: {
     nav_learn: 'Apprendre',
@@ -424,6 +462,18 @@ const translations: Record<AppLanguage, Translations> = {
     auth_register_button: "S'inscrire",
     auth_no_account: "Pas encore de compte ?",
     auth_has_account: 'Déjà un compte ?',
+    request_title: 'Soumettre une demande',
+    request_verb_label: 'Demande (infinitif)',
+    request_verb_placeholder: 'ex. hablar, comer, vivir',
+    request_notes_label: 'Remarques (optionnel)',
+    request_notes_placeholder: 'Remarques ou contexte',
+    request_submit: 'Soumettre la demande',
+    request_submitting: 'Envoi...',
+    request_success: 'Demande envoyée !',
+    request_error: 'Impossible de soumettre la demande',
+    request_login_required: 'Vous devez être connecté',
+    request_fill_verb: 'Veuillez entrer une demande',
+    request_info: 'Votre demande sera examinée par un administrateur. Si le verbe est ajouté, il sera disponible pour tout le monde.',
   },
   es: {
     nav_learn: 'Aprender',
@@ -525,6 +575,18 @@ const translations: Record<AppLanguage, Translations> = {
     auth_register_button: 'Registrarse',
     auth_no_account: '¿No tienes cuenta?',
     auth_has_account: '¿Ya tienes cuenta?',
+    request_title: 'Enviar Solicitud',
+    request_verb_label: 'Solicitud (infinitivo)',
+    request_verb_placeholder: 'ej. hablar, comer, vivir',
+    request_notes_label: 'Notas (opcional)',
+    request_notes_placeholder: 'Notas o contexto adicional',
+    request_submit: 'Enviar Solicitud',
+    request_submitting: 'Enviando...',
+    request_success: '¡Solicitud enviada!',
+    request_error: 'No se pudo enviar la solicitud',
+    request_login_required: 'Debes iniciar sesión',
+    request_fill_verb: 'Por favor ingresa una solicitud',
+    request_info: 'Tu solicitud será revisada por un administrador. Si se añade el verbo, estará disponible para todos.',
   },
 };
 

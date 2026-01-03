@@ -7,8 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Send, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function RequestConjugationForm() {
+  const { t } = useLanguage();
   const [infinitive, setInfinitive] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,7 +19,7 @@ export function RequestConjugationForm() {
     e.preventDefault();
     
     if (!infinitive.trim()) {
-      toast.error("Vul een werkwoord in");
+      toast.error(t.request_fill_verb);
       return;
     }
 
@@ -26,7 +28,7 @@ export function RequestConjugationForm() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error("Je moet ingelogd zijn");
+        toast.error(t.request_login_required);
         return;
       }
 
@@ -40,12 +42,12 @@ export function RequestConjugationForm() {
 
       if (error) throw error;
 
-      toast.success("Verzoek ingediend!");
+      toast.success(t.request_success);
       setInfinitive("");
       setNotes("");
     } catch (error) {
       console.error("Error submitting request:", error);
-      toast.error("Kon verzoek niet indienen");
+      toast.error(t.request_error);
     } finally {
       setIsSubmitting(false);
     }
@@ -56,29 +58,29 @@ export function RequestConjugationForm() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Send className="h-5 w-5" />
-          Werkwoord Aanvragen
+          {t.request_title}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="infinitive">Werkwoord (infinitief)</Label>
+            <Label htmlFor="infinitive">{t.request_verb_label}</Label>
             <Input
               id="infinitive"
               value={infinitive}
               onChange={(e) => setInfinitive(e.target.value)}
-              placeholder="bijv. hablar, comer, vivir"
+              placeholder={t.request_verb_placeholder}
               disabled={isSubmitting}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Opmerkingen (optioneel)</Label>
+            <Label htmlFor="notes">{t.request_notes_label}</Label>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Eventuele opmerkingen of context"
+              placeholder={t.request_notes_placeholder}
               disabled={isSubmitting}
               rows={3}
             />
@@ -88,20 +90,19 @@ export function RequestConjugationForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Indienen...
+                {t.request_submitting}
               </>
             ) : (
               <>
                 <Send className="h-4 w-4 mr-2" />
-                Verzoek Indienen
+                {t.request_submit}
               </>
             )}
           </Button>
         </form>
 
         <p className="text-sm text-muted-foreground mt-4">
-          Je verzoek wordt beoordeeld door een beheerder. Als het werkwoord wordt toegevoegd, 
-          is het voor iedereen beschikbaar.
+          {t.request_info}
         </p>
       </CardContent>
     </Card>
