@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,12 @@ interface ParsedWord {
   wordType: string;
   niveau: string;
   thema: string;
+  context: string;
+}
+
+interface Theme {
+  id: string;
+  name: string;
 }
 
 export function ImportWords({ onWordsAdded }: ImportWordsProps) {
@@ -26,7 +32,23 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
   const [parsedWords, setParsedWords] = useState<ParsedWord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [themes, setThemes] = useState<Theme[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch themes on mount
+  useEffect(() => {
+    const fetchThemes = async () => {
+      const { data, error } = await supabase
+        .from("themes")
+        .select("id, name")
+        .order("name");
+      
+      if (!error && data) {
+        setThemes(data);
+      }
+    };
+    fetchThemes();
+  }, []);
 
   // Only admins can import words
   if (roleLoading) {
@@ -77,8 +99,9 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
               sourceWord: String(row[0]).trim().toLowerCase(),
               translation: String(row[1]).trim().toLowerCase(),
               wordType: row[2] ? String(row[2]).trim().toLowerCase() : "",
-              niveau: row[3] ? String(row[3]).trim() : "",
-              thema: row[4] ? String(row[4]).trim() : "",
+              niveau: row[3] ? String(row[3]).trim().toUpperCase() : "",
+              thema: row[4] ? String(row[4]).trim().toLowerCase() : "",
+              context: row[5] ? String(row[5]).trim() : "",
             });
           }
         }
@@ -94,6 +117,13 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
     reader.readAsBinaryString(file);
   };
 
+  const findThemeId = (themaName: string): string | null => {
+    if (!themaName) return null;
+    const normalizedName = themaName.toLowerCase().trim();
+    const theme = themes.find(t => t.name.toLowerCase() === normalizedName);
+    return theme?.id || null;
+  };
+
   const handleImport = async () => {
     if (parsedWords.length === 0) return;
     if (!user) {
@@ -103,6 +133,27 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
 
     setIsLoading(true);
     try {
+      // Collect unique themes that don't exist yet
+      const uniqueThemes = [...new Set(parsedWords.map(w => w.thema).filter(t => t))];
+      const missingThemes = uniqueThemes.filter(t => !findThemeId(t));
+      
+      // Create missing themes first
+      if (missingThemes.length > 0) {
+        const themesToInsert = missingThemes.map(name => ({ name: name.toLowerCase() }));
+        const { data: newThemes, error: themeError } = await supabase
+          .from("themes")
+          .insert(themesToInsert)
+          .select("id, name");
+        
+        if (themeError) {
+          console.error("Error creating themes:", themeError);
+        } else if (newThemes) {
+          setThemes(prev => [...prev, ...newThemes]);
+          // Update local reference for mapping
+          newThemes.forEach(t => themes.push(t));
+        }
+      }
+
       // Admin imports words with their user_id and shared='Yes' so everyone can see them
       const wordsToInsert = parsedWords.map((w) => ({
         source_word: w.sourceWord,
@@ -111,7 +162,8 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
         target_language: "es",
         word_type: w.wordType || null,
         niveau: w.niveau || null,
-        thema: w.thema || null,
+        theme_id: findThemeId(w.thema),
+        context: w.context || null,
         user_id: user.id,
         shared: "Yes",
       }));
@@ -166,7 +218,7 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Upload een Excel-bestand met 5 kolommen: A = Nederlands woord, B = Spaanse vertaling, C = Soort woord, D = Niveau, E = Thema
+          Upload een Excel-bestand met 6 kolommen: A = Nederlands woord, B = Spaanse vertaling, C = Soort woord, D = Niveau (A1-C2), E = Thema, F = Context
         </p>
 
         <div className="flex gap-2">
@@ -202,6 +254,8 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
                     <th className="p-2 text-left">Nederlands</th>
                     <th className="p-2 text-left">Spaans</th>
                     <th className="p-2 text-left">Soort</th>
+                    <th className="p-2 text-left">Niveau</th>
+                    <th className="p-2 text-left">Thema</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,6 +264,16 @@ export function ImportWords({ onWordsAdded }: ImportWordsProps) {
                       <td className="p-2">{word.sourceWord}</td>
                       <td className="p-2">{word.translation}</td>
                       <td className="p-2 text-muted-foreground">{word.wordType || "-"}</td>
+                      <td className="p-2 text-muted-foreground">{word.niveau || "-"}</td>
+                      <td className="p-2 text-muted-foreground">
+                        {word.thema ? (
+                          findThemeId(word.thema) ? (
+                            word.thema
+                          ) : (
+                            <span className="text-amber-600">{word.thema} (nieuw)</span>
+                          )
+                        ) : "-"}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
