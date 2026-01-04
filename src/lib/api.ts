@@ -336,41 +336,63 @@ export async function getWordsWithProgress(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Je moet ingelogd zijn");
 
-  // Use the SECURITY DEFINER function to get all shared words + user's own words
-  const { data: words, error: wordsError } = await supabase
-    .rpc("get_words_with_shared")
-    .order("created_at", { ascending: false })
-    .range(0, 99999); // Fetch all words without default 1000 limit
+  // Note: RPC calls are capped at 1000 rows per request; paginate to load everything.
+  const PAGE_SIZE = 1000;
+  const MAX_PAGES = 200; // safety cap
 
-  if (wordsError) {
-    throw new Error(wordsError.message);
+  const allWordsFromRpc: any[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
+      .rpc("get_words_with_shared")
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) throw new Error(error.message);
+
+    const chunk = data || [];
+    allWordsFromRpc.push(...chunk);
+
+    if (chunk.length < PAGE_SIZE) break;
   }
 
   // Filter by language if specified
-  let filteredWords = words || [];
+  let filteredWords = allWordsFromRpc;
   if (sourceLanguage) {
-    filteredWords = filteredWords.filter(w => w.source_language === sourceLanguage);
+    filteredWords = filteredWords.filter((w) => w.source_language === sourceLanguage);
   }
   if (targetLanguage) {
-    filteredWords = filteredWords.filter(w => w.target_language === targetLanguage);
-  }
-
-  if (wordsError) {
-    throw new Error(wordsError.message);
+    filteredWords = filteredWords.filter((w) => w.target_language === targetLanguage);
   }
 
   // Cast to include context field that exists in database
-  const wordsWithExtras = filteredWords as Array<typeof filteredWords[number] & { context?: string | null }>;
+  const wordsWithExtras = filteredWords as Array<(typeof filteredWords)[number] & { context?: string | null }>;
 
-  // Get all user progress
-  const { data: progress } = await supabase
-    .from("user_word_progress")
-    .select("*")
-    .eq("user_id", user.id)
-    .range(0, 99999); // Fetch all progress without default 1000 limit
+  // Get all user progress (paginate; can exceed 1000 rows)
+  const allProgress: UserWordProgress[] = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const from = page * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
+      .from("user_word_progress")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) throw new Error(error.message);
+
+    const chunk = (data || []) as UserWordProgress[];
+    allProgress.push(...chunk);
+
+    if (chunk.length < PAGE_SIZE) break;
+  }
 
   const progressMap = new Map<string, UserWordProgress>();
-  (progress || []).forEach((p) => {
+  allProgress.forEach((p) => {
     progressMap.set(p.word_id, p);
   });
 
