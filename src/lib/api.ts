@@ -339,7 +339,8 @@ export async function getWordsWithProgress(
   // Use the SECURITY DEFINER function to get all shared words + user's own words
   const { data: words, error: wordsError } = await supabase
     .rpc("get_words_with_shared")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(0, 99999); // Fetch all words without default 1000 limit
 
   if (wordsError) {
     throw new Error(wordsError.message);
