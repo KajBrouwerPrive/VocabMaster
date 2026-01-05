@@ -261,93 +261,115 @@ export function QuizStatistics() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {results.map((result) => (
-              <div
-                key={result.id}
-                className={`flex items-center justify-between p-3 rounded-lg border ${
-                  result.score_percentage === 100
-                    ? "bg-gradient-to-r from-yellow-100/50 to-amber-200/30 dark:from-yellow-900/20 dark:to-amber-800/15 border-yellow-400/50 dark:border-yellow-600/40"
-                    : result.score_percentage >= 90
-                    ? "bg-gradient-to-r from-slate-100/50 to-gray-200/30 dark:from-slate-800/30 dark:to-gray-700/20 border-slate-300/60 dark:border-slate-600/40"
-                    : result.score_percentage >= 80
-                    ? "bg-gradient-to-r from-orange-100/50 to-amber-100/30 dark:from-orange-950/20 dark:to-amber-900/15 border-orange-300/50 dark:border-orange-700/40"
-                    : result.score_percentage >= 50
-                    ? "bg-gradient-to-r from-emerald-100/50 to-green-100/30 dark:from-emerald-950/20 dark:to-green-900/15 border-emerald-300/50 dark:border-emerald-700/40"
-                    : "bg-gradient-to-r from-red-100/50 to-rose-100/30 dark:from-red-950/20 dark:to-rose-900/15 border-red-300/50 dark:border-red-700/40"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    result.quiz_type === 'words' 
-                      ? 'bg-primary/10' 
-                      : 'bg-purple-500/10'
-                  }`}>
-                    {result.quiz_type === 'words' ? (
-                      <BookOpen className={`h-4 w-4 ${
-                        result.quiz_type === 'words' ? 'text-primary' : 'text-purple-500'
-                      }`} />
-                    ) : (
-                      <Languages className="h-4 w-4 text-purple-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium">
-                      {result.quiz_type === 'words' ? 'Woordentoets' : 'Vervoegingentoets'}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1" title="Datum">
-                        <Calendar className="h-3 w-3" />
-                        {format(new Date(result.created_at), "d MMM yyyy", { locale: nl })}
-                      </span>
-                      <span className="flex items-center gap-1" title="Aantal vragen">
-                        <Hash className="h-3 w-3" />
-                        {result.total_questions}
-                      </span>
-                      {result.quiz_type === 'words' && (
-                        <span className="flex items-center gap-1" title="Niveau">
-                          <Layers className="h-3 w-3" />
-                          {result.niveau === 'difficult' ? 'MW' : result.niveau === 'all' || !result.niveau ? 'All' : result.niveau}
-                        </span>
-                      )}
-                      {result.thema && (
-                        <span className="truncate max-w-[100px]" title={result.thema}>
-                          {result.thema}
-                        </span>
-                      )}
-                      {result.tenses && result.tenses.length > 0 && (
-                        <span className="truncate max-w-[150px]" title={result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}>
-                          {result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}
-                        </span>
-                      )}
-                      {result.quiz_type === 'words' && (
-                        <span className="flex items-center gap-1" title={result.ignore_accents ? "Accenten genegeerd" : "Met accenten"}>
-                          <Type className={`h-3 w-3 ${result.ignore_accents ? 'text-primary' : 'text-muted-foreground/50'}`} />
-                          {result.ignore_accents ? 'Á→A' : 'Á=Á'}
-                        </span>
+            {results.map((result) => {
+              const isGold = result.score_percentage === 100;
+              const isSilver = result.score_percentage >= 90 && result.score_percentage < 100;
+              const isBronze = result.score_percentage >= 80 && result.score_percentage < 90;
+              const isGreen = result.score_percentage >= 50 && result.score_percentage < 80;
+              const isRed = result.score_percentage < 50;
+
+              return (
+                <div
+                  key={result.id}
+                  className={`flex items-center justify-between p-3 rounded-lg border relative overflow-hidden ${
+                    isGold
+                      ? "bg-gradient-to-r from-yellow-200 via-amber-100 to-yellow-200 dark:from-yellow-800/40 dark:via-amber-700/30 dark:to-yellow-800/40 border-yellow-500 dark:border-yellow-500/60 shadow-md shadow-yellow-200/50 dark:shadow-yellow-900/30"
+                      : isSilver
+                      ? "bg-gradient-to-r from-slate-200 via-gray-100 to-slate-200 dark:from-slate-700/50 dark:via-gray-600/40 dark:to-slate-700/50 border-slate-400 dark:border-slate-400/60 shadow-md shadow-slate-200/50 dark:shadow-slate-800/30"
+                      : isBronze
+                      ? "bg-gradient-to-r from-orange-200 via-amber-100 to-orange-200 dark:from-orange-800/40 dark:via-amber-700/30 dark:to-orange-800/40 border-orange-500 dark:border-orange-500/60 shadow-md shadow-orange-200/50 dark:shadow-orange-900/30"
+                      : isGreen
+                      ? "bg-gradient-to-r from-emerald-100/50 to-green-100/30 dark:from-emerald-950/20 dark:to-green-900/15 border-emerald-300/50 dark:border-emerald-700/40"
+                      : "bg-gradient-to-r from-red-100/50 to-rose-100/30 dark:from-red-950/20 dark:to-rose-900/15 border-red-300/50 dark:border-red-700/40"
+                  }`}
+                >
+                  {/* Medal badge for 80%+ scores */}
+                  {(isGold || isSilver || isBronze) && (
+                    <div className={`absolute top-0 right-0 px-2 py-0.5 text-xs font-bold rounded-bl-lg flex items-center gap-1 ${
+                      isGold
+                        ? "bg-yellow-500 text-yellow-950"
+                        : isSilver
+                        ? "bg-slate-400 text-slate-950"
+                        : "bg-orange-500 text-orange-950"
+                    }`}>
+                      {isGold ? <Trophy className="h-3 w-3" /> : <Award className="h-3 w-3" />}
+                      {isGold ? "GOUD" : isSilver ? "ZILVER" : "BRONS"}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      result.quiz_type === 'words' 
+                        ? 'bg-primary/10' 
+                        : 'bg-purple-500/10'
+                    }`}>
+                      {result.quiz_type === 'words' ? (
+                        <BookOpen className={`h-4 w-4 ${
+                          result.quiz_type === 'words' ? 'text-primary' : 'text-purple-500'
+                        }`} />
+                      ) : (
+                        <Languages className="h-4 w-4 text-purple-500" />
                       )}
                     </div>
+                    <div>
+                      <p className="font-medium">
+                        {result.quiz_type === 'words' ? 'Woordentoets' : 'Vervoegingentoets'}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1" title="Datum">
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(result.created_at), "d MMM yyyy", { locale: nl })}
+                        </span>
+                        <span className="flex items-center gap-1" title="Aantal vragen">
+                          <Hash className="h-3 w-3" />
+                          {result.total_questions}
+                        </span>
+                        {result.quiz_type === 'words' && (
+                          <span className="flex items-center gap-1" title="Niveau">
+                            <Layers className="h-3 w-3" />
+                            {result.niveau === 'difficult' ? 'MW' : result.niveau === 'all' || !result.niveau ? 'All' : result.niveau}
+                          </span>
+                        )}
+                        {result.thema && (
+                          <span className="truncate max-w-[100px]" title={result.thema}>
+                            {result.thema}
+                          </span>
+                        )}
+                        {result.tenses && result.tenses.length > 0 && (
+                          <span className="truncate max-w-[150px]" title={result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}>
+                            {result.tenses.map(t => TENSE_LABELS[t] || t).join(", ")}
+                          </span>
+                        )}
+                        {result.quiz_type === 'words' && (
+                          <span className="flex items-center gap-1" title={result.ignore_accents ? "Accenten genegeerd" : "Met accenten"}>
+                            <Type className={`h-3 w-3 ${result.ignore_accents ? 'text-primary' : 'text-muted-foreground/50'}`} />
+                            {result.ignore_accents ? 'Á→A' : 'Á=Á'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">
+                      {result.correct_answers}/{result.total_questions}
+                    </span>
+                    <span className={`text-xl font-black ${
+                      isGold
+                        ? "text-yellow-700 dark:text-yellow-300 drop-shadow-sm"
+                        : isSilver
+                        ? "text-slate-700 dark:text-slate-200 drop-shadow-sm"
+                        : isBronze
+                        ? "text-orange-700 dark:text-orange-300 drop-shadow-sm"
+                        : isGreen
+                        ? "text-emerald-700 dark:text-emerald-300"
+                        : "text-red-700 dark:text-red-300"
+                    }`}>
+                      {result.score_percentage}%
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">
-                    {result.correct_answers}/{result.total_questions}
-                  </span>
-                  <span className={`text-lg font-bold ${
-                    result.score_percentage === 100
-                      ? "text-yellow-700 dark:text-yellow-300"
-                      : result.score_percentage >= 90
-                      ? "text-slate-700 dark:text-slate-200"
-                      : result.score_percentage >= 80
-                      ? "text-orange-800 dark:text-orange-300"
-                      : result.score_percentage >= 50
-                      ? "text-emerald-700 dark:text-emerald-300"
-                      : "text-red-700 dark:text-red-300"
-                  }`}>
-                    {result.score_percentage}%
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
