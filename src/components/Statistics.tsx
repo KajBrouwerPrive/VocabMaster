@@ -81,6 +81,50 @@ export function Statistics() {
       });
   }, [words]);
 
+  // Tense labels for display
+  const TENSE_LABELS: Record<string, string> = {
+    present: "Presente",
+    past: "Imperfecto",
+    perfect: "Perfecto",
+    indefinido: "Indefinido",
+    futuro: "Futuro",
+    futuro_perfecto: "Futuro Perfecto",
+    condicional: "Condicional",
+    pluscuamperfecto: "Pluscuamperfecto",
+    subjuntivo_presente: "Subjuntivo Presente",
+    subjuntivo_imperfecto: "Subjuntivo Imperfecto",
+  };
+
+  const TENSES = Object.keys(TENSE_LABELS);
+
+  // Conjugation stats per tense
+  const conjugationTenseStats = useMemo(() => {
+    const stats: Record<string, { total: number; seen: number }> = {};
+    
+    TENSES.forEach(tense => {
+      stats[tense] = { total: 0, seen: 0 };
+    });
+
+    conjugations.forEach(conj => {
+      // Check which tenses have data for this conjugation
+      TENSES.forEach(tense => {
+        // Check if this conjugation has data for this tense (using _ik form as indicator)
+        const tenseKey = `${tense}_ik` as keyof typeof conj;
+        const tenseValue = conj[tenseKey];
+        
+        if (tenseValue && typeof tenseValue === 'string' && tenseValue.trim() !== '') {
+          stats[tense].total++;
+          if (conj.progress?.seen) {
+            stats[tense].seen++;
+          }
+        }
+      });
+    });
+
+    return Object.entries(stats)
+      .filter(([_, data]) => data.total > 0);
+  }, [conjugations]);
+
   // Conjugation overall stats
   const conjugationStats = useMemo(() => {
     let totalCorrect = 0;
@@ -285,6 +329,39 @@ export function Statistics() {
                     </span>
                   )}
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-primary" />
+                Geleerd per tijdsvorm
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {conjugationTenseStats.map(([tense, data]) => {
+                  const progressPercentage = data.total > 0 ? Math.round((data.seen / data.total) * 100) : 0;
+                  
+                  return (
+                    <div key={tense} className="p-4 rounded-lg bg-secondary/30 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-lg">{TENSE_LABELS[tense]}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {data.seen} / {data.total} {t.stats_learned.toLowerCase()}
+                        </span>
+                      </div>
+                      <Progress value={progressPercentage} className="h-2" />
+                    </div>
+                  );
+                })}
+                {conjugationTenseStats.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4">
+                    Geen vervoegingen beschikbaar
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
