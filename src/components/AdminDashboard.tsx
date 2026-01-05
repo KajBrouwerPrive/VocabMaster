@@ -67,6 +67,10 @@ export function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Fetch themes FIRST so we can map them to words
+      const themesData = await getThemes();
+      setThemes(themesData);
+
       // Fetch pending conjugation requests
       const { data: requestsData, error: requestsError } = await supabase
         .from("conjugation_requests")
@@ -86,16 +90,12 @@ export function AdminDashboard() {
         .order("created_at", { ascending: false });
 
       if (wordsError) throw wordsError;
-      // Map words to include thema from themes
+      // Map words to include thema from themes (use themesData, not stale state)
       const wordsWithThema = (wordsData || []).map(w => ({
         ...w,
-        thema: themes.find(t => t.id === w.theme_id)?.name || null,
+        thema: themesData.find(t => t.id === w.theme_id)?.name || null,
       })) as UserWord[];
       setUserWords(wordsWithThema);
-
-      // Fetch themes
-      const themesData = await getThemes();
-      setThemes(themesData);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Kon gegevens niet laden");
