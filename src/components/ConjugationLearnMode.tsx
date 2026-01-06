@@ -227,21 +227,40 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     }
   };
 
-  const handleMarkAsSeen = async () => {
+  const handleMarkAsSeenAndNext = async () => {
     if (!currentConjugation) return;
     try {
-      await markConjugationAsSeen(currentConjugation.id);
+      await Promise.all([
+        markConjugationAsSeen(currentConjugation.id),
+        markTensesAsSeen(currentConjugation.id, selectedTenses),
+      ]);
       setAllConjugations((prev) =>
         prev.map((c) =>
           c.id === currentConjugation.id
-            ? { ...c, progress: { ...c.progress!, seen: true } }
+            ? { 
+                ...c, 
+                progress: { ...c.progress!, seen: true },
+                tenseProgress: [
+                  ...(c.tenseProgress || []).filter(tp => !selectedTenses.includes(tp.tense as TenseType)),
+                  ...selectedTenses.map(t => ({ tense: t, seen: true })),
+                ],
+              }
             : c
         )
       );
-      if (currentIndex >= conjugations.length - 1 && currentIndex > 0) {
-        setCurrentIndex((prev) => prev - 1);
+      // Go to next word and show conjugations
+      if (currentIndex < conjugations.length - 1) {
+        const nextIndex = currentIndex + 1;
+        setCurrentIndex(nextIndex);
+        setShowConjugations(true);
+        // Also mark next conjugation view
+        const nextConjugation = conjugations[nextIndex];
+        if (nextConjugation) {
+          await incrementConjugationViewCount(nextConjugation.id);
+        }
+      } else {
+        setShowConjugations(false);
       }
-      setShowConjugations(false);
     } catch (error) {
       console.error("Failed to mark as seen:", error);
       toast({
@@ -397,7 +416,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         <Button variant="outline" size="icon" onClick={handleShuffle} title={t.learn_shuffle}>
           <Shuffle className="h-4 w-4" />
         </Button>
-        <Button variant="default" size="icon" onClick={handleMarkAsSeen} title={t.learn_learned}>
+        <Button variant="default" size="icon" onClick={handleMarkAsSeenAndNext} title={t.learn_learned}>
           <Check className="h-4 w-4" />
         </Button>
         <Button variant="destructive" size="icon" onClick={handleDelete} title={t.common_delete}>
