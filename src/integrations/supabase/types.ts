@@ -185,6 +185,51 @@ export type Database = {
           },
         ]
       }
+      user_conjugation_tense_progress: {
+        Row: {
+          conjugation_id: string
+          created_at: string
+          id: string
+          seen: boolean
+          tense: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conjugation_id: string
+          created_at?: string
+          id?: string
+          seen?: boolean
+          tense: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conjugation_id?: string
+          created_at?: string
+          id?: string
+          seen?: boolean
+          tense?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_conjugation_tense_progress_conjugation_id_fkey"
+            columns: ["conjugation_id"]
+            isOneToOne: false
+            referencedRelation: "verb_conjugations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_conjugation_tense_progress_conjugation_id_fkey"
+            columns: ["conjugation_id"]
+            isOneToOne: false
+            referencedRelation: "verb_conjugations_secure"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
