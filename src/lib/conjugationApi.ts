@@ -93,8 +93,14 @@ export interface ConjugationProgress {
   correct_count: number;
 }
 
+export interface TenseProgress {
+  tense: string;
+  seen: boolean;
+}
+
 export interface VerbConjugationWithProgress extends VerbConjugation {
   progress?: ConjugationProgress;
+  tenseProgress?: TenseProgress[];
 }
 
 export async function getConjugations(
@@ -126,9 +132,23 @@ export async function getConjugations(
     progressData?.map((p) => [p.conjugation_id, p]) || []
   );
 
+  // Get tense progress
+  const { data: tenseProgressData } = await supabase
+    .from("user_conjugation_tense_progress")
+    .select("conjugation_id, tense, seen")
+    .eq("user_id", userData.user.id);
+
+  const tenseProgressMap = new Map<string, TenseProgress[]>();
+  tenseProgressData?.forEach((tp) => {
+    const existing = tenseProgressMap.get(tp.conjugation_id) || [];
+    existing.push({ tense: tp.tense, seen: tp.seen });
+    tenseProgressMap.set(tp.conjugation_id, existing);
+  });
+
   return (conjugations || []).map((conj) => ({
     ...conj,
     progress: progressMap.get(conj.id),
+    tenseProgress: tenseProgressMap.get(conj.id) || [],
   }));
 }
 
@@ -279,4 +299,20 @@ export async function incrementConjugationCorrectCount(conjugationId: string): P
       onConflict: "user_id,conjugation_id",
     }
   );
+}
+
+export async function markTensesAsSeen(conjugationId: string, tenses: string[]): Promise<void> {
+  const { data: userData } = await supabase.auth.getUser();
+  if (!userData.user) throw new Error("User not authenticated");
+
+  const records = tenses.map((tense) => ({
+    user_id: userData.user!.id,
+    conjugation_id: conjugationId,
+    tense,
+    seen: true,
+  }));
+
+  await supabase.from("user_conjugation_tense_progress").upsert(records, {
+    onConflict: "user_id,conjugation_id,tense",
+  });
 }

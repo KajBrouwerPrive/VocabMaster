@@ -136,10 +136,18 @@ export function ConjugationQuizMode() {
     
     if (seen.length === 0 || selectedTenses.length === 0) return [];
 
-    // Generate all possible questions
+    // Generate all possible questions - only for tenses the user has learned for each verb
     const allPossible: QuizQuestion[] = [];
     for (const conj of seen) {
-      for (const tense of selectedTenses) {
+      // Get learned tenses for this conjugation
+      const learnedTenses = conj.tenseProgress
+        ?.filter(tp => tp.seen)
+        .map(tp => tp.tense) || [];
+      
+      // Only include tenses that are both selected AND learned
+      const availableTenses = selectedTenses.filter(t => learnedTenses.includes(t));
+      
+      for (const tense of availableTenses) {
         for (let i = 0; i < PRONOUN_KEYS.length; i++) {
           const answer = getConjugationForm(conj, tense, PRONOUN_KEYS[i]);
           if (answer) {

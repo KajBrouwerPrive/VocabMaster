@@ -16,6 +16,7 @@ import {
   deleteConjugation,
   markConjugationAsSeen,
   incrementConjugationViewCount,
+  markTensesAsSeen,
   VerbConjugationWithProgress,
 } from "@/lib/conjugationApi";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -158,11 +159,21 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       const nextConjugation = conjugations[nextIndex];
       if (nextConjugation) {
         try {
-          await incrementConjugationViewCount(nextConjugation.id);
+          await Promise.all([
+            incrementConjugationViewCount(nextConjugation.id),
+            markTensesAsSeen(nextConjugation.id, selectedTenses),
+          ]);
           setAllConjugations((prev) =>
             prev.map((c) =>
               c.id === nextConjugation.id
-                ? { ...c, progress: { ...c.progress!, seen: true, view_count: (c.progress?.view_count || 0) + 1 } }
+                ? { 
+                    ...c, 
+                    progress: { ...c.progress!, seen: true, view_count: (c.progress?.view_count || 0) + 1 },
+                    tenseProgress: [
+                      ...(c.tenseProgress || []).filter(tp => !selectedTenses.includes(tp.tense as TenseType)),
+                      ...selectedTenses.map(t => ({ tense: t, seen: true })),
+                    ],
+                  }
                 : c
             )
           );
@@ -171,7 +182,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         }
       }
     }
-  }, [currentIndex, conjugations]);
+  }, [currentIndex, conjugations, selectedTenses]);
 
   const goPrevious = useCallback(() => {
     if (currentIndex > 0) {
@@ -191,12 +202,22 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     setShowConjugations(true);
     if (currentConjugation) {
       try {
-        await incrementConjugationViewCount(currentConjugation.id);
+        await Promise.all([
+          incrementConjugationViewCount(currentConjugation.id),
+          markTensesAsSeen(currentConjugation.id, selectedTenses),
+        ]);
         // Update local state to mark as seen
         setAllConjugations((prev) =>
           prev.map((c) =>
             c.id === currentConjugation.id
-              ? { ...c, progress: { ...c.progress!, seen: true, view_count: (c.progress?.view_count || 0) + 1 } }
+              ? { 
+                  ...c, 
+                  progress: { ...c.progress!, seen: true, view_count: (c.progress?.view_count || 0) + 1 },
+                  tenseProgress: [
+                    ...(c.tenseProgress || []).filter(tp => !selectedTenses.includes(tp.tense as TenseType)),
+                    ...selectedTenses.map(t => ({ tense: t, seen: true })),
+                  ],
+                }
               : c
           )
         );
