@@ -8,12 +8,26 @@ import { toast } from "sonner";
 import { Loader2, Brain, Plus, Check, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/contexts/LanguageContext";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SuggestWordsProps {
   onWordsAdded: () => void;
   defaultSourceLanguage: string;
   defaultTargetLanguage: string;
 }
+
+interface SuggestionWithMeta extends WordSuggestion {
+  context: string;
+  niveau: string;
+}
+
+const NIVEAU_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 export function SuggestWords({
   onWordsAdded,
@@ -27,7 +41,7 @@ export function SuggestWords({
   const [count, setCount] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const [suggestions, setSuggestions] = useState<WordSuggestion[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionWithMeta[]>([]);
   const [selectedWords, setSelectedWords] = useState<Set<number>>(new Set());
 
   const handleGetSuggestions = async () => {
@@ -39,13 +53,31 @@ export function SuggestWords({
         category || undefined,
         count
       );
-      setSuggestions(result);
+      // Add context and niveau fields to each suggestion
+      const suggestionsWithMeta: SuggestionWithMeta[] = result.map((s) => ({
+        ...s,
+        context: "",
+        niveau: "",
+      }));
+      setSuggestions(suggestionsWithMeta);
       setSelectedWords(new Set(result.map((_, i) => i)));
     } catch (error) {
       toast.error(t.common_error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateSuggestionContext = (index: number, context: string) => {
+    setSuggestions((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, context } : s))
+    );
+  };
+
+  const updateSuggestionNiveau = (index: number, niveau: string) => {
+    setSuggestions((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, niveau } : s))
+    );
   };
 
   const toggleWord = (index: number) => {
@@ -69,7 +101,12 @@ export function SuggestWords({
   const handleAddSelected = async () => {
     const wordsToAdd = suggestions
       .filter((_, i) => selectedWords.has(i))
-      .map((s) => ({ sourceWord: s.word, translation: s.translation }));
+      .map((s) => ({
+        sourceWord: s.word,
+        translation: s.translation,
+        context: s.context || undefined,
+        niveau: s.niveau || undefined,
+      }));
 
     if (wordsToAdd.length === 0) {
       toast.error(t.common_error);
@@ -168,24 +205,72 @@ export function SuggestWords({
               </div>
             </div>
 
-            <div className="grid gap-2 max-h-80 overflow-y-auto pr-2">
+            <div className="grid gap-3 max-h-[500px] overflow-y-auto pr-2">
               {suggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+                  className={`p-3 rounded-lg border transition-colors ${
                     selectedWords.has(index)
                       ? "bg-primary/5 border-primary/30"
-                      : "bg-card border-border hover:bg-secondary/50"
+                      : "bg-card border-border"
                   }`}
-                  onClick={() => toggleWord(index)}
                 >
-                  <Checkbox
-                    checked={selectedWords.has(index)}
-                    onCheckedChange={() => toggleWord(index)}
-                  />
-                  <span className="font-medium">{suggestion.word}</span>
-                  <span className="text-muted-foreground">→</span>
-                  <span>{suggestion.translation}</span>
+                  <div
+                    className="flex items-center gap-3 cursor-pointer"
+                    onClick={() => toggleWord(index)}
+                  >
+                    <Checkbox
+                      checked={selectedWords.has(index)}
+                      onCheckedChange={() => toggleWord(index)}
+                    />
+                    <span className="font-medium">{suggestion.word}</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span>{suggestion.translation}</span>
+                  </div>
+                  
+                  {selectedWords.has(index) && (
+                    <div className="mt-3 pl-7 grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">
+                          {t.filter_niveau}
+                        </label>
+                        <Select
+                          value={suggestion.niveau}
+                          onValueChange={(value) =>
+                            updateSuggestionNiveau(index, value)
+                          }
+                        >
+                          <SelectTrigger
+                            className="h-8"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SelectValue placeholder="Selecteer niveau" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {NIVEAU_OPTIONS.map((niveau) => (
+                              <SelectItem key={niveau} value={niveau}>
+                                {niveau}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">
+                          Context
+                        </label>
+                        <Input
+                          value={suggestion.context}
+                          onChange={(e) =>
+                            updateSuggestionContext(index, e.target.value)
+                          }
+                          onClick={(e) => e.stopPropagation()}
+                          placeholder="Voorbeeldzin..."
+                          className="h-8"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

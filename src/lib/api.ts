@@ -265,7 +265,7 @@ export async function addWord(
 
 // Add multiple words at once (skips duplicates using upsert)
 export async function addWords(
-  words: { sourceWord: string; translation: string }[],
+  words: { sourceWord: string; translation: string; context?: string; niveau?: string }[],
   sourceLanguage: string,
   targetLanguage: string,
   asShared: boolean = false
@@ -286,6 +286,8 @@ export async function addWords(
         target_language: targetLanguage,
         user_id: asShared ? null : user.id,
         shared: isAdmin ? "Yes" : "No",
+        context: w.context || null,
+        niveau: w.niveau || null,
       })),
       { 
         onConflict: 'source_word,translation',
