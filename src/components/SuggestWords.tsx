@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Loader2, Brain, Plus, Check, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Select,
   SelectContent,
@@ -22,9 +23,15 @@ interface SuggestWordsProps {
   defaultTargetLanguage: string;
 }
 
+interface Theme {
+  id: string;
+  name: string;
+}
+
 interface SuggestionWithMeta extends WordSuggestion {
   context: string;
   niveau: string;
+  themeId: string;
 }
 
 const NIVEAU_OPTIONS = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -43,6 +50,21 @@ export function SuggestWords({
   const [isAdding, setIsAdding] = useState(false);
   const [suggestions, setSuggestions] = useState<SuggestionWithMeta[]>([]);
   const [selectedWords, setSelectedWords] = useState<Set<number>>(new Set());
+  const [themes, setThemes] = useState<Theme[]>([]);
+
+  // Load themes on mount
+  useEffect(() => {
+    const loadThemes = async () => {
+      const { data } = await supabase
+        .from("themes")
+        .select("id, name")
+        .order("name");
+      if (data) {
+        setThemes(data);
+      }
+    };
+    loadThemes();
+  }, []);
 
   const handleGetSuggestions = async () => {
     setIsLoading(true);
@@ -53,11 +75,12 @@ export function SuggestWords({
         category || undefined,
         count
       );
-      // Add context and niveau fields to each suggestion
+      // Add context, niveau and themeId fields to each suggestion
       const suggestionsWithMeta: SuggestionWithMeta[] = result.map((s) => ({
         ...s,
         context: "",
         niveau: "",
+        themeId: "",
       }));
       setSuggestions(suggestionsWithMeta);
       setSelectedWords(new Set(result.map((_, i) => i)));
@@ -77,6 +100,12 @@ export function SuggestWords({
   const updateSuggestionNiveau = (index: number, niveau: string) => {
     setSuggestions((prev) =>
       prev.map((s, i) => (i === index ? { ...s, niveau } : s))
+    );
+  };
+
+  const updateSuggestionTheme = (index: number, themeId: string) => {
+    setSuggestions((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, themeId } : s))
     );
   };
 
@@ -106,6 +135,7 @@ export function SuggestWords({
         translation: s.translation,
         context: s.context || undefined,
         niveau: s.niveau || undefined,
+        themeId: s.themeId || undefined,
       }));
 
     if (wordsToAdd.length === 0) {
@@ -229,7 +259,7 @@ export function SuggestWords({
                   </div>
                   
                   {selectedWords.has(index) && (
-                    <div className="mt-3 pl-7 grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="mt-3 pl-7 grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="space-y-1">
                         <label className="text-xs text-muted-foreground">
                           {t.filter_niveau}
@@ -250,6 +280,31 @@ export function SuggestWords({
                             {NIVEAU_OPTIONS.map((niveau) => (
                               <SelectItem key={niveau} value={niveau}>
                                 {niveau}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs text-muted-foreground">
+                          {t.filter_thema}
+                        </label>
+                        <Select
+                          value={suggestion.themeId}
+                          onValueChange={(value) =>
+                            updateSuggestionTheme(index, value)
+                          }
+                        >
+                          <SelectTrigger
+                            className="h-8"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SelectValue placeholder="Selecteer thema" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {themes.map((theme) => (
+                              <SelectItem key={theme.id} value={theme.id}>
+                                {theme.name}
                               </SelectItem>
                             ))}
                           </SelectContent>
