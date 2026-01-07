@@ -263,7 +263,7 @@ export async function addWord(
   };
 }
 
-// Add multiple words at once
+// Add multiple words at once (skips duplicates using upsert)
 export async function addWords(
   words: { sourceWord: string; translation: string }[],
   sourceLanguage: string,
@@ -275,9 +275,10 @@ export async function addWords(
 
   const isAdmin = await checkIsAdmin(user.id);
 
+  // Use upsert with onConflict to skip duplicates instead of failing
   const { data, error } = await supabase
     .from("words")
-    .insert(
+    .upsert(
       words.map((w) => ({
         source_word: w.sourceWord,
         source_language: sourceLanguage,
@@ -285,7 +286,11 @@ export async function addWords(
         target_language: targetLanguage,
         user_id: asShared ? null : user.id,
         shared: isAdmin ? "Yes" : "No",
-      }))
+      })),
+      { 
+        onConflict: 'source_word,translation',
+        ignoreDuplicates: true 
+      }
     )
     .select();
 
