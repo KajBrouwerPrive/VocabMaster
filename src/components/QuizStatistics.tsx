@@ -265,8 +265,8 @@ export function QuizStatistics() {
               const isGold = result.score_percentage === 100;
               const isSilver = result.score_percentage >= 90 && result.score_percentage < 100;
               const isBronze = result.score_percentage >= 80 && result.score_percentage < 90;
-              const isGreen = result.score_percentage >= 50 && result.score_percentage < 80;
-              const isRed = result.score_percentage < 50;
+              const isGreen = result.score_percentage >= 60 && result.score_percentage < 80;
+              const isRed = result.score_percentage < 60;
 
               return (
                 <div
