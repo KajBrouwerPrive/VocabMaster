@@ -52,6 +52,11 @@
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(200 50% 10% / 0.08);
     --shadow-card: 0 8px 30px -8px hsl(200 50% 10% / 0.12);
+    
+    /* Learn mode word colors */
+    --word-source: 0 0% 7%;
+    --word-translation: 0 0% 13%;
+    --word-source-small: 0 0% 42%;
     --shadow-glow: 0 0 40px hsl(175 60% 40% / 0.15);
 
     --sidebar-background: 0 0% 98%;
@@ -103,6 +108,11 @@
     --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
     --shadow-card: 0 8px 30px -8px hsl(0 0% 0% / 0.4);
     --shadow-glow: 0 0 40px hsl(175 55% 50% / 0.2);
+    
+    /* Learn mode word colors (lighter for dark mode) */
+    --word-source: 0 0% 95%;
+    --word-translation: 0 0% 85%;
+    --word-source-small: 0 0% 60%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

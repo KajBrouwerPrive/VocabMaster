@@ -317,7 +317,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               <p className="text-xs text-muted-foreground text-right">
                 {getLanguageName(currentWord.target_language)}
               </p>
-              <p className="text-3xl font-bold text-foreground text-center">
+              <p className="text-3xl font-bold text-center" style={{ color: 'hsl(var(--word-translation))' }}>
                 {currentWord.translation}
               </p>
               <div></div>
@@ -329,7 +329,10 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
               {getLanguageName(currentWord.source_language)}
             </p>
             <div className="text-center">
-              <h2 className={`font-bold transition-all text-primary ${showTranslation ? 'text-xl' : 'text-3xl'}`}>
+              <h2 
+                className={`font-bold transition-all ${showTranslation ? 'text-xl' : 'text-3xl'}`}
+                style={{ color: showTranslation ? 'hsl(var(--word-source-small))' : 'hsl(var(--word-source))' }}
+              >
                 {currentWord.source_word}
               </h2>
               {!showTranslation && currentWord.context && (
