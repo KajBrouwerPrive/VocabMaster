@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getQuizResults, type QuizResultRecord } from "@/lib/api";
 import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type, Hash, Layers, X } from "lucide-react";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { nl, enUS, fr, es } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const TENSE_LABELS: Record<string, string> = {
@@ -30,7 +30,7 @@ const NIVEAU_LABELS: Record<string, string> = {
 type StatCategory = 'total' | 'average' | 'bronze' | 'silver' | 'gold' | null;
 
 export function QuizStatistics() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [results, setResults] = useState<QuizResultRecord[]>([]);
   const [allResults, setAllResults] = useState<QuizResultRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,12 +117,12 @@ export function QuizStatistics() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-primary" />
-            Toetsstatistieken
+            {t.stats_quiz_title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-center py-8">
-            Nog geen toetsen gemaakt. Maak een toets om je statistieken te zien!
+            {t.stats_no_quizzes} {t.stats_no_quizzes_hint}
           </p>
         </CardContent>
       </Card>
@@ -139,13 +139,13 @@ export function QuizStatistics() {
       <div className="mt-3 pt-3 border-t border-current/10 space-y-1 text-xs">
         <div className="flex justify-between items-center">
           <span className="flex items-center gap-1">
-            <BookOpen className="h-3 w-3" /> Woorden
+            <BookOpen className="h-3 w-3" /> {t.common_words}
           </span>
           <span className="font-semibold">{data.words}{isPercentage ? '%' : ''}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="flex items-center gap-1">
-            <Languages className="h-3 w-3" /> Vervoegingen
+            <Languages className="h-3 w-3" /> {t.nav_learn_conjugations}
           </span>
           <span className="font-semibold">{data.conjugations}{isPercentage ? '%' : ''}</span>
         </div>
@@ -168,7 +168,7 @@ export function QuizStatistics() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xl font-bold text-teal-700 dark:text-teal-300 truncate">{stats.total.all}</p>
-                <p className="text-xs text-teal-600/70 dark:text-teal-400/70 truncate">Totaal toetsen</p>
+                <p className="text-xs text-teal-600/70 dark:text-teal-400/70 truncate">{t.stats_total_quizzes}</p>
               </div>
             </div>
             {renderBreakdown('total')}
@@ -186,7 +186,7 @@ export function QuizStatistics() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 truncate">{stats.average.all}%</p>
-                <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 truncate">Gem. score</p>
+                <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 truncate">{t.stats_avg_score}</p>
               </div>
             </div>
             {renderBreakdown('average')}
@@ -205,7 +205,7 @@ export function QuizStatistics() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xl font-bold text-orange-800 dark:text-orange-300 truncate">{stats.bronze.all}</p>
-                <p className="text-xs text-orange-700/70 dark:text-orange-400/70 truncate">Boven 80%</p>
+                <p className="text-xs text-orange-700/70 dark:text-orange-400/70 truncate">{t.stats_above_80}</p>
               </div>
             </div>
             {renderBreakdown('bronze')}
@@ -224,7 +224,7 @@ export function QuizStatistics() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">{stats.silver.all}</p>
-                <p className="text-xs text-slate-600/70 dark:text-slate-400/70 truncate">Boven 90%</p>
+                <p className="text-xs text-slate-600/70 dark:text-slate-400/70 truncate">{t.stats_above_90}</p>
               </div>
             </div>
             {renderBreakdown('silver')}
@@ -243,7 +243,7 @@ export function QuizStatistics() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xl font-bold text-yellow-700 dark:text-yellow-300 truncate">{stats.gold.all}</p>
-                <p className="text-xs text-yellow-700/70 dark:text-yellow-400/70 truncate">100% scores</p>
+                <p className="text-xs text-yellow-700/70 dark:text-yellow-400/70 truncate">{t.stats_perfect_scores}</p>
               </div>
             </div>
             {renderBreakdown('gold')}
@@ -254,9 +254,9 @@ export function QuizStatistics() {
       {/* Recent Results */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
-            Recente toetsen
+            {t.stats_recent_quizzes}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -293,7 +293,7 @@ export function QuizStatistics() {
                         : "bg-orange-500 text-orange-950"
                     }`}>
                       {isGold ? <Trophy className="h-3 w-3" /> : <Award className="h-3 w-3" />}
-                      {isGold ? "GOUD" : isSilver ? "ZILVER" : "BRONS"}
+                      {isGold ? t.stats_gold : isSilver ? t.stats_silver : t.stats_bronze}
                     </div>
                   )}
 
@@ -313,12 +313,12 @@ export function QuizStatistics() {
                     </div>
                     <div>
                       <p className="font-medium">
-                        {result.quiz_type === 'words' ? 'Woordentoets' : 'Vervoegingentoets'}
+                        {result.quiz_type === 'words' ? t.stats_words_quiz : t.stats_conjugations_quiz}
                       </p>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1" title="Datum">
                           <Calendar className="h-3 w-3" />
-                          {format(new Date(result.created_at), "d MMM yyyy", { locale: nl })}
+                          {format(new Date(result.created_at), "d MMM yyyy", { locale: language === 'nl' ? nl : language === 'fr' ? fr : language === 'es' ? es : enUS })}
                         </span>
                         <span className="flex items-center gap-1" title="Aantal vragen">
                           <Hash className="h-3 w-3" />

@@ -110,6 +110,22 @@ interface Translations {
   stats_incorrect: string;
   stats_per_niveau: string;
   
+  // Quiz Statistics
+  stats_quiz_title: string;
+  stats_total_quizzes: string;
+  stats_avg_score: string;
+  stats_above_80: string;
+  stats_above_90: string;
+  stats_perfect_scores: string;
+  stats_recent_quizzes: string;
+  stats_words_quiz: string;
+  stats_conjugations_quiz: string;
+  stats_gold: string;
+  stats_silver: string;
+  stats_bronze: string;
+  stats_no_quizzes: string;
+  stats_no_quizzes_hint: string;
+  
   // Auth
   auth_login: string;
   auth_register: string;
@@ -228,6 +244,20 @@ const translations: Record<AppLanguage, Translations> = {
     stats_quiz_attempts: 'Toets pogingen',
     stats_incorrect: 'Moeilijke woorden',
     stats_per_niveau: 'Statistieken per niveau',
+    stats_quiz_title: 'Toetsstatistieken',
+    stats_total_quizzes: 'Totaal toetsen',
+    stats_avg_score: 'Gem. score',
+    stats_above_80: 'Boven 80%',
+    stats_above_90: 'Boven 90%',
+    stats_perfect_scores: '100% scores',
+    stats_recent_quizzes: 'Recente toetsen',
+    stats_words_quiz: 'Woordentoets',
+    stats_conjugations_quiz: 'Vervoegingentoets',
+    stats_gold: 'GOUD',
+    stats_silver: 'ZILVER',
+    stats_bronze: 'BRONS',
+    stats_no_quizzes: 'Nog geen toetsen gemaakt.',
+    stats_no_quizzes_hint: 'Maak een toets om je statistieken te zien!',
     auth_login: 'Inloggen',
     auth_register: 'Registreren',
     auth_email: 'E-mail',
@@ -341,6 +371,20 @@ const translations: Record<AppLanguage, Translations> = {
     stats_quiz_attempts: 'Quiz attempts',
     stats_incorrect: 'Difficult words',
     stats_per_niveau: 'Statistics per level',
+    stats_quiz_title: 'Quiz Statistics',
+    stats_total_quizzes: 'Total quizzes',
+    stats_avg_score: 'Avg. score',
+    stats_above_80: 'Above 80%',
+    stats_above_90: 'Above 90%',
+    stats_perfect_scores: '100% scores',
+    stats_recent_quizzes: 'Recent quizzes',
+    stats_words_quiz: 'Word quiz',
+    stats_conjugations_quiz: 'Conjugation quiz',
+    stats_gold: 'GOLD',
+    stats_silver: 'SILVER',
+    stats_bronze: 'BRONZE',
+    stats_no_quizzes: 'No quizzes taken yet.',
+    stats_no_quizzes_hint: 'Take a quiz to see your statistics!',
     auth_login: 'Login',
     auth_register: 'Register',
     auth_email: 'Email',
@@ -454,6 +498,20 @@ const translations: Record<AppLanguage, Translations> = {
     stats_quiz_attempts: 'Tentatives de quiz',
     stats_incorrect: 'Mots difficiles',
     stats_per_niveau: 'Statistiques par niveau',
+    stats_quiz_title: 'Statistiques de quiz',
+    stats_total_quizzes: 'Total des quiz',
+    stats_avg_score: 'Score moy.',
+    stats_above_80: 'Plus de 80%',
+    stats_above_90: 'Plus de 90%',
+    stats_perfect_scores: 'Scores de 100%',
+    stats_recent_quizzes: 'Quiz récents',
+    stats_words_quiz: 'Quiz de mots',
+    stats_conjugations_quiz: 'Quiz de conjugaisons',
+    stats_gold: 'OR',
+    stats_silver: 'ARGENT',
+    stats_bronze: 'BRONZE',
+    stats_no_quizzes: 'Aucun quiz effectué.',
+    stats_no_quizzes_hint: 'Faites un quiz pour voir vos statistiques !',
     auth_login: 'Connexion',
     auth_register: 'Inscription',
     auth_email: 'E-mail',
@@ -567,6 +625,20 @@ const translations: Record<AppLanguage, Translations> = {
     stats_quiz_attempts: 'Intentos de prueba',
     stats_incorrect: 'Palabras difíciles',
     stats_per_niveau: 'Estadísticas por nivel',
+    stats_quiz_title: 'Estadísticas de pruebas',
+    stats_total_quizzes: 'Total de pruebas',
+    stats_avg_score: 'Puntaje prom.',
+    stats_above_80: 'Más del 80%',
+    stats_above_90: 'Más del 90%',
+    stats_perfect_scores: 'Puntajes del 100%',
+    stats_recent_quizzes: 'Pruebas recientes',
+    stats_words_quiz: 'Prueba de palabras',
+    stats_conjugations_quiz: 'Prueba de conjugaciones',
+    stats_gold: 'ORO',
+    stats_silver: 'PLATA',
+    stats_bronze: 'BRONCE',
+    stats_no_quizzes: 'Aún no hay pruebas.',
+    stats_no_quizzes_hint: '¡Realiza una prueba para ver tus estadísticas!',
     auth_login: 'Iniciar sesión',
     auth_register: 'Registrarse',
     auth_email: 'Correo electrónico',
