@@ -105,7 +105,7 @@ export function SuggestWords({
 
   const updateSuggestionTheme = (index: number, themeId: string) => {
     setSuggestions((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, themeId } : s))
+      prev.map((s, i) => (i === index ? { ...s, themeId: themeId === "__none__" ? "" : themeId } : s))
     );
   };
 
@@ -302,6 +302,9 @@ export function SuggestWords({
                             <SelectValue placeholder="Selecteer thema" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="__none__">
+                              <span className="text-muted-foreground italic">Geen thema</span>
+                            </SelectItem>
                             {themes.map((theme) => (
                               <SelectItem key={theme.id} value={theme.id}>
                                 {theme.name}
