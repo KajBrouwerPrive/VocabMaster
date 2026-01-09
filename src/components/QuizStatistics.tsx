@@ -134,6 +134,11 @@ export function QuizStatistics() {
     
     const data = stats[category];
     const isPercentage = category === 'average';
+    const isMedal = category === 'bronze' || category === 'silver' || category === 'gold';
+    
+    // For medal categories, calculate percentage based on words/conjugations totals
+    const wordsTotal = stats.total.words;
+    const conjTotal = stats.total.conjugations;
     
     return (
       <div className="mt-3 pt-3 border-t border-current/10 space-y-1 text-xs">
@@ -141,13 +146,23 @@ export function QuizStatistics() {
           <span className="flex items-center gap-1">
             <BookOpen className="h-3 w-3" /> {t.common_words}
           </span>
-          <span className="font-semibold">{data.words}{isPercentage ? '%' : ''}</span>
+          <span className="font-semibold">
+            {data.words}{isPercentage ? '%' : ''}
+            {isMedal && wordsTotal > 0 && (
+              <span className="opacity-70 ml-1">({Math.round((data.words / wordsTotal) * 100)}%)</span>
+            )}
+          </span>
         </div>
         <div className="flex justify-between items-center">
           <span className="flex items-center gap-1">
             <Languages className="h-3 w-3" /> {t.nav_learn_conjugations}
           </span>
-          <span className="font-semibold">{data.conjugations}{isPercentage ? '%' : ''}</span>
+          <span className="font-semibold">
+            {data.conjugations}{isPercentage ? '%' : ''}
+            {isMedal && conjTotal > 0 && (
+              <span className="opacity-70 ml-1">({Math.round((data.conjugations / conjTotal) * 100)}%)</span>
+            )}
+          </span>
         </div>
       </div>
     );
@@ -204,7 +219,14 @@ export function QuizStatistics() {
                 <Target className="h-4 w-4 text-orange-700 dark:text-orange-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold text-orange-800 dark:text-orange-300 truncate">{stats.bronze.all}</p>
+                <p className="text-xl font-bold text-orange-800 dark:text-orange-300 truncate">
+                  {stats.bronze.all}
+                  {stats.total.all > 0 && (
+                    <span className="text-sm font-medium ml-1 opacity-70">
+                      ({Math.round((stats.bronze.all / stats.total.all) * 100)}%)
+                    </span>
+                  )}
+                </p>
                 <p className="text-xs text-orange-700/70 dark:text-orange-400/70 truncate">{t.stats_above_80}</p>
               </div>
             </div>
@@ -223,7 +245,14 @@ export function QuizStatistics() {
                 <Award className="h-4 w-4 text-slate-600 dark:text-slate-300" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">{stats.silver.all}</p>
+                <p className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
+                  {stats.silver.all}
+                  {stats.total.all > 0 && (
+                    <span className="text-sm font-medium ml-1 opacity-70">
+                      ({Math.round((stats.silver.all / stats.total.all) * 100)}%)
+                    </span>
+                  )}
+                </p>
                 <p className="text-xs text-slate-600/70 dark:text-slate-400/70 truncate">{t.stats_above_90}</p>
               </div>
             </div>
@@ -242,7 +271,14 @@ export function QuizStatistics() {
                 <Trophy className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold text-yellow-700 dark:text-yellow-300 truncate">{stats.gold.all}</p>
+                <p className="text-xl font-bold text-yellow-700 dark:text-yellow-300 truncate">
+                  {stats.gold.all}
+                  {stats.total.all > 0 && (
+                    <span className="text-sm font-medium ml-1 opacity-70">
+                      ({Math.round((stats.gold.all / stats.total.all) * 100)}%)
+                    </span>
+                  )}
+                </p>
                 <p className="text-xs text-yellow-700/70 dark:text-yellow-400/70 truncate">{t.stats_perfect_scores}</p>
               </div>
             </div>
