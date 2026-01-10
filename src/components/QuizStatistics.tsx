@@ -5,7 +5,7 @@ import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languag
 import { format } from "date-fns";
 import { nl, enUS, fr, es } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from "recharts";
 
 const TENSE_LABELS: Record<string, string> = {
   present: "Presente",
@@ -98,21 +98,56 @@ export function QuizStatistics() {
     };
   }, [allResults]);
 
-  // Chart data - sort by date ascending for the trend line
+  // Chart data - group by date and calculate averages per niveau
   const chartData = useMemo(() => {
     if (allResults.length === 0) return [];
     
     const dateLocale = language === 'nl' ? nl : language === 'fr' ? fr : language === 'es' ? es : enUS;
     
-    return [...allResults]
+    // Group results by date
+    const groupedByDate = new Map<string, QuizResultRecord[]>();
+    
+    [...allResults]
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-      .map((result, index) => ({
-        name: format(new Date(result.created_at), "d MMM", { locale: dateLocale }),
-        score: result.score_percentage,
-        type: result.quiz_type,
-        index: index + 1,
-      }));
+      .forEach((result) => {
+        const dateKey = format(new Date(result.created_at), "yyyy-MM-dd");
+        if (!groupedByDate.has(dateKey)) {
+          groupedByDate.set(dateKey, []);
+        }
+        groupedByDate.get(dateKey)!.push(result);
+      });
+    
+    // Calculate averages per date per niveau
+    return Array.from(groupedByDate.entries()).map(([dateKey, dayResults]) => {
+      const calcAverage = (results: QuizResultRecord[]) => 
+        results.length > 0 
+          ? Math.round(results.reduce((sum, r) => sum + r.score_percentage, 0) / results.length) 
+          : undefined;
+      
+      const niveauA = dayResults.filter(r => r.niveau === 'A');
+      const niveauB = dayResults.filter(r => r.niveau === 'B');
+      const niveauC = dayResults.filter(r => r.niveau === 'C');
+      const difficult = dayResults.filter(r => r.niveau === 'difficult');
+      
+      return {
+        name: format(new Date(dateKey), "d MMM", { locale: dateLocale }),
+        overall: calcAverage(dayResults),
+        niveauA: calcAverage(niveauA),
+        niveauB: calcAverage(niveauB),
+        niveauC: calcAverage(niveauC),
+        difficult: calcAverage(difficult),
+      };
+    });
   }, [allResults, language]);
+
+  // Legend labels mapping
+  const chartLegendLabels = useMemo(() => ({
+    overall: t.stats_overall,
+    niveauA: t.stats_niveau_a,
+    niveauB: t.stats_niveau_b,
+    niveauC: t.stats_niveau_c,
+    difficult: t.stats_difficult,
+  }), [t]);
 
   const handleCardClick = (category: StatCategory) => {
     setSelectedCategory(selectedCategory === category ? null : category);
@@ -314,7 +349,7 @@ export function QuizStatistics() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[250px] w-full">
+            <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -340,18 +375,72 @@ export function QuizStatistics() {
                       fontSize: '12px'
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
-                    formatter={(value: number, name: string) => [`${value}%`, t.stats_score]}
+                    formatter={(value: number, name: string) => {
+                      const label = chartLegendLabels[name as keyof typeof chartLegendLabels] || name;
+                      return [`${value}%`, label];
+                    }}
                   />
-                  <ReferenceLine y={80} stroke="hsl(30, 80%, 50%)" strokeDasharray="5 5" strokeOpacity={0.5} />
-                  <ReferenceLine y={90} stroke="hsl(210, 20%, 60%)" strokeDasharray="5 5" strokeOpacity={0.5} />
-                  <ReferenceLine y={100} stroke="hsl(45, 90%, 50%)" strokeDasharray="5 5" strokeOpacity={0.5} />
+                  <Legend 
+                    formatter={(value: string) => chartLegendLabels[value as keyof typeof chartLegendLabels] || value}
+                    wrapperStyle={{ fontSize: '12px' }}
+                  />
+                  <ReferenceLine y={80} stroke="hsl(30, 80%, 50%)" strokeDasharray="5 5" strokeOpacity={0.3} />
+                  <ReferenceLine y={90} stroke="hsl(210, 20%, 60%)" strokeDasharray="5 5" strokeOpacity={0.3} />
+                  <ReferenceLine y={100} stroke="hsl(45, 90%, 50%)" strokeDasharray="5 5" strokeOpacity={0.3} />
+                  {/* Overall line - primary color, thicker */}
                   <Line 
                     type="monotone" 
-                    dataKey="score" 
+                    dataKey="overall" 
+                    name="overall"
                     stroke="hsl(var(--primary))" 
-                    strokeWidth={2}
+                    strokeWidth={3}
                     dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
                     activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                    connectNulls
+                  />
+                  {/* Niveau A - green */}
+                  <Line 
+                    type="monotone" 
+                    dataKey="niveauA" 
+                    name="niveauA"
+                    stroke="hsl(150, 60%, 45%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(150, 60%, 45%)', strokeWidth: 1, r: 3 }}
+                    activeDot={{ r: 5, fill: 'hsl(150, 60%, 45%)' }}
+                    connectNulls
+                  />
+                  {/* Niveau B - blue */}
+                  <Line 
+                    type="monotone" 
+                    dataKey="niveauB" 
+                    name="niveauB"
+                    stroke="hsl(210, 70%, 50%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(210, 70%, 50%)', strokeWidth: 1, r: 3 }}
+                    activeDot={{ r: 5, fill: 'hsl(210, 70%, 50%)' }}
+                    connectNulls
+                  />
+                  {/* Niveau C - purple */}
+                  <Line 
+                    type="monotone" 
+                    dataKey="niveauC" 
+                    name="niveauC"
+                    stroke="hsl(270, 60%, 55%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(270, 60%, 55%)', strokeWidth: 1, r: 3 }}
+                    activeDot={{ r: 5, fill: 'hsl(270, 60%, 55%)' }}
+                    connectNulls
+                  />
+                  {/* Difficult - red/orange */}
+                  <Line 
+                    type="monotone" 
+                    dataKey="difficult" 
+                    name="difficult"
+                    stroke="hsl(0, 65%, 55%)" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(0, 65%, 55%)', strokeWidth: 1, r: 3 }}
+                    activeDot={{ r: 5, fill: 'hsl(0, 65%, 55%)' }}
+                    connectNulls
                   />
                 </LineChart>
               </ResponsiveContainer>
