@@ -127,6 +127,11 @@ interface Translations {
   stats_no_quizzes_hint: string;
   stats_score_trend: string;
   stats_score: string;
+  stats_overall: string;
+  stats_niveau_a: string;
+  stats_niveau_b: string;
+  stats_niveau_c: string;
+  stats_difficult: string;
   
   // Auth
   auth_login: string;
@@ -262,6 +267,11 @@ const translations: Record<AppLanguage, Translations> = {
     stats_no_quizzes_hint: 'Maak een toets om je statistieken te zien!',
     stats_score_trend: 'Score-trend over tijd',
     stats_score: 'Score',
+    stats_overall: 'Totaal',
+    stats_niveau_a: 'Niveau A',
+    stats_niveau_b: 'Niveau B',
+    stats_niveau_c: 'Niveau C',
+    stats_difficult: 'Moeilijk',
     auth_login: 'Inloggen',
     auth_register: 'Registreren',
     auth_email: 'E-mail',
@@ -391,6 +401,11 @@ const translations: Record<AppLanguage, Translations> = {
     stats_no_quizzes_hint: 'Take a quiz to see your statistics!',
     stats_score_trend: 'Score trend over time',
     stats_score: 'Score',
+    stats_overall: 'Overall',
+    stats_niveau_a: 'Level A',
+    stats_niveau_b: 'Level B',
+    stats_niveau_c: 'Level C',
+    stats_difficult: 'Difficult',
     auth_login: 'Login',
     auth_register: 'Register',
     auth_email: 'Email',
@@ -520,6 +535,11 @@ const translations: Record<AppLanguage, Translations> = {
     stats_no_quizzes_hint: 'Faites un quiz pour voir vos statistiques !',
     stats_score_trend: 'Tendance des scores',
     stats_score: 'Score',
+    stats_overall: 'Global',
+    stats_niveau_a: 'Niveau A',
+    stats_niveau_b: 'Niveau B',
+    stats_niveau_c: 'Niveau C',
+    stats_difficult: 'Difficile',
     auth_login: 'Connexion',
     auth_register: 'Inscription',
     auth_email: 'E-mail',
@@ -649,6 +669,11 @@ const translations: Record<AppLanguage, Translations> = {
     stats_no_quizzes_hint: '¡Realiza una prueba para ver tus estadísticas!',
     stats_score_trend: 'Tendencia de puntajes',
     stats_score: 'Puntaje',
+    stats_overall: 'Total',
+    stats_niveau_a: 'Nivel A',
+    stats_niveau_b: 'Nivel B',
+    stats_niveau_c: 'Nivel C',
+    stats_difficult: 'Difícil',
     auth_login: 'Iniciar sesión',
     auth_register: 'Registrarse',
     auth_email: 'Correo electrónico',
