@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getQuizResults, type QuizResultRecord } from "@/lib/api";
-import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type, Hash, Layers, X } from "lucide-react";
+import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type, Hash, Layers } from "lucide-react";
 import { format } from "date-fns";
 import { nl, enUS, fr, es } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
 const TENSE_LABELS: Record<string, string> = {
   present: "Presente",
@@ -96,6 +97,22 @@ export function QuizStatistics() {
       },
     };
   }, [allResults]);
+
+  // Chart data - sort by date ascending for the trend line
+  const chartData = useMemo(() => {
+    if (allResults.length === 0) return [];
+    
+    const dateLocale = language === 'nl' ? nl : language === 'fr' ? fr : language === 'es' ? es : enUS;
+    
+    return [...allResults]
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .map((result, index) => ({
+        name: format(new Date(result.created_at), "d MMM", { locale: dateLocale }),
+        score: result.score_percentage,
+        type: result.quiz_type,
+        index: index + 1,
+      }));
+  }, [allResults, language]);
 
   const handleCardClick = (category: StatCategory) => {
     setSelectedCategory(selectedCategory === category ? null : category);
@@ -286,6 +303,62 @@ export function QuizStatistics() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Score Trend Chart */}
+      {chartData.length >= 2 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              {t.stats_score_trend}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 12 }} 
+                    className="text-muted-foreground"
+                    tickLine={false}
+                  />
+                  <YAxis 
+                    domain={[0, 100]} 
+                    tick={{ fontSize: 12 }} 
+                    className="text-muted-foreground"
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `${value}%`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--background))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    formatter={(value: number, name: string) => [`${value}%`, t.stats_score]}
+                  />
+                  <ReferenceLine y={80} stroke="hsl(30, 80%, 50%)" strokeDasharray="5 5" strokeOpacity={0.5} />
+                  <ReferenceLine y={90} stroke="hsl(210, 20%, 60%)" strokeDasharray="5 5" strokeOpacity={0.5} />
+                  <ReferenceLine y={100} stroke="hsl(45, 90%, 50%)" strokeDasharray="5 5" strokeOpacity={0.5} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2}
+                    dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Recent Results */}
       <Card>

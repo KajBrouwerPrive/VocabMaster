@@ -125,6 +125,8 @@ interface Translations {
   stats_bronze: string;
   stats_no_quizzes: string;
   stats_no_quizzes_hint: string;
+  stats_score_trend: string;
+  stats_score: string;
   
   // Auth
   auth_login: string;
@@ -258,6 +260,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_bronze: 'BRONS',
     stats_no_quizzes: 'Nog geen toetsen gemaakt.',
     stats_no_quizzes_hint: 'Maak een toets om je statistieken te zien!',
+    stats_score_trend: 'Score-trend over tijd',
+    stats_score: 'Score',
     auth_login: 'Inloggen',
     auth_register: 'Registreren',
     auth_email: 'E-mail',
@@ -385,6 +389,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_bronze: 'BRONZE',
     stats_no_quizzes: 'No quizzes taken yet.',
     stats_no_quizzes_hint: 'Take a quiz to see your statistics!',
+    stats_score_trend: 'Score trend over time',
+    stats_score: 'Score',
     auth_login: 'Login',
     auth_register: 'Register',
     auth_email: 'Email',
@@ -512,6 +518,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_bronze: 'BRONZE',
     stats_no_quizzes: 'Aucun quiz effectué.',
     stats_no_quizzes_hint: 'Faites un quiz pour voir vos statistiques !',
+    stats_score_trend: 'Tendance des scores',
+    stats_score: 'Score',
     auth_login: 'Connexion',
     auth_register: 'Inscription',
     auth_email: 'E-mail',
@@ -639,6 +647,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_bronze: 'BRONCE',
     stats_no_quizzes: 'Aún no hay pruebas.',
     stats_no_quizzes_hint: '¡Realiza una prueba para ver tus estadísticas!',
+    stats_score_trend: 'Tendencia de puntajes',
+    stats_score: 'Puntaje',
     auth_login: 'Iniciar sesión',
     auth_register: 'Registrarse',
     auth_email: 'Correo electrónico',
