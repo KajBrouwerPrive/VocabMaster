@@ -279,7 +279,7 @@ export function QuizStatistics() {
 
         {/* Gold - 100% */}
         <Card 
-          className={`bg-gradient-to-br from-yellow-300 via-amber-300 to-yellow-400 dark:from-yellow-700/70 dark:via-amber-600/60 dark:to-yellow-700/70 border-yellow-500 dark:border-yellow-500 shadow-md shadow-yellow-300/50 dark:shadow-yellow-900/40 hover:shadow-lg hover:shadow-yellow-400/50 transition-all cursor-pointer col-span-2 sm:col-span-1 ${selectedCategory === 'gold' ? 'ring-2 ring-yellow-500' : ''}`}
+          className={`shimmer-gold bg-gradient-to-br from-yellow-300 via-amber-300 to-yellow-400 dark:from-yellow-700/70 dark:via-amber-600/60 dark:to-yellow-700/70 border-yellow-500 dark:border-yellow-500 shadow-md shadow-yellow-300/50 dark:shadow-yellow-900/40 hover:shadow-lg hover:shadow-yellow-400/50 transition-all cursor-pointer col-span-2 sm:col-span-1 ${selectedCategory === 'gold' ? 'ring-2 ring-yellow-500' : ''}`}
           onClick={() => handleCardClick('gold')}
         >
           <CardContent className="p-4">
