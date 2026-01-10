@@ -227,16 +227,16 @@ export function QuizStatistics() {
 
         {/* Bronze - 80% */}
         <Card 
-          className={`bg-gradient-to-br from-orange-100 to-amber-100/50 dark:from-orange-950/40 dark:to-amber-900/30 border-orange-300/50 dark:border-orange-700/40 shadow-sm hover:shadow-md transition-all cursor-pointer ${selectedCategory === 'bronze' ? 'ring-2 ring-orange-500' : ''}`}
+          className={`bg-gradient-to-br from-orange-200 via-amber-200 to-orange-300 dark:from-orange-800/60 dark:via-amber-700/50 dark:to-orange-800/60 border-orange-400 dark:border-orange-600 shadow-md shadow-orange-200/50 dark:shadow-orange-900/30 hover:shadow-lg hover:shadow-orange-300/50 transition-all cursor-pointer ${selectedCategory === 'bronze' ? 'ring-2 ring-orange-500' : ''}`}
           onClick={() => handleCardClick('bronze')}
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-orange-600/15 rounded-xl shrink-0">
-                <Target className="h-4 w-4 text-orange-700 dark:text-orange-400" />
+              <div className="p-2 bg-orange-600/25 rounded-xl shrink-0">
+                <Target className="h-4 w-4 text-orange-800 dark:text-orange-300" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold text-orange-800 dark:text-orange-300 truncate">
+                <p className="text-xl font-bold text-orange-900 dark:text-orange-200 truncate">
                   {stats.bronze.all}
                   {stats.total.all > 0 && (
                     <span className="text-sm font-medium ml-1 opacity-70">
@@ -244,7 +244,7 @@ export function QuizStatistics() {
                     </span>
                   )}
                 </p>
-                <p className="text-xs text-orange-700/70 dark:text-orange-400/70 truncate">{t.stats_above_80}</p>
+                <p className="text-xs text-orange-800/80 dark:text-orange-300/80 truncate">{t.stats_above_80}</p>
               </div>
             </div>
             {renderBreakdown('bronze')}
@@ -253,16 +253,16 @@ export function QuizStatistics() {
 
         {/* Silver - 90% */}
         <Card 
-          className={`bg-gradient-to-br from-slate-100 to-gray-200/50 dark:from-slate-800/50 dark:to-gray-700/30 border-slate-300/60 dark:border-slate-600/40 shadow-sm hover:shadow-md transition-all cursor-pointer ${selectedCategory === 'silver' ? 'ring-2 ring-slate-500' : ''}`}
+          className={`bg-gradient-to-br from-slate-200 via-gray-300 to-slate-300 dark:from-slate-600/70 dark:via-gray-500/60 dark:to-slate-600/70 border-slate-400 dark:border-slate-500 shadow-md shadow-slate-300/50 dark:shadow-slate-800/40 hover:shadow-lg hover:shadow-slate-400/50 transition-all cursor-pointer ${selectedCategory === 'silver' ? 'ring-2 ring-slate-500' : ''}`}
           onClick={() => handleCardClick('silver')}
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-slate-400/20 rounded-xl shrink-0">
-                <Award className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              <div className="p-2 bg-slate-500/25 rounded-xl shrink-0">
+                <Award className="h-4 w-4 text-slate-700 dark:text-slate-200" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold text-slate-700 dark:text-slate-200 truncate">
+                <p className="text-xl font-bold text-slate-800 dark:text-slate-100 truncate">
                   {stats.silver.all}
                   {stats.total.all > 0 && (
                     <span className="text-sm font-medium ml-1 opacity-70">
@@ -270,7 +270,7 @@ export function QuizStatistics() {
                     </span>
                   )}
                 </p>
-                <p className="text-xs text-slate-600/70 dark:text-slate-400/70 truncate">{t.stats_above_90}</p>
+                <p className="text-xs text-slate-700/80 dark:text-slate-300/80 truncate">{t.stats_above_90}</p>
               </div>
             </div>
             {renderBreakdown('silver')}
@@ -279,16 +279,16 @@ export function QuizStatistics() {
 
         {/* Gold - 100% */}
         <Card 
-          className={`bg-gradient-to-br from-yellow-100 to-amber-200/60 dark:from-yellow-900/40 dark:to-amber-800/30 border-yellow-400/50 dark:border-yellow-600/40 shadow-sm hover:shadow-md transition-all cursor-pointer col-span-2 sm:col-span-1 ${selectedCategory === 'gold' ? 'ring-2 ring-yellow-500' : ''}`}
+          className={`bg-gradient-to-br from-yellow-300 via-amber-300 to-yellow-400 dark:from-yellow-700/70 dark:via-amber-600/60 dark:to-yellow-700/70 border-yellow-500 dark:border-yellow-500 shadow-md shadow-yellow-300/50 dark:shadow-yellow-900/40 hover:shadow-lg hover:shadow-yellow-400/50 transition-all cursor-pointer col-span-2 sm:col-span-1 ${selectedCategory === 'gold' ? 'ring-2 ring-yellow-500' : ''}`}
           onClick={() => handleCardClick('gold')}
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-yellow-500/20 rounded-xl shrink-0">
-                <Trophy className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+              <div className="p-2 bg-yellow-600/30 rounded-xl shrink-0">
+                <Trophy className="h-4 w-4 text-yellow-800 dark:text-yellow-200" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-bold text-yellow-700 dark:text-yellow-300 truncate">
+                <p className="text-xl font-bold text-yellow-900 dark:text-yellow-100 truncate">
                   {stats.gold.all}
                   {stats.total.all > 0 && (
                     <span className="text-sm font-medium ml-1 opacity-70">
@@ -296,7 +296,7 @@ export function QuizStatistics() {
                     </span>
                   )}
                 </p>
-                <p className="text-xs text-yellow-700/70 dark:text-yellow-400/70 truncate">{t.stats_perfect_scores}</p>
+                <p className="text-xs text-yellow-800/80 dark:text-yellow-200/80 truncate">{t.stats_perfect_scores}</p>
               </div>
             </div>
             {renderBreakdown('gold')}
