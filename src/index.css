@@ -179,6 +179,52 @@
   .animate-bounce-subtle {
     animation: bounceSlight 0.6s ease-out;
   }
+
+  .shimmer-gold {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-gold::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsla(45, 100%, 70%, 0.25),
+      hsla(45, 100%, 85%, 0.4),
+      hsla(45, 100%, 70%, 0.25),
+      transparent
+    );
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .dark .shimmer-gold::before {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsla(45, 90%, 60%, 0.2),
+      hsla(45, 90%, 75%, 0.3),
+      hsla(45, 90%, 60%, 0.2),
+      transparent
+    );
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 @keyframes fadeIn {
