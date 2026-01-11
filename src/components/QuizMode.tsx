@@ -105,9 +105,9 @@ export function QuizMode() {
           return (
             <span
               key={i}
-              className={isWrong ? "text-destructive bg-destructive/20 px-0.5 rounded" : "text-muted-foreground"}
+              className={isWrong ? "text-destructive bg-destructive/20 px-0.5 rounded text-lg font-bold" : "text-muted-foreground"}
             >
-              {char}
+              {isWrong ? char.toUpperCase() : char}
             </span>
           );
         })}
