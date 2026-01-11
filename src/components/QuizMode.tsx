@@ -75,6 +75,52 @@ export function QuizMode() {
       .replace(/[~'`´¨^]/g, "");
   };
 
+  // Highlight incorrect letters in user answer compared to correct answer
+  const highlightDifferences = (userAnswer: string, correctAnswer: string): React.ReactNode => {
+    const userChars = userAnswer.split('');
+    const correctChars = correctAnswer.split('');
+    
+    // Count differences
+    let diffCount = 0;
+    const maxLen = Math.max(userChars.length, correctChars.length);
+    for (let i = 0; i < maxLen; i++) {
+      const userChar = userChars[i] || '';
+      const correctChar = correctChars[i] || '';
+      if (userChar.toLowerCase() !== correctChar.toLowerCase()) {
+        diffCount++;
+      }
+    }
+    
+    // If more than 3 differences, don't highlight
+    if (diffCount > 3) {
+      return <span className="text-destructive font-medium">{userAnswer || "-"}</span>;
+    }
+    
+    // Highlight each character
+    return (
+      <span className="font-medium">
+        {userChars.map((char, i) => {
+          const correctChar = correctChars[i] || '';
+          const isWrong = char.toLowerCase() !== correctChar.toLowerCase();
+          return (
+            <span
+              key={i}
+              className={isWrong ? "text-destructive bg-destructive/20 px-0.5 rounded" : "text-muted-foreground"}
+            >
+              {char}
+            </span>
+          );
+        })}
+        {/* Show missing characters */}
+        {correctChars.length > userChars.length && (
+          <span className="text-destructive bg-destructive/20 px-0.5 rounded opacity-60">
+            {'_'.repeat(correctChars.length - userChars.length)}
+          </span>
+        )}
+      </span>
+    );
+  };
+
   // Get seen words for manual selection
   const seenWords = useMemo(() => {
     let words = allWords.filter(w => w.seen);
@@ -584,7 +630,7 @@ export function QuizMode() {
                 {!result.correct && (
                   <div className="ml-6 mt-1 text-sm">
                     <span className="text-muted-foreground">{t.quiz_your_answer}: </span>
-                    <span className="text-destructive">{result.userAnswer || "-"}</span>
+                    {highlightDifferences(result.userAnswer, result.word.translation)}
                     <span className="text-muted-foreground"> → </span>
                     <span className="text-success">{result.word.translation}</span>
                   </div>
@@ -653,7 +699,7 @@ export function QuizMode() {
                     <span className="font-medium">{t.quiz_incorrect}</span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-1">
-                    {t.quiz_your_answer}: <span className="text-destructive font-medium">{userAnswer || "-"}</span>
+                    {t.quiz_your_answer}: {highlightDifferences(userAnswer, currentWord?.translation || "")}
                   </p>
                   <p className="text-sm">
                     <span className="text-success font-medium">{currentWord?.translation}</span>
