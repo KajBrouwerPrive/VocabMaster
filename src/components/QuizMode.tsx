@@ -63,6 +63,7 @@ export function QuizMode() {
   const [selectedNiveaus, setSelectedNiveaus] = useState<Set<string>>(new Set());
   const [selectedThemas, setSelectedThemas] = useState<Set<string>>(new Set());
   const [ignoreAccents, setIgnoreAccents] = useState(false);
+  const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
 
   // Remove diacritics/accents from a string for comparison
   const normalizeText = (text: string): string => {
@@ -230,6 +231,7 @@ export function QuizMode() {
       
       setQuizWords(words);
       setQuizStarted(true);
+      setQuizStartTime(Date.now());
       setCurrentIndex(0);
       setResults([]);
       setQuizFinished(false);
@@ -335,6 +337,9 @@ export function QuizMode() {
       const correctAnswers = finalResults.filter(r => r.correct).length;
       const scorePercentage = Math.round((correctAnswers / quizWords.length) * 100);
       
+      // Calculate duration
+      const durationSeconds = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : null;
+      
       // Convert selected values to string for storage
       const niveauStr = selectedNiveaus.size > 0 ? Array.from(selectedNiveaus).join(',') : null;
       const themaStr = selectedThemas.size > 0 ? Array.from(selectedThemas).join(',') : null;
@@ -347,6 +352,7 @@ export function QuizMode() {
         niveau: niveauStr,
         thema: themaStr,
         ignore_accents: ignoreAccents,
+        duration_seconds: durationSeconds,
       }).catch(() => {});
       
       setQuizFinished(true);
@@ -375,6 +381,7 @@ export function QuizMode() {
     setShowFeedback(false);
     setLastCorrect(null);
     setSelectedWordIds(new Set());
+    setQuizStartTime(null);
     checkAvailableWords();
   };
 
