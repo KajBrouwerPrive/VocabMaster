@@ -135,6 +135,8 @@ interface Translations {
   stats_fastest_times: string;
   stats_time_per_word: string;
   stats_seconds_short: string;
+  stats_quiz_duration: string;
+  stats_minutes_short: string;
   
   // Auth
   auth_login: string;
@@ -278,6 +280,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_fastest_times: 'Snelste tijden',
     stats_time_per_word: 'per vraag',
     stats_seconds_short: 's',
+    stats_quiz_duration: 'Quizduur',
+    stats_minutes_short: 'm',
     auth_login: 'Inloggen',
     auth_register: 'Registreren',
     auth_email: 'E-mail',
@@ -415,6 +419,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_fastest_times: 'Fastest times',
     stats_time_per_word: 'per question',
     stats_seconds_short: 's',
+    stats_quiz_duration: 'Quiz duration',
+    stats_minutes_short: 'm',
     auth_login: 'Login',
     auth_register: 'Register',
     auth_email: 'Email',
@@ -552,6 +558,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_fastest_times: 'Temps les plus rapides',
     stats_time_per_word: 'par question',
     stats_seconds_short: 's',
+    stats_quiz_duration: 'Durée du quiz',
+    stats_minutes_short: 'm',
     auth_login: 'Connexion',
     auth_register: 'Inscription',
     auth_email: 'E-mail',
@@ -689,6 +697,8 @@ const translations: Record<AppLanguage, Translations> = {
     stats_fastest_times: 'Tiempos más rápidos',
     stats_time_per_word: 'por pregunta',
     stats_seconds_short: 's',
+    stats_quiz_duration: 'Duración del quiz',
+    stats_minutes_short: 'm',
     auth_login: 'Iniciar sesión',
     auth_register: 'Registrarse',
     auth_email: 'Correo electrónico',

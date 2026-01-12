@@ -19,6 +19,7 @@ import {
   RotateCcw,
   Trophy,
   ArrowRight,
+  Timer,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -461,6 +462,22 @@ export function ConjugationQuizMode() {
             <p className="text-muted-foreground">
               {correctCount} / {questions.length} {t.quiz_correct.toLowerCase().replace('!', '')}
             </p>
+            {quizStartTime && (
+              <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50">
+                  <Timer className="h-4 w-4" />
+                  <span className="font-medium">
+                    {Math.floor((Date.now() - quizStartTime) / 60000)}{t.stats_minutes_short} {Math.floor(((Date.now() - quizStartTime) / 1000) % 60)}{t.stats_seconds_short}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50">
+                  <span className="font-medium">
+                    {((Date.now() - quizStartTime) / 1000 / questions.length).toFixed(1)}{t.stats_seconds_short}
+                  </span>
+                  <span>{t.stats_time_per_word}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2 max-h-64 overflow-y-auto">

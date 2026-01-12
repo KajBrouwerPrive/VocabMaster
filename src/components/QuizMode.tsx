@@ -14,6 +14,7 @@ import {
   ArrowRight,
   ListChecks,
   Shuffle,
+  Timer,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -614,6 +615,22 @@ export function QuizMode() {
             <p className="text-muted-foreground">
               {correctCount} / {quizWords.length} {t.quiz_correct}
             </p>
+            {quizStartTime && (
+              <div className="flex items-center justify-center gap-4 mt-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50">
+                  <Timer className="h-4 w-4" />
+                  <span className="font-medium">
+                    {Math.floor((Date.now() - quizStartTime) / 60000)}{t.stats_minutes_short} {Math.floor(((Date.now() - quizStartTime) / 1000) % 60)}{t.stats_seconds_short}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/50">
+                  <span className="font-medium">
+                    {((Date.now() - quizStartTime) / 1000 / quizWords.length).toFixed(1)}{t.stats_seconds_short}
+                  </span>
+                  <span>{t.stats_time_per_word}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2 max-h-80 overflow-y-auto">
