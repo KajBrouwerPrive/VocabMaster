@@ -97,6 +97,7 @@ export function ConjugationQuizMode() {
   const [retryAnswer, setRetryAnswer] = useState("");
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
 
   const seenConjugations = useMemo(() => {
     return allConjugations.filter(c => c.progress?.seen);
@@ -179,6 +180,7 @@ export function ConjugationQuizMode() {
       
       setQuestions(quizQuestions);
       setQuizStarted(true);
+      setQuizStartTime(Date.now());
       setCurrentIndex(0);
       setResults([]);
       setQuizFinished(false);
@@ -310,12 +312,16 @@ export function ConjugationQuizMode() {
       const correctAnswers = finalResults.filter(r => r.correct).length;
       const scorePercentage = Math.round((correctAnswers / questions.length) * 100);
       
+      // Calculate duration
+      const durationSeconds = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : null;
+      
       saveQuizResult({
         quiz_type: 'conjugations',
         score_percentage: scorePercentage,
         total_questions: questions.length,
         correct_answers: correctAnswers,
         tenses: selectedTenses,
+        duration_seconds: durationSeconds,
       }).catch(() => {});
       
       setQuizFinished(true);
@@ -343,6 +349,7 @@ export function ConjugationQuizMode() {
     setUserAnswer("");
     setShowFeedback(false);
     setLastCorrect(null);
+    setQuizStartTime(null);
     loadConjugations();
   };
 

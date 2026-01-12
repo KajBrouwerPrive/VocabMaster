@@ -75,6 +75,7 @@ export type Database = {
         Row: {
           correct_answers: number
           created_at: string
+          duration_seconds: number | null
           id: string
           ignore_accents: boolean | null
           niveau: string | null
@@ -88,6 +89,7 @@ export type Database = {
         Insert: {
           correct_answers: number
           created_at?: string
+          duration_seconds?: number | null
           id?: string
           ignore_accents?: boolean | null
           niveau?: string | null
@@ -101,6 +103,7 @@ export type Database = {
         Update: {
           correct_answers?: number
           created_at?: string
+          duration_seconds?: number | null
           id?: string
           ignore_accents?: boolean | null
           niveau?: string | null

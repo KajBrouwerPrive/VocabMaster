@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getQuizResults, type QuizResultRecord } from "@/lib/api";
-import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type, Hash, Layers } from "lucide-react";
+import { Loader2, Trophy, TrendingUp, Target, Award, Calendar, BookOpen, Languages, Type, Hash, Layers, Timer } from "lucide-react";
 import { format } from "date-fns";
 import { nl, enUS, fr, es } from "date-fns/locale";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -148,6 +148,24 @@ export function QuizStatistics() {
     niveauC: t.stats_niveau_c,
     difficult: t.stats_difficult,
   }), [t]);
+
+  // Fastest times - only quizzes with timing and 10+ questions
+  const fastestTimes = useMemo(() => {
+    const dateLocale = language === 'nl' ? nl : language === 'fr' ? fr : language === 'es' ? es : enUS;
+    
+    return allResults
+      .filter(r => r.duration_seconds && r.duration_seconds > 0 && r.total_questions >= 10)
+      .map(r => ({
+        ...r,
+        timePerQuestion: r.duration_seconds! / r.total_questions,
+      }))
+      .sort((a, b) => a.timePerQuestion - b.timePerQuestion)
+      .slice(0, 3)
+      .map(r => ({
+        ...r,
+        formattedDate: format(new Date(r.created_at), "d MMM", { locale: dateLocale }),
+      }));
+  }, [allResults, language]);
 
   const handleCardClick = (category: StatCategory) => {
     setSelectedCategory(selectedCategory === category ? null : category);
@@ -338,6 +356,56 @@ export function QuizStatistics() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Fastest Times */}
+      {fastestTimes.length > 0 && (
+        <Card className="bg-gradient-to-br from-cyan-50 to-cyan-100/50 dark:from-cyan-950/30 dark:to-cyan-900/20 border-cyan-200/50 dark:border-cyan-800/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Timer className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+              {t.stats_fastest_times}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2">
+              {fastestTimes.map((result, idx) => {
+                const medalColors = [
+                  "bg-yellow-400/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-300",
+                  "bg-slate-300/30 border-slate-400/30 text-slate-700 dark:text-slate-300",
+                  "bg-orange-300/20 border-orange-400/30 text-orange-700 dark:text-orange-300",
+                ];
+                const medals = ["🥇", "🥈", "🥉"];
+                
+                return (
+                  <div
+                    key={result.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${medalColors[idx]}`}
+                  >
+                    <span className="text-xl">{medals[idx]}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-lg">
+                          {result.timePerQuestion.toFixed(1)}{t.stats_seconds_short}
+                        </span>
+                        <span className="text-xs opacity-70">{t.stats_time_per_word}</span>
+                      </div>
+                      <p className="text-xs opacity-70 truncate">
+                        {result.quiz_type === 'words' ? t.stats_words_quiz : t.stats_conjugations_quiz}
+                        {' • '}{result.total_questions} {t.common_words.toLowerCase()}
+                        {' • '}{result.formattedDate}
+                        {' • '}{result.score_percentage}%
+                      </p>
+                    </div>
+                    <div className="text-right text-xs opacity-70">
+                      {Math.floor(result.duration_seconds! / 60)}:{(result.duration_seconds! % 60).toString().padStart(2, '0')}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Score Trend Chart */}
       {chartData.length >= 2 && (
