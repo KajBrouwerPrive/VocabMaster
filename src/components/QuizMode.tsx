@@ -65,6 +65,7 @@ export function QuizMode() {
   const [selectedThemas, setSelectedThemas] = useState<Set<string>>(new Set());
   const [ignoreAccents, setIgnoreAccents] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   // Remove diacritics/accents from a string for comparison
   const normalizeText = (text: string): string => {
@@ -153,6 +154,15 @@ export function QuizMode() {
     }
     return words.length;
   }, [allWords, selectedNiveaus, selectedThemas]);
+
+  // Live timer effect
+  useEffect(() => {
+    if (!quizStartTime || quizFinished) return;
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - quizStartTime) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [quizStartTime, quizFinished]);
 
   useEffect(() => {
     checkAvailableWords();
@@ -383,6 +393,7 @@ export function QuizMode() {
     setLastCorrect(null);
     setSelectedWordIds(new Set());
     setQuizStartTime(null);
+    setElapsedTime(0);
     checkAvailableWords();
   };
 
@@ -681,9 +692,17 @@ export function QuizMode() {
             <GraduationCap className="h-5 w-5 text-primary" />
             {t.quiz_title}
           </CardTitle>
-          <span className="text-sm text-muted-foreground">
-            {currentIndex + 1} / {quizWords.length}
-          </span>
+          <div className="flex items-center gap-3">
+            {quizStartTime && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full">
+                <Timer className="h-3.5 w-3.5" />
+                <span>{Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</span>
+              </div>
+            )}
+            <span className="text-sm text-muted-foreground">
+              {currentIndex + 1} / {quizWords.length}
+            </span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
