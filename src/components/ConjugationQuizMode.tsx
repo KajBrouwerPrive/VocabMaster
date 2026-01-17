@@ -99,10 +99,20 @@ export function ConjugationQuizMode() {
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   const seenConjugations = useMemo(() => {
     return allConjugations.filter(c => c.progress?.seen);
   }, [allConjugations]);
+
+  // Live timer effect
+  useEffect(() => {
+    if (!quizStartTime || quizFinished) return;
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - quizStartTime) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [quizStartTime, quizFinished]);
 
   useEffect(() => {
     loadConjugations();
@@ -351,6 +361,7 @@ export function ConjugationQuizMode() {
     setShowFeedback(false);
     setLastCorrect(null);
     setQuizStartTime(null);
+    setElapsedTime(0);
     loadConjugations();
   };
 
@@ -527,9 +538,17 @@ export function ConjugationQuizMode() {
             <GraduationCap className="h-5 w-5 text-primary" />
             {t.nav_quiz_conjugations}
           </CardTitle>
-          <span className="text-sm text-muted-foreground">
-            {currentIndex + 1} / {questions.length}
-          </span>
+          <div className="flex items-center gap-3">
+            {quizStartTime && (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground bg-secondary/50 px-2 py-1 rounded-full">
+                <Timer className="h-3.5 w-3.5" />
+                <span>{Math.floor(elapsedTime / 60)}:{(elapsedTime % 60).toString().padStart(2, '0')}</span>
+              </div>
+            )}
+            <span className="text-sm text-muted-foreground">
+              {currentIndex + 1} / {questions.length}
+            </span>
+          </div>
         </div>
         <Progress value={((currentIndex + 1) / questions.length) * 100} className="h-2" />
       </CardHeader>
