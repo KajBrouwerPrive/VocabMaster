@@ -348,8 +348,8 @@ export function QuizMode() {
       const correctAnswers = finalResults.filter(r => r.correct).length;
       const scorePercentage = Math.round((correctAnswers / quizWords.length) * 100);
       
-      // Calculate duration
-      const durationSeconds = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : null;
+      // Calculate duration in seconds with millisecond precision
+      const durationSeconds = quizStartTime ? (Date.now() - quizStartTime) / 1000 : null;
       
       // Convert selected values to string for storage
       const niveauStr = selectedNiveaus.size > 0 ? Array.from(selectedNiveaus).join(',') : null;
