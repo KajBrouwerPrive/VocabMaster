@@ -323,8 +323,8 @@ export function ConjugationQuizMode() {
       const correctAnswers = finalResults.filter(r => r.correct).length;
       const scorePercentage = Math.round((correctAnswers / questions.length) * 100);
       
-      // Calculate duration
-      const durationSeconds = quizStartTime ? Math.round((Date.now() - quizStartTime) / 1000) : null;
+      // Calculate duration in seconds with millisecond precision
+      const durationSeconds = quizStartTime ? (Date.now() - quizStartTime) / 1000 : null;
       
       saveQuizResult({
         quiz_type: 'conjugations',
