@@ -149,18 +149,38 @@ export function QuizStatistics() {
     difficult: t.stats_difficult,
   }), [t]);
 
-  // Fastest times - only quizzes with timing and 10+ questions
+  // Fastest times - one per medal category (gold, silver, bronze)
   const fastestTimes = useMemo(() => {
     const dateLocale = language === 'nl' ? nl : language === 'fr' ? fr : language === 'es' ? es : enUS;
     
-    return allResults
+    const timedResults = allResults
       .filter(r => r.duration_seconds && r.duration_seconds > 0 && r.total_questions >= 10)
       .map(r => ({
         ...r,
         timePerQuestion: r.duration_seconds! / r.total_questions,
-      }))
-      .sort((a, b) => a.timePerQuestion - b.timePerQuestion)
-      .slice(0, 3)
+      }));
+    
+    // Find fastest for each medal category
+    const goldResults = timedResults.filter(r => r.score_percentage === 100);
+    const silverResults = timedResults.filter(r => r.score_percentage >= 90 && r.score_percentage < 100);
+    const bronzeResults = timedResults.filter(r => r.score_percentage >= 80 && r.score_percentage < 90);
+    
+    const fastestGold = goldResults.length > 0 
+      ? goldResults.reduce((a, b) => a.timePerQuestion < b.timePerQuestion ? a : b) 
+      : null;
+    const fastestSilver = silverResults.length > 0 
+      ? silverResults.reduce((a, b) => a.timePerQuestion < b.timePerQuestion ? a : b) 
+      : null;
+    const fastestBronze = bronzeResults.length > 0 
+      ? bronzeResults.reduce((a, b) => a.timePerQuestion < b.timePerQuestion ? a : b) 
+      : null;
+    
+    return [
+      fastestGold ? { ...fastestGold, medal: 'gold' as const } : null,
+      fastestSilver ? { ...fastestSilver, medal: 'silver' as const } : null,
+      fastestBronze ? { ...fastestBronze, medal: 'bronze' as const } : null,
+    ]
+      .filter((r): r is NonNullable<typeof r> => r !== null)
       .map(r => ({
         ...r,
         formattedDate: format(new Date(r.created_at), "d MMM", { locale: dateLocale }),
@@ -368,20 +388,29 @@ export function QuizStatistics() {
           </CardHeader>
           <CardContent className="pt-0">
             <div className="space-y-2">
-              {fastestTimes.map((result, idx) => {
-                const medalColors = [
-                  "bg-yellow-400/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-300",
-                  "bg-slate-300/30 border-slate-400/30 text-slate-700 dark:text-slate-300",
-                  "bg-orange-300/20 border-orange-400/30 text-orange-700 dark:text-orange-300",
-                ];
-                const medals = ["🥇", "🥈", "🥉"];
+              {fastestTimes.map((result) => {
+                const medalConfig = {
+                  gold: {
+                    color: "bg-yellow-400/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-300",
+                    emoji: "🥇",
+                  },
+                  silver: {
+                    color: "bg-slate-300/30 border-slate-400/30 text-slate-700 dark:text-slate-300",
+                    emoji: "🥈",
+                  },
+                  bronze: {
+                    color: "bg-orange-300/20 border-orange-400/30 text-orange-700 dark:text-orange-300",
+                    emoji: "🥉",
+                  },
+                };
+                const config = medalConfig[result.medal];
                 
                 return (
                   <div
                     key={result.id}
-                    className={`flex items-center gap-3 p-3 rounded-lg border ${medalColors[idx]}`}
+                    className={`flex items-center gap-3 p-3 rounded-lg border ${config.color}`}
                   >
-                    <span className="text-xl">{medals[idx]}</span>
+                    <span className="text-xl">{config.emoji}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-lg">
