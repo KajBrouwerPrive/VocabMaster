@@ -414,7 +414,7 @@ export function QuizStatistics() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-lg">
-                          {result.timePerQuestion.toFixed(2)}{t.stats_seconds_short}
+                          {result.timePerQuestion.toFixed(3)}{t.stats_seconds_short}
                         </span>
                         <span className="text-xs opacity-70">{t.stats_time_per_word}</span>
                       </div>
