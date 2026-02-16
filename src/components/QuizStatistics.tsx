@@ -426,7 +426,7 @@ export function QuizStatistics() {
                       </p>
                     </div>
                     <div className="text-right text-xs opacity-70">
-                      {Math.floor(result.duration_seconds! / 60)}:{(result.duration_seconds! % 60).toString().padStart(2, '0')}
+                      {Math.floor(result.duration_seconds! / 60)}:{(result.duration_seconds! % 60).toFixed(3).padStart(6, '0')}
                     </div>
                   </div>
                 );
