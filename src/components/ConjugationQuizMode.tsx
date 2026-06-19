@@ -421,8 +421,18 @@ export function ConjugationQuizMode() {
                     type="number"
                     min={1}
                     max={100}
-                    value={questionCount}
-                    onChange={(e) => setQuestionCount(Math.max(1, parseInt(e.target.value) || 1))}
+                    value={questionCount === 0 ? "" : questionCount}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") {
+                        setQuestionCount(0);
+                      } else {
+                        setQuestionCount(Math.max(1, Math.min(100, parseInt(v) || 1)));
+                      }
+                    }}
+                    onBlur={() => {
+                      if (!questionCount) setQuestionCount(1);
+                    }}
                   />
                 </div>
 
