@@ -78,7 +78,7 @@ export interface VerbConjugation {
   subjuntivo_imperfecto_jullie: string;
   subjuntivo_imperfecto_zij: string;
   shared: string;
-  verb_type: "regular" | "irregular";
+  verb_type: string;
   created_at: string;
   updated_at: string;
 }
