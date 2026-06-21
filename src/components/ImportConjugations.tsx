@@ -306,10 +306,28 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Count filled tenses for display
-  const countFilledTenses = (conj: ParsedConjugation): number => {
-    const tenses = ["present", "past", "perfect", "indefinido", "futuro", "futuro_perfecto", "condicional", "pluscuamperfecto", "subjuntivo_presente", "subjuntivo_imperfecto"];
-    return tenses.filter((t) => (conj as any)[`${t}_ik`]).length;
+  // Tense labels for display
+  const TENSE_LABELS: { key: string; label: string }[] = [
+    { key: "present", label: "presente" },
+    { key: "past", label: "imperfecto" },
+    { key: "perfect", label: "perfecto compuesto" },
+    { key: "indefinido", label: "indefinido" },
+    { key: "futuro", label: "futuro" },
+    { key: "futuro_perfecto", label: "futuro perfecto" },
+    { key: "condicional", label: "condicional" },
+    { key: "pluscuamperfecto", label: "pluscuamperfecto" },
+    { key: "subjuntivo_presente", label: "subjuntivo presente" },
+    { key: "subjuntivo_imperfecto", label: "subjuntivo imperfecto" },
+  ];
+
+  const getTenseStatus = (conj: ParsedConjugation) => {
+    const found: string[] = [];
+    const missing: string[] = [];
+    for (const t of TENSE_LABELS) {
+      if ((conj as any)[`${t.key}_ik`]) found.push(t.label);
+      else missing.push(t.label);
+    }
+    return { found, missing };
   };
 
   return (
@@ -361,13 +379,30 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                   </tr>
                 </thead>
                 <tbody>
-                  {parsedConjugations.slice(0, 50).map((conj, i) => (
-                    <tr key={i} className="border-t">
-                      <td className="p-2 font-medium">{conj.infinitive}</td>
-                      <td className="p-2">{conj.translation}</td>
-                      <td className="p-2 text-muted-foreground">{countFilledTenses(conj)}/10</td>
-                    </tr>
-                  ))}
+                  {parsedConjugations.slice(0, 50).map((conj, i) => {
+                    const { found, missing } = getTenseStatus(conj);
+                    return (
+                      <tr key={i} className="border-t align-top">
+                        <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
+                        <td className="p-2 whitespace-nowrap">{conj.translation}</td>
+                        <td className="p-2">
+                          <div className={`text-xs font-medium ${missing.length === 0 ? "text-green-600" : "text-amber-600"}`}>
+                            {found.length}/10
+                          </div>
+                          {found.length > 0 && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              <span className="text-green-600">✓</span> {found.join(", ")}
+                            </div>
+                          )}
+                          {missing.length > 0 && (
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              <span className="text-amber-600">✗</span> {missing.join(", ")}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               {parsedConjugations.length > 50 && (
