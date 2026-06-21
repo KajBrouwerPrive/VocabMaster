@@ -97,13 +97,18 @@ export function ConjugationQuizMode() {
   const [retryMode, setRetryMode] = useState(false);
   const [retryAnswer, setRetryAnswer] = useState("");
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
+  const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const seenConjugations = useMemo(() => {
-    return allConjugations.filter(c => c.progress?.seen);
-  }, [allConjugations]);
+    return allConjugations.filter(c => {
+      if (!c.progress?.seen) return false;
+      if (verbTypeFilter !== "all" && (c.verb_type || "regular") !== verbTypeFilter) return false;
+      return true;
+    });
+  }, [allConjugations, verbTypeFilter]);
 
   // Live timer effect
   useEffect(() => {
