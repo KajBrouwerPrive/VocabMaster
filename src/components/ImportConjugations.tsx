@@ -301,6 +301,16 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
               (conj as any)[fieldKey] = row.esVorm;
             }
           }
+
+          // Detect verb type from column G if provided
+          if (row.type) {
+            const t = normalize(row.type);
+            if (t.includes("onregelmatig") || t.includes("irregular") || t === "ir") {
+              conj.verb_type = "irregular";
+            } else if (t.includes("regelmatig") || t.includes("regular") || t === "r") {
+              conj.verb_type = "regular";
+            }
+          }
         }
 
         const conjugations = Array.from(verbMap.values());
