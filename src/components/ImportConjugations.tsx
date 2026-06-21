@@ -379,13 +379,30 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                   </tr>
                 </thead>
                 <tbody>
-                  {parsedConjugations.slice(0, 50).map((conj, i) => (
-                    <tr key={i} className="border-t">
-                      <td className="p-2 font-medium">{conj.infinitive}</td>
-                      <td className="p-2">{conj.translation}</td>
-                      <td className="p-2 text-muted-foreground">{countFilledTenses(conj)}/10</td>
-                    </tr>
-                  ))}
+                  {parsedConjugations.slice(0, 50).map((conj, i) => {
+                    const { found, missing } = getTenseStatus(conj);
+                    return (
+                      <tr key={i} className="border-t align-top">
+                        <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
+                        <td className="p-2 whitespace-nowrap">{conj.translation}</td>
+                        <td className="p-2">
+                          <div className={`text-xs font-medium ${missing.length === 0 ? "text-green-600" : "text-amber-600"}`}>
+                            {found.length}/10
+                          </div>
+                          {found.length > 0 && (
+                            <div className="text-xs text-muted-foreground mt-1">
+                              <span className="text-green-600">✓</span> {found.join(", ")}
+                            </div>
+                          )}
+                          {missing.length > 0 && (
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              <span className="text-amber-600">✗</span> {missing.join(", ")}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               {parsedConjugations.length > 50 && (
