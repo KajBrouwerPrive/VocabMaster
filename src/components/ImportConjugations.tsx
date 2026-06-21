@@ -209,6 +209,7 @@ const createEmptyConjugation = (infinitive: string, translation: string): Parsed
   pluscuamperfecto_ik: "", pluscuamperfecto_jij: "", pluscuamperfecto_hij_zij: "", pluscuamperfecto_wij: "", pluscuamperfecto_jullie: "", pluscuamperfecto_zij: "",
   subjuntivo_presente_ik: "", subjuntivo_presente_jij: "", subjuntivo_presente_hij_zij: "", subjuntivo_presente_wij: "", subjuntivo_presente_jullie: "", subjuntivo_presente_zij: "",
   subjuntivo_imperfecto_ik: "", subjuntivo_imperfecto_jij: "", subjuntivo_imperfecto_hij_zij: "", subjuntivo_imperfecto_wij: "", subjuntivo_imperfecto_jullie: "", subjuntivo_imperfecto_zij: "",
+  verb_type: "regular",
 });
 
 export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsProps) {
