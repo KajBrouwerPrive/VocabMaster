@@ -268,6 +268,30 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
             </div>
           </div>
 
+          {/* Verb type */}
+          <div className="space-y-2">
+            <Label>Type werkwoord</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={verbType === "regular" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setVerbType("regular")}
+              >
+                Regelmatig
+              </Button>
+              <Button
+                type="button"
+                variant={verbType === "irregular" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setVerbType("irregular")}
+              >
+                Onregelmatig
+              </Button>
+            </div>
+          </div>
+
+
           {/* Tenses in Accordion */}
           <Accordion type="multiple" defaultValue={["present"]} className="w-full">
             {TENSES.map((tense) => (
