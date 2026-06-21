@@ -114,14 +114,84 @@ const TENSE_MAP: Record<string, string> = {
   "subjuntivo imperfecto": "subjuntivo_imperfecto",
 };
 
+// Normalize a string for tense matching: strip diacritics, lowercase, collapse whitespace
+const normalize = (s: string): string =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[_\-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+// Pre-normalized tense map
+const NORMALIZED_TENSE_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(TENSE_MAP).map(([k, v]) => [normalize(k), v])
+);
+
+// Keyword fallback: ordered list of (keyword, tense). First match wins.
+// More specific entries MUST come before less specific ones.
+const TENSE_KEYWORDS: [string, string][] = [
+  ["subjuntivo presente", "subjuntivo_presente"],
+  ["subjuntivo imperfecto", "subjuntivo_imperfecto"],
+  ["aanvoegende wijs tegenwoordige", "subjuntivo_presente"],
+  ["aanvoegende wijs verleden", "subjuntivo_imperfecto"],
+  ["pluscuamperfecto", "pluscuamperfecto"],
+  ["voltooide verleden", "pluscuamperfecto"],
+  ["futuro perfecto", "futuro_perfecto"],
+  ["toekomende voltooide", "futuro_perfecto"],
+  ["perfecto compuesto", "perfect"],
+  ["voltooide tijd", "perfect"],
+  ["preterito perfecto", "perfect"],
+  ["indefinido", "indefinido"],
+  ["preterito indefinido", "indefinido"],
+  ["condicional", "condicional"],
+  ["voorwaardelijke", "condicional"],
+  ["futuro", "futuro"],
+  ["toekomende", "futuro"],
+  ["imperfecto", "past"],
+  ["verleden tijd onvoltooid", "past"],
+  ["presente", "present"],
+  ["tegenwoordige", "present"],
+];
+
+const resolveTense = (raw: string): string | null => {
+  const n = normalize(raw);
+  if (!n) return null;
+  if (NORMALIZED_TENSE_MAP[n]) return NORMALIZED_TENSE_MAP[n];
+  for (const [kw, tense] of TENSE_KEYWORDS) {
+    if (n.includes(kw)) return tense;
+  }
+  return null;
+};
+
 // Map Excel person names to our database person suffixes
 const PERSON_MAP: Record<string, string> = {
   "ik": "ik",
   "jij": "jij",
+  "je": "jij",
   "hij/zij": "hij_zij",
+  "hij": "hij_zij",
+  "zij (ev)": "hij_zij",
+  "hij/zij/u": "hij_zij",
   "wij": "wij",
+  "we": "wij",
   "jullie": "jullie",
   "zij": "zij",
+  "zij (mv)": "zij",
+};
+
+const resolvePerson = (raw: string): string | null => {
+  const n = normalize(raw);
+  if (!n) return null;
+  if (PERSON_MAP[n]) return PERSON_MAP[n];
+  if (n.includes("jullie")) return "jullie";
+  if (n.includes("hij") || n.includes("zij ev") || n === "u") return "hij_zij";
+  if (n === "zij" || n.includes("zij mv") || n.includes("ze")) return "zij";
+  if (n.includes("wij")) return "wij";
+  if (n.includes("jij") || n === "je") return "jij";
+  if (n === "ik") return "ik";
+  return null;
 };
 
 const createEmptyConjugation = (infinitive: string, translation: string): ParsedConjugation => ({
