@@ -306,10 +306,28 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  // Count filled tenses for display
-  const countFilledTenses = (conj: ParsedConjugation): number => {
-    const tenses = ["present", "past", "perfect", "indefinido", "futuro", "futuro_perfecto", "condicional", "pluscuamperfecto", "subjuntivo_presente", "subjuntivo_imperfecto"];
-    return tenses.filter((t) => (conj as any)[`${t}_ik`]).length;
+  // Tense labels for display
+  const TENSE_LABELS: { key: string; label: string }[] = [
+    { key: "present", label: "presente" },
+    { key: "past", label: "imperfecto" },
+    { key: "perfect", label: "perfecto compuesto" },
+    { key: "indefinido", label: "indefinido" },
+    { key: "futuro", label: "futuro" },
+    { key: "futuro_perfecto", label: "futuro perfecto" },
+    { key: "condicional", label: "condicional" },
+    { key: "pluscuamperfecto", label: "pluscuamperfecto" },
+    { key: "subjuntivo_presente", label: "subjuntivo presente" },
+    { key: "subjuntivo_imperfecto", label: "subjuntivo imperfecto" },
+  ];
+
+  const getTenseStatus = (conj: ParsedConjugation) => {
+    const found: string[] = [];
+    const missing: string[] = [];
+    for (const t of TENSE_LABELS) {
+      if ((conj as any)[`${t.key}_ik`]) found.push(t.label);
+      else missing.push(t.label);
+    }
+    return { found, missing };
   };
 
   return (
