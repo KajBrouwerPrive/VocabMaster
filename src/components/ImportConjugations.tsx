@@ -459,6 +459,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                   <tr>
                     <th className="p-2 text-left">Infinitief (ES)</th>
                     <th className="p-2 text-left">Vertaling (NL)</th>
+                    <th className="p-2 text-left">Type</th>
                     <th className="p-2 text-left">Tijden</th>
                   </tr>
                 </thead>
@@ -469,6 +470,11 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                       <tr key={i} className="border-t align-top">
                         <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
                         <td className="p-2 whitespace-nowrap">{conj.translation}</td>
+                        <td className="p-2 whitespace-nowrap">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${conj.verb_type === "irregular" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"}`}>
+                            {conj.verb_type === "irregular" ? "onregelmatig" : "regelmatig"}
+                          </span>
+                        </td>
                         <td className="p-2">
                           <div className={`text-xs font-medium ${missing.length === 0 ? "text-green-600" : "text-amber-600"}`}>
                             {found.length}/10
