@@ -19,6 +19,7 @@ interface ExcelRow {
   persoon: string;
   nlVorm: string;
   esVorm: string;
+  type: string;
 }
 
 interface ParsedConjugation {
