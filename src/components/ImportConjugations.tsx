@@ -288,8 +288,8 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
           }
           
           const conj = verbMap.get(key)!;
-          const tenseKey = TENSE_MAP[row.tijd];
-          const personKey = PERSON_MAP[row.persoon];
+          const tenseKey = resolveTense(row.tijd);
+          const personKey = resolvePerson(row.persoon);
           
           if (tenseKey && personKey) {
             const fieldKey = `${tenseKey}_${personKey}` as keyof ParsedConjugation;
