@@ -424,7 +424,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Upload een Excel-bestand met kolommen: NL werkwoord, ES werkwoord, Tijd, Persoon, NL vorm, ES vorm
+          Upload een Excel-bestand met kolommen: NL werkwoord, ES werkwoord, Tijd, Persoon, NL vorm, ES vorm, Type (regelmatig/onregelmatig — optioneel, standaard regelmatig)
         </p>
 
         <div className="flex gap-2">
