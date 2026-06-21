@@ -277,6 +277,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
             persoon: String(row[3] || "").trim().toLowerCase(),
             nlVorm: String(row[4] || "").trim(),
             esVorm: String(row[5] || "").trim(),
+            type: String(row[6] || "").trim().toLowerCase(),
           });
         }
 
