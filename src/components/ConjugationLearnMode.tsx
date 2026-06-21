@@ -74,14 +74,19 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(false);
+  const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
   const { toast } = useToast();
 
   const conjugations = useMemo(() => {
-    if (showOnlyUnseen) {
-      return allConjugations.filter((c) => !c.progress?.seen);
+    let list = allConjugations;
+    if (verbTypeFilter !== "all") {
+      list = list.filter((c) => (c.verb_type || "regular") === verbTypeFilter);
     }
-    return allConjugations;
-  }, [allConjugations, showOnlyUnseen]);
+    if (showOnlyUnseen) {
+      list = list.filter((c) => !c.progress?.seen);
+    }
+    return list;
+  }, [allConjugations, showOnlyUnseen, verbTypeFilter]);
 
   const currentConjugation = conjugations[currentIndex];
 
