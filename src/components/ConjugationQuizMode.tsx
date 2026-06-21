@@ -397,6 +397,24 @@ export function ConjugationQuizMode() {
               </p>
 
               <div className="space-y-4">
+                {/* Verb type filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Type werkwoord</label>
+                  <div className="flex gap-2">
+                    {(["all", "regular", "irregular"] as const).map((v) => (
+                      <Button
+                        key={v}
+                        type="button"
+                        size="sm"
+                        variant={verbTypeFilter === v ? "default" : "outline"}
+                        onClick={() => setVerbTypeFilter(v)}
+                      >
+                        {v === "all" ? "Alle" : v === "regular" ? "Regelmatig" : "Onregelmatig"}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Tense Selection */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">{t.common_filter}</label>
