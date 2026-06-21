@@ -379,6 +379,7 @@ export type Database = {
           translation: string
           updated_at: string
           user_id: string | null
+          verb_type: string
         }
         Insert: {
           condicional_hij_zij?: string
@@ -450,6 +451,7 @@ export type Database = {
           translation: string
           updated_at?: string
           user_id?: string | null
+          verb_type?: string
         }
         Update: {
           condicional_hij_zij?: string
@@ -521,6 +523,7 @@ export type Database = {
           translation?: string
           updated_at?: string
           user_id?: string | null
+          verb_type?: string
         }
         Relationships: []
       }
@@ -665,6 +668,7 @@ export type Database = {
           translation: string | null
           updated_at: string | null
           user_id: string | null
+          verb_type: string | null
         }
         Insert: {
           condicional_hij_zij?: string | null
@@ -736,6 +740,7 @@ export type Database = {
           translation?: string | null
           updated_at?: string | null
           user_id?: never
+          verb_type?: string | null
         }
         Update: {
           condicional_hij_zij?: string | null
@@ -807,6 +812,7 @@ export type Database = {
           translation?: string | null
           updated_at?: string | null
           user_id?: never
+          verb_type?: string | null
         }
         Relationships: []
       }
