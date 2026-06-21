@@ -68,6 +68,7 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [shared, setShared] = useState(false);
+  const [verbType, setVerbType] = useState<"regular" | "irregular">("regular");
 
   const [infinitive, setInfinitive] = useState("");
   const [translation, setTranslation] = useState("");
