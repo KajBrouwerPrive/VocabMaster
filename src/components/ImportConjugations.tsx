@@ -19,6 +19,7 @@ interface ExcelRow {
   persoon: string;
   nlVorm: string;
   esVorm: string;
+  type: string;
 }
 
 interface ParsedConjugation {
@@ -84,6 +85,7 @@ interface ParsedConjugation {
   subjuntivo_imperfecto_wij: string;
   subjuntivo_imperfecto_jullie: string;
   subjuntivo_imperfecto_zij: string;
+  verb_type: "regular" | "irregular";
 }
 
 // Map Excel tense names to our database tense prefixes
@@ -207,6 +209,7 @@ const createEmptyConjugation = (infinitive: string, translation: string): Parsed
   pluscuamperfecto_ik: "", pluscuamperfecto_jij: "", pluscuamperfecto_hij_zij: "", pluscuamperfecto_wij: "", pluscuamperfecto_jullie: "", pluscuamperfecto_zij: "",
   subjuntivo_presente_ik: "", subjuntivo_presente_jij: "", subjuntivo_presente_hij_zij: "", subjuntivo_presente_wij: "", subjuntivo_presente_jullie: "", subjuntivo_presente_zij: "",
   subjuntivo_imperfecto_ik: "", subjuntivo_imperfecto_jij: "", subjuntivo_imperfecto_hij_zij: "", subjuntivo_imperfecto_wij: "", subjuntivo_imperfecto_jullie: "", subjuntivo_imperfecto_zij: "",
+  verb_type: "regular",
 });
 
 export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsProps) {
@@ -274,6 +277,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
             persoon: String(row[3] || "").trim().toLowerCase(),
             nlVorm: String(row[4] || "").trim(),
             esVorm: String(row[5] || "").trim(),
+            type: String(row[6] || "").trim().toLowerCase(),
           });
         }
 
@@ -295,6 +299,16 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
             const fieldKey = `${tenseKey}_${personKey}` as keyof ParsedConjugation;
             if (fieldKey in conj) {
               (conj as any)[fieldKey] = row.esVorm;
+            }
+          }
+
+          // Detect verb type from column G if provided
+          if (row.type) {
+            const t = normalize(row.type);
+            if (t.includes("onregelmatig") || t.includes("irregular") || t === "ir") {
+              conj.verb_type = "irregular";
+            } else if (t.includes("regelmatig") || t.includes("regular") || t === "r") {
+              conj.verb_type = "regular";
             }
           }
         }
@@ -410,7 +424,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Upload een Excel-bestand met kolommen: NL werkwoord, ES werkwoord, Tijd, Persoon, NL vorm, ES vorm
+          Upload een Excel-bestand met kolommen: NL werkwoord, ES werkwoord, Tijd, Persoon, NL vorm, ES vorm, Type (regelmatig/onregelmatig — optioneel, standaard regelmatig)
         </p>
 
         <div className="flex gap-2">
@@ -445,6 +459,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                   <tr>
                     <th className="p-2 text-left">Infinitief (ES)</th>
                     <th className="p-2 text-left">Vertaling (NL)</th>
+                    <th className="p-2 text-left">Type</th>
                     <th className="p-2 text-left">Tijden</th>
                   </tr>
                 </thead>
@@ -455,6 +470,11 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                       <tr key={i} className="border-t align-top">
                         <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
                         <td className="p-2 whitespace-nowrap">{conj.translation}</td>
+                        <td className="p-2 whitespace-nowrap">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${conj.verb_type === "irregular" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"}`}>
+                            {conj.verb_type === "irregular" ? "onregelmatig" : "regelmatig"}
+                          </span>
+                        </td>
                         <td className="p-2">
                           <div className={`text-xs font-medium ${missing.length === 0 ? "text-green-600" : "text-amber-600"}`}>
                             {found.length}/10

@@ -74,14 +74,19 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(false);
+  const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
   const { toast } = useToast();
 
   const conjugations = useMemo(() => {
-    if (showOnlyUnseen) {
-      return allConjugations.filter((c) => !c.progress?.seen);
+    let list = allConjugations;
+    if (verbTypeFilter !== "all") {
+      list = list.filter((c) => (c.verb_type || "regular") === verbTypeFilter);
     }
-    return allConjugations;
-  }, [allConjugations, showOnlyUnseen]);
+    if (showOnlyUnseen) {
+      list = list.filter((c) => !c.progress?.seen);
+    }
+    return list;
+  }, [allConjugations, showOnlyUnseen, verbTypeFilter]);
 
   const currentConjugation = conjugations[currentIndex];
 
@@ -317,20 +322,39 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       {/* Tense Selection with Checkboxes */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <p className="text-sm text-muted-foreground">
               {t.common_filter}:
             </p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Alleen nieuwe</span>
-              <Switch
-                checked={showOnlyUnseen}
-                onCheckedChange={(checked) => {
-                  setShowOnlyUnseen(checked);
-                  setCurrentIndex(0);
-                  setShowConjugations(false);
-                }}
-              />
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex gap-1">
+                {(["all", "regular", "irregular"] as const).map((v) => (
+                  <Button
+                    key={v}
+                    type="button"
+                    size="sm"
+                    variant={verbTypeFilter === v ? "default" : "outline"}
+                    onClick={() => {
+                      setVerbTypeFilter(v);
+                      setCurrentIndex(0);
+                      setShowConjugations(false);
+                    }}
+                  >
+                    {v === "all" ? "Alle" : v === "regular" ? "Regelmatig" : "Onregelmatig"}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Alleen nieuwe</span>
+                <Switch
+                  checked={showOnlyUnseen}
+                  onCheckedChange={(checked) => {
+                    setShowOnlyUnseen(checked);
+                    setCurrentIndex(0);
+                    setShowConjugations(false);
+                  }}
+                />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">

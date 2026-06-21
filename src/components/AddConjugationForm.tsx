@@ -68,6 +68,7 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [shared, setShared] = useState(false);
+  const [verbType, setVerbType] = useState<"regular" | "irregular">("regular");
 
   const [infinitive, setInfinitive] = useState("");
   const [translation, setTranslation] = useState("");
@@ -78,6 +79,7 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
     setTranslation("");
     setAllForms(createAllEmptyForms());
     setShared(false);
+    setVerbType("regular");
   };
 
   const updateForm = (tense: TenseKey, pronoun: PronounKey, value: string) => {
@@ -191,6 +193,7 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
         subjuntivo_imperfecto_jullie: allForms.subjuntivo_imperfecto.jullie.trim(),
         subjuntivo_imperfecto_zij: allForms.subjuntivo_imperfecto.zij.trim(),
         shared: shared ? "Yes" : "No",
+        verb_type: verbType,
       });
 
       toast({
@@ -264,6 +267,30 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
               />
             </div>
           </div>
+
+          {/* Verb type */}
+          <div className="space-y-2">
+            <Label>Type werkwoord</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={verbType === "regular" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setVerbType("regular")}
+              >
+                Regelmatig
+              </Button>
+              <Button
+                type="button"
+                variant={verbType === "irregular" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setVerbType("irregular")}
+              >
+                Onregelmatig
+              </Button>
+            </div>
+          </div>
+
 
           {/* Tenses in Accordion */}
           <Accordion type="multiple" defaultValue={["present"]} className="w-full">

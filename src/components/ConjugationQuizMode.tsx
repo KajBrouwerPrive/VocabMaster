@@ -97,13 +97,18 @@ export function ConjugationQuizMode() {
   const [retryMode, setRetryMode] = useState(false);
   const [retryAnswer, setRetryAnswer] = useState("");
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
+  const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
   const nextButtonRef = useRef<HTMLButtonElement>(null);
   const [quizStartTime, setQuizStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
 
   const seenConjugations = useMemo(() => {
-    return allConjugations.filter(c => c.progress?.seen);
-  }, [allConjugations]);
+    return allConjugations.filter(c => {
+      if (!c.progress?.seen) return false;
+      if (verbTypeFilter !== "all" && (c.verb_type || "regular") !== verbTypeFilter) return false;
+      return true;
+    });
+  }, [allConjugations, verbTypeFilter]);
 
   // Live timer effect
   useEffect(() => {
@@ -392,6 +397,24 @@ export function ConjugationQuizMode() {
               </p>
 
               <div className="space-y-4">
+                {/* Verb type filter */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Type werkwoord</label>
+                  <div className="flex gap-2">
+                    {(["all", "regular", "irregular"] as const).map((v) => (
+                      <Button
+                        key={v}
+                        type="button"
+                        size="sm"
+                        variant={verbTypeFilter === v ? "default" : "outline"}
+                        onClick={() => setVerbTypeFilter(v)}
+                      >
+                        {v === "all" ? "Alle" : v === "regular" ? "Regelmatig" : "Onregelmatig"}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Tense Selection */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">{t.common_filter}</label>
