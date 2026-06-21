@@ -192,6 +192,7 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
         subjuntivo_imperfecto_jullie: allForms.subjuntivo_imperfecto.jullie.trim(),
         subjuntivo_imperfecto_zij: allForms.subjuntivo_imperfecto.zij.trim(),
         shared: shared ? "Yes" : "No",
+        verb_type: verbType,
       });
 
       toast({
