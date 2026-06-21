@@ -79,6 +79,7 @@ export function AddConjugationForm({ onConjugationAdded }: AddConjugationFormPro
     setTranslation("");
     setAllForms(createAllEmptyForms());
     setShared(false);
+    setVerbType("regular");
   };
 
   const updateForm = (tense: TenseKey, pronoun: PronounKey, value: string) => {
