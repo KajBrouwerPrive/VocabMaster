@@ -85,6 +85,7 @@ interface ParsedConjugation {
   subjuntivo_imperfecto_wij: string;
   subjuntivo_imperfecto_jullie: string;
   subjuntivo_imperfecto_zij: string;
+  verb_type: "regular" | "irregular";
 }
 
 // Map Excel tense names to our database tense prefixes
