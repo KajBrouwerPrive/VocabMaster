@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, FileSpreadsheet, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -216,6 +217,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [parsedConjugations, setParsedConjugations] = useState<ParsedConjugation[]>([]);
+  const [selected, setSelected] = useState<boolean[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -315,6 +317,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
         const conjugations = Array.from(verbMap.values());
         setParsedConjugations(conjugations);
+        setSelected(conjugations.map(() => true));
         toast.success(`${conjugations.length} werkwoorden gevonden in bestand`);
       } catch (error) {
         toast.error("Fout bij het lezen van het bestand");
@@ -332,6 +335,12 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       return;
     }
 
+    const chosen = parsedConjugations.filter((_, i) => selected[i]);
+    if (chosen.length === 0) {
+      toast.error("Selecteer minstens één werkwoord");
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Get existing conjugations to check for duplicates
@@ -346,12 +355,12 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       );
 
       // Filter out duplicates
-      const newConjugations = parsedConjugations.filter(
+      const newConjugations = chosen.filter(
         (c) => !existingSet.has(c.infinitive.toLowerCase())
       );
 
       if (newConjugations.length === 0) {
-        toast.info("Alle werkwoorden bestaan al");
+        toast.info("Alle geselecteerde werkwoorden bestaan al");
         clearFile();
         return;
       }
@@ -369,11 +378,12 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
       if (error) throw error;
 
-      const skipped = parsedConjugations.length - newConjugations.length;
-      const message = skipped > 0
-        ? `${newConjugations.length} werkwoorden toegevoegd, ${skipped} duplicaten overgeslagen`
-        : `${newConjugations.length} werkwoorden geïmporteerd`;
-      toast.success(message);
+      const deselected = parsedConjugations.length - chosen.length;
+      const skipped = chosen.length - newConjugations.length;
+      const parts = [`${newConjugations.length} werkwoorden toegevoegd`];
+      if (skipped > 0) parts.push(`${skipped} duplicaten overgeslagen`);
+      if (deselected > 0) parts.push(`${deselected} niet geselecteerd`);
+      toast.success(parts.join(", "));
       clearFile();
       onConjugationsAdded();
     } catch (error: any) {
@@ -386,6 +396,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
   const clearFile = () => {
     setParsedConjugations([]);
+    setSelected([]);
     setFileName(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -457,6 +468,13 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
               <table className="w-full text-sm">
                 <thead className="bg-muted sticky top-0">
                   <tr>
+                    <th className="p-2 text-left w-8">
+                      <Checkbox
+                        checked={selected.length > 0 && selected.every(Boolean)}
+                        onCheckedChange={(c) => setSelected(parsedConjugations.map(() => !!c))}
+                        aria-label="Alles selecteren"
+                      />
+                    </th>
                     <th className="p-2 text-left">Infinitief (ES)</th>
                     <th className="p-2 text-left">Vertaling (NL)</th>
                     <th className="p-2 text-left">Type</th>
@@ -467,7 +485,20 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                   {parsedConjugations.slice(0, 50).map((conj, i) => {
                     const { found, missing } = getTenseStatus(conj);
                     return (
-                      <tr key={i} className="border-t align-top">
+                      <tr key={i} className={`border-t align-top ${!selected[i] ? "opacity-50" : ""}`}>
+                        <td className="p-2">
+                          <Checkbox
+                            checked={!!selected[i]}
+                            onCheckedChange={(c) =>
+                              setSelected((prev) => {
+                                const next = [...prev];
+                                next[i] = !!c;
+                                return next;
+                              })
+                            }
+                            aria-label={`Selecteer ${conj.infinitive}`}
+                          />
+                        </td>
                         <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
                         <td className="p-2 whitespace-nowrap">{conj.translation}</td>
                         <td className="p-2 whitespace-nowrap">
@@ -502,9 +533,10 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
               )}
             </div>
 
+
             <Button
               onClick={handleImport}
-              disabled={isLoading}
+              disabled={isLoading || selected.filter(Boolean).length === 0}
               className="w-full"
             >
               {isLoading ? (
@@ -515,7 +547,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
               ) : (
                 <>
                   <Check className="h-4 w-4 mr-2" />
-                  {parsedConjugations.length} werkwoorden importeren
+                  {selected.filter(Boolean).length} werkwoorden importeren
                 </>
               )}
             </Button>
