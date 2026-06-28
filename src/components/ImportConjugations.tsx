@@ -250,7 +250,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
     setFileName(file.name);
     const reader = new FileReader();
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const data = event.target?.result;
         const workbook = XLSX.read(data, { type: "binary" });
@@ -317,9 +317,27 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
         }
 
         const conjugations = Array.from(verbMap.values());
+
+        // Fetch existing infinitives to detect duplicates
+        const { data: existingConj } = await supabase
+          .from("verb_conjugations")
+          .select("infinitive")
+          .eq("source_language", "nl")
+          .eq("target_language", "es");
+        const existingSet = new Set(
+          (existingConj || []).map((c) => c.infinitive.toLowerCase())
+        );
+
+        setExistingInfinitives(existingSet);
         setParsedConjugations(conjugations);
-        setSelected(conjugations.map(() => true));
-        toast.success(`${conjugations.length} werkwoorden gevonden in bestand`);
+        // Default: select only verbs that don't already exist
+        setSelected(conjugations.map((c) => !existingSet.has(c.infinitive.toLowerCase())));
+
+        const dupCount = conjugations.filter((c) => existingSet.has(c.infinitive.toLowerCase())).length;
+        const msg = dupCount > 0
+          ? `${conjugations.length} werkwoorden gevonden (${dupCount} bestaan al — uitgevinkt)`
+          : `${conjugations.length} werkwoorden gevonden in bestand`;
+        toast.success(msg);
       } catch (error) {
         toast.error("Fout bij het lezen van het bestand");
         console.error(error);
@@ -328,6 +346,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
     reader.readAsBinaryString(file);
   };
+
 
   const handleImport = async () => {
     if (parsedConjugations.length === 0) return;
