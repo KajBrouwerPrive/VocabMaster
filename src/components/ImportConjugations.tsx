@@ -218,6 +218,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [parsedConjugations, setParsedConjugations] = useState<ParsedConjugation[]>([]);
   const [selected, setSelected] = useState<boolean[]>([]);
+  const [existingInfinitives, setExistingInfinitives] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -249,7 +250,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
     setFileName(file.name);
     const reader = new FileReader();
 
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const data = event.target?.result;
         const workbook = XLSX.read(data, { type: "binary" });
@@ -316,9 +317,27 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
         }
 
         const conjugations = Array.from(verbMap.values());
+
+        // Fetch existing infinitives to detect duplicates
+        const { data: existingConj } = await supabase
+          .from("verb_conjugations")
+          .select("infinitive")
+          .eq("source_language", "nl")
+          .eq("target_language", "es");
+        const existingSet = new Set(
+          (existingConj || []).map((c) => c.infinitive.toLowerCase())
+        );
+
+        setExistingInfinitives(existingSet);
         setParsedConjugations(conjugations);
-        setSelected(conjugations.map(() => true));
-        toast.success(`${conjugations.length} werkwoorden gevonden in bestand`);
+        // Default: select only verbs that don't already exist
+        setSelected(conjugations.map((c) => !existingSet.has(c.infinitive.toLowerCase())));
+
+        const dupCount = conjugations.filter((c) => existingSet.has(c.infinitive.toLowerCase())).length;
+        const msg = dupCount > 0
+          ? `${conjugations.length} werkwoorden gevonden (${dupCount} bestaan al — uitgevinkt)`
+          : `${conjugations.length} werkwoorden gevonden in bestand`;
+        toast.success(msg);
       } catch (error) {
         toast.error("Fout bij het lezen van het bestand");
         console.error(error);
@@ -327,6 +346,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
     reader.readAsBinaryString(file);
   };
+
 
   const handleImport = async () => {
     if (parsedConjugations.length === 0) return;
@@ -397,6 +417,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
   const clearFile = () => {
     setParsedConjugations([]);
     setSelected([]);
+    setExistingInfinitives(new Set());
     setFileName(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -484,6 +505,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                 <tbody>
                   {parsedConjugations.slice(0, 50).map((conj, i) => {
                     const { found, missing } = getTenseStatus(conj);
+                    const isDuplicate = existingInfinitives.has(conj.infinitive.toLowerCase());
                     return (
                       <tr key={i} className={`border-t align-top ${!selected[i] ? "opacity-50" : ""}`}>
                         <td className="p-2">
@@ -499,7 +521,14 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                             aria-label={`Selecteer ${conj.infinitive}`}
                           />
                         </td>
-                        <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
+                        <td className="p-2 font-medium whitespace-nowrap">
+                          {conj.infinitive}
+                          {isDuplicate && (
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800">
+                              bestaat al
+                            </span>
+                          )}
+                        </td>
                         <td className="p-2 whitespace-nowrap">{conj.translation}</td>
                         <td className="p-2 whitespace-nowrap">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${conj.verb_type === "irregular" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"}`}>
