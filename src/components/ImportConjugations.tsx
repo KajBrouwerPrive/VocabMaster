@@ -505,6 +505,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                 <tbody>
                   {parsedConjugations.slice(0, 50).map((conj, i) => {
                     const { found, missing } = getTenseStatus(conj);
+                    const isDuplicate = existingInfinitives.has(conj.infinitive.toLowerCase());
                     return (
                       <tr key={i} className={`border-t align-top ${!selected[i] ? "opacity-50" : ""}`}>
                         <td className="p-2">
@@ -520,7 +521,14 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                             aria-label={`Selecteer ${conj.infinitive}`}
                           />
                         </td>
-                        <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
+                        <td className="p-2 font-medium whitespace-nowrap">
+                          {conj.infinitive}
+                          {isDuplicate && (
+                            <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-800">
+                              bestaat al
+                            </span>
+                          )}
+                        </td>
                         <td className="p-2 whitespace-nowrap">{conj.translation}</td>
                         <td className="p-2 whitespace-nowrap">
                           <span className={`text-xs px-2 py-0.5 rounded-full ${conj.verb_type === "irregular" ? "bg-amber-100 text-amber-800" : "bg-green-100 text-green-800"}`}>
