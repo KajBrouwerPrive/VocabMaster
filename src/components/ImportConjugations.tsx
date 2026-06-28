@@ -117,9 +117,22 @@ const TENSE_MAP: Record<string, string> = {
   "subjuntivo imperfecto": "subjuntivo_imperfecto",
 };
 
+// Repair UTF-8 text that was interpreted as Latin-1/Windows-1252 (e.g. oÃ­r -> oír)
+const repairMojibake = (value: unknown): string => {
+  const text = String(value ?? "").trim();
+  if (!/[ÃÂ]/.test(text)) return text;
+
+  try {
+    const bytes = Uint8Array.from(Array.from(text).map((char) => char.charCodeAt(0) & 0xff));
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes).trim();
+  } catch {
+    return text;
+  }
+};
+
 // Normalize a string for tense matching: strip diacritics, lowercase, collapse whitespace
 const normalize = (s: string): string =>
-  s
+  repairMojibake(s)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
@@ -274,13 +287,13 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
           }
 
           rows.push({
-            nlWerkwoord: String(row[0]).trim(),
-            esWerkwoord: String(row[1]).trim(),
-            tijd: String(row[2] || "").trim().toLowerCase(),
-            persoon: String(row[3] || "").trim().toLowerCase(),
-            nlVorm: String(row[4] || "").trim(),
-            esVorm: String(row[5] || "").trim(),
-            type: String(row[6] || "").trim().toLowerCase(),
+            nlWerkwoord: repairMojibake(row[0]),
+            esWerkwoord: repairMojibake(row[1]),
+            tijd: repairMojibake(row[2]).toLowerCase(),
+            persoon: repairMojibake(row[3]).toLowerCase(),
+            nlVorm: repairMojibake(row[4]),
+            esVorm: repairMojibake(row[5]),
+            type: repairMojibake(row[6]).toLowerCase(),
           });
         }
 
