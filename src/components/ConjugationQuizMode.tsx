@@ -179,8 +179,12 @@ export function ConjugationQuizMode() {
       }
     }
 
-    // Shuffle and take requested count
-    const shuffled = allPossible.sort(() => Math.random() - 0.5);
+    // Fisher-Yates shuffle (unbiased) and take requested count
+    const shuffled = [...allPossible];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     return shuffled.slice(0, Math.min(questionCount, shuffled.length));
   };
 
