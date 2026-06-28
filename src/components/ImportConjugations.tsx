@@ -536,7 +536,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
             <Button
               onClick={handleImport}
-              disabled={isLoading}
+              disabled={isLoading || selected.filter(Boolean).length === 0}
               className="w-full"
             >
               {isLoading ? (
@@ -547,7 +547,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
               ) : (
                 <>
                   <Check className="h-4 w-4 mr-2" />
-                  {parsedConjugations.length} werkwoorden importeren
+                  {selected.filter(Boolean).length} werkwoorden importeren
                 </>
               )}
             </Button>
