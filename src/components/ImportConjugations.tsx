@@ -335,6 +335,12 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       return;
     }
 
+    const chosen = parsedConjugations.filter((_, i) => selected[i]);
+    if (chosen.length === 0) {
+      toast.error("Selecteer minstens één werkwoord");
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Get existing conjugations to check for duplicates
@@ -349,12 +355,12 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       );
 
       // Filter out duplicates
-      const newConjugations = parsedConjugations.filter(
+      const newConjugations = chosen.filter(
         (c) => !existingSet.has(c.infinitive.toLowerCase())
       );
 
       if (newConjugations.length === 0) {
-        toast.info("Alle werkwoorden bestaan al");
+        toast.info("Alle geselecteerde werkwoorden bestaan al");
         clearFile();
         return;
       }
@@ -372,11 +378,12 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
       if (error) throw error;
 
-      const skipped = parsedConjugations.length - newConjugations.length;
-      const message = skipped > 0
-        ? `${newConjugations.length} werkwoorden toegevoegd, ${skipped} duplicaten overgeslagen`
-        : `${newConjugations.length} werkwoorden geïmporteerd`;
-      toast.success(message);
+      const deselected = parsedConjugations.length - chosen.length;
+      const skipped = chosen.length - newConjugations.length;
+      const parts = [`${newConjugations.length} werkwoorden toegevoegd`];
+      if (skipped > 0) parts.push(`${skipped} duplicaten overgeslagen`);
+      if (deselected > 0) parts.push(`${deselected} niet geselecteerd`);
+      toast.success(parts.join(", "));
       clearFile();
       onConjugationsAdded();
     } catch (error: any) {
@@ -389,6 +396,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
   const clearFile = () => {
     setParsedConjugations([]);
+    setSelected([]);
     setFileName(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
