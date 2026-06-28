@@ -344,7 +344,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       }
     };
 
-    reader.readAsBinaryString(file);
+    reader.readAsArrayBuffer(file);
   };
 
 
