@@ -218,6 +218,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
   const { isAdmin, loading: roleLoading } = useUserRole();
   const [parsedConjugations, setParsedConjugations] = useState<ParsedConjugation[]>([]);
   const [selected, setSelected] = useState<boolean[]>([]);
+  const [existingInfinitives, setExistingInfinitives] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
