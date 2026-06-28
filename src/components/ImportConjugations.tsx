@@ -468,6 +468,13 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
               <table className="w-full text-sm">
                 <thead className="bg-muted sticky top-0">
                   <tr>
+                    <th className="p-2 text-left w-8">
+                      <Checkbox
+                        checked={selected.length > 0 && selected.every(Boolean)}
+                        onCheckedChange={(c) => setSelected(parsedConjugations.map(() => !!c))}
+                        aria-label="Alles selecteren"
+                      />
+                    </th>
                     <th className="p-2 text-left">Infinitief (ES)</th>
                     <th className="p-2 text-left">Vertaling (NL)</th>
                     <th className="p-2 text-left">Type</th>
@@ -478,7 +485,20 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                   {parsedConjugations.slice(0, 50).map((conj, i) => {
                     const { found, missing } = getTenseStatus(conj);
                     return (
-                      <tr key={i} className="border-t align-top">
+                      <tr key={i} className={`border-t align-top ${!selected[i] ? "opacity-50" : ""}`}>
+                        <td className="p-2">
+                          <Checkbox
+                            checked={!!selected[i]}
+                            onCheckedChange={(c) =>
+                              setSelected((prev) => {
+                                const next = [...prev];
+                                next[i] = !!c;
+                                return next;
+                              })
+                            }
+                            aria-label={`Selecteer ${conj.infinitive}`}
+                          />
+                        </td>
                         <td className="p-2 font-medium whitespace-nowrap">{conj.infinitive}</td>
                         <td className="p-2 whitespace-nowrap">{conj.translation}</td>
                         <td className="p-2 whitespace-nowrap">
@@ -512,6 +532,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
                 </p>
               )}
             </div>
+
 
             <Button
               onClick={handleImport}
