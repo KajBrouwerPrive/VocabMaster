@@ -417,6 +417,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
   const clearFile = () => {
     setParsedConjugations([]);
     setSelected([]);
+    setExistingInfinitives(new Set());
     setFileName(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
