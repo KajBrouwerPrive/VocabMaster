@@ -317,6 +317,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
 
         const conjugations = Array.from(verbMap.values());
         setParsedConjugations(conjugations);
+        setSelected(conjugations.map(() => true));
         toast.success(`${conjugations.length} werkwoorden gevonden in bestand`);
       } catch (error) {
         toast.error("Fout bij het lezen van het bestand");
