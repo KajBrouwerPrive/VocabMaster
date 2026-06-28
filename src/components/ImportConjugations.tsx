@@ -476,7 +476,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
           <input
             ref={fileInputRef}
             type="file"
-            accept=".xlsx,.xls"
+            
             onChange={handleFileUpload}
             className="hidden"
             id="conjugation-excel-upload"
