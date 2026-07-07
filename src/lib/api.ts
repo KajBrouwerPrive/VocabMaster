@@ -594,9 +594,12 @@ export async function markWordsAsSeen(wordIds: string[]): Promise<void> {
 
 // Niveau groups for filtering
 const NIVEAU_GROUPS: Record<string, string[]> = {
-  "A": ["A1", "A2"],
-  "B": ["B1", "B2"],
-  "C": ["C1", "C2"],
+  "A1": ["A1"],
+  "A2": ["A2"],
+  "B1": ["B1"],
+  "B2": ["B2"],
+  "C1": ["C1"],
+  "C2": ["C2"],
 };
 
 const matchesNiveauGroup = (word: WordWithProgress, group: string): boolean => {
