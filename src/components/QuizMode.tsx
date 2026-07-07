@@ -33,9 +33,12 @@ type SelectionMode = "random" | "manual";
 
 // Niveau group values for filtering (labels will be translated)
 const NIVEAU_GROUP_VALUES = [
-  { value: "A", levels: ["A1", "A2"] },
-  { value: "B", levels: ["B1", "B2"] },
-  { value: "C", levels: ["C1", "C2"] },
+  { value: "A1", levels: ["A1"] },
+  { value: "A2", levels: ["A2"] },
+  { value: "B1", levels: ["B1"] },
+  { value: "B2", levels: ["B2"] },
+  { value: "C1", levels: ["C1"] },
+  { value: "C2", levels: ["C2"] },
   { value: "difficult", levels: [] },
 ];
 
