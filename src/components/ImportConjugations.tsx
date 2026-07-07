@@ -289,11 +289,11 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
           rows.push({
             nlWerkwoord: repairMojibake(row[0]),
             esWerkwoord: repairMojibake(row[1]),
-            type: repairMojibake(row[2]).toLowerCase(),
-            tijd: repairMojibake(row[3]).toLowerCase(),
-            persoon: repairMojibake(row[4]).toLowerCase(),
-            nlVorm: repairMojibake(row[5]),
-            esVorm: repairMojibake(row[6]),
+            tijd: repairMojibake(row[2]).toLowerCase(),
+            persoon: repairMojibake(row[3]).toLowerCase(),
+            nlVorm: repairMojibake(row[4]),
+            esVorm: repairMojibake(row[5]),
+            type: repairMojibake(row[6]).toLowerCase(),
           });
         }
 
@@ -469,7 +469,7 @@ export function ImportConjugations({ onConjugationsAdded }: ImportConjugationsPr
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Upload een Excel-bestand met kolommen: A) NL werkwoord, B) ES werkwoord, C) Type (regelmatig/onregelmatig), D) Tijd, E) Persoon, F) NL vorm, G) ES vorm
+          Upload een Excel-bestand met kolommen: NL werkwoord, ES werkwoord, Tijd, Persoon, NL vorm, ES vorm, Type (regelmatig/onregelmatig — optioneel, standaard regelmatig)
         </p>
 
         <div className="flex gap-2">
