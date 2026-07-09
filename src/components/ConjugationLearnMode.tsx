@@ -75,6 +75,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(false);
   const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   const conjugations = useMemo(() => {
@@ -85,8 +86,16 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     if (showOnlyUnseen) {
       list = list.filter((c) => !c.progress?.seen);
     }
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (c) =>
+          c.infinitive.toLowerCase().includes(q) ||
+          (c.translation || "").toLowerCase().includes(q)
+      );
+    }
     return list;
-  }, [allConjugations, showOnlyUnseen, verbTypeFilter]);
+  }, [allConjugations, showOnlyUnseen, verbTypeFilter, searchQuery]);
 
   const currentConjugation = conjugations[currentIndex];
 
