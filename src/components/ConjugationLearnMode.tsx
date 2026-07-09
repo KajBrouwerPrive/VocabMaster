@@ -332,6 +332,33 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       {/* Tense Selection with Checkboxes */}
       <Card>
         <CardContent className="p-4">
+          <div className="relative mb-3">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentIndex(0);
+                setShowConjugations(false);
+              }}
+              placeholder="Zoek werkwoord (bv. abusar)..."
+              className="pl-9 pr-9"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentIndex(0);
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                aria-label="Wis zoekopdracht"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <p className="text-sm text-muted-foreground">
               {t.common_filter}:
