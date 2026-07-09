@@ -316,19 +316,16 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     );
   }
 
-  if (conjugations.length === 0) {
+  if (allConjugations.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">
-            {allConjugations.length === 0
-              ? t.learn_no_words
-              : "🎉"}
-          </p>
+          <p className="text-muted-foreground">{t.learn_no_words}</p>
         </CardContent>
       </Card>
     );
   }
+
 
   return (
     <div className="space-y-4">
