@@ -511,6 +511,9 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
           </span>
         )}
       </div>
+      </>
+      )}
     </div>
+
   );
 }
