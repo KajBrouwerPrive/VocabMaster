@@ -416,7 +416,16 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       </Card>
 
       {/* Main Card */}
+      {!currentConjugation ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            Geen werkwoorden gevonden.
+          </CardContent>
+        </Card>
+      ) : (
+      <>
       <Card className="overflow-hidden">
+
         <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
           <CardTitle className="text-center">
             <span className="text-2xl font-bold">{currentConjugation.infinitive}</span>
