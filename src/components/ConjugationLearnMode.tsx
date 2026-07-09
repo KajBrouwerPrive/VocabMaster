@@ -9,6 +9,8 @@ import {
   Check,
   Trash2,
   Loader2,
+  Search,
+  X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,6 +24,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Input } from "@/components/ui/input";
+
 
 interface ConjugationLearnModeProps {
   refreshTrigger: number;
@@ -75,6 +79,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(false);
   const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   const conjugations = useMemo(() => {
@@ -85,8 +90,16 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     if (showOnlyUnseen) {
       list = list.filter((c) => !c.progress?.seen);
     }
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(
+        (c) =>
+          c.infinitive.toLowerCase().includes(q) ||
+          (c.translation || "").toLowerCase().includes(q)
+      );
+    }
     return list;
-  }, [allConjugations, showOnlyUnseen, verbTypeFilter]);
+  }, [allConjugations, showOnlyUnseen, verbTypeFilter, searchQuery]);
 
   const currentConjugation = conjugations[currentIndex];
 
@@ -303,25 +316,49 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     );
   }
 
-  if (conjugations.length === 0) {
+  if (allConjugations.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">
-            {allConjugations.length === 0
-              ? t.learn_no_words
-              : "🎉"}
-          </p>
+          <p className="text-muted-foreground">{t.learn_no_words}</p>
         </CardContent>
       </Card>
     );
   }
+
 
   return (
     <div className="space-y-4">
       {/* Tense Selection with Checkboxes */}
       <Card>
         <CardContent className="p-4">
+          <div className="relative mb-3">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentIndex(0);
+                setShowConjugations(false);
+              }}
+              placeholder="Zoek werkwoord (bv. abusar)..."
+              className="pl-9 pr-9"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentIndex(0);
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                aria-label="Wis zoekopdracht"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <p className="text-sm text-muted-foreground">
               {t.common_filter}:
@@ -379,7 +416,16 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       </Card>
 
       {/* Main Card */}
+      {!currentConjugation ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            Geen werkwoorden gevonden.
+          </CardContent>
+        </Card>
+      ) : (
+      <>
       <Card className="overflow-hidden">
+
         <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
           <CardTitle className="text-center">
             <span className="text-2xl font-bold">{currentConjugation.infinitive}</span>
@@ -465,6 +511,9 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
           </span>
         )}
       </div>
+      </>
+      )}
     </div>
+
   );
 }
