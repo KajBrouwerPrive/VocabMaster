@@ -479,6 +479,7 @@ export function QuizMode() {
                     <Input
                       type="text"
                       inputMode="numeric"
+                      className="max-w-[140px]"
                       value={wordCount}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -569,7 +570,7 @@ export function QuizMode() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+                <div className="flex items-center justify-between gap-4 p-4 rounded-lg bg-secondary/50 max-w-md">
                   <div>
                     <p className="font-medium">{t.quiz_ignore_accents}</p>
                     <p className="text-sm text-muted-foreground">ñ = n, é = e, etc.</p>
@@ -580,7 +581,7 @@ export function QuizMode() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+                <div className="flex items-center justify-between gap-4 p-4 rounded-lg bg-secondary/50 max-w-md">
                   <div>
                     <p className="font-medium">{t.quiz_check}</p>
                   </div>
@@ -595,7 +596,7 @@ export function QuizMode() {
                 variant="hero"
                 onClick={startQuiz}
                 disabled={isLoading || (selectionMode === "manual" && selectedWordIds.size === 0)}
-                className="w-full"
+                className="w-full max-w-md"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
