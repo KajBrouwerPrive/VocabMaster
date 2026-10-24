@@ -28,6 +28,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CONJUGATION_TENSE_HELP } from "@/lib/conjugationTenseHelp";
+import { useDutchConjugationExamples } from "@/hooks/useDutchConjugationExamples";
 
 
 interface ConjugationLearnModeProps {
@@ -105,6 +106,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   }, [allConjugations, showOnlyUnseen, verbTypeFilter, searchQuery]);
 
   const currentConjugation = conjugations[currentIndex];
+  const dutchExamples = useDutchConjugationExamples(currentConjugation?.infinitive, currentConjugation?.translation, showConjugations);
 
   const loadConjugations = useCallback(async () => {
     try {
@@ -472,11 +474,12 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                             </PopoverTrigger>
                             <PopoverContent className="max-w-[calc(100vw-2rem)] text-sm font-normal" side="bottom">
                               {CONJUGATION_TENSE_HELP[tense].explanation}
+                              {dutchExamples.data && <p className="mt-2 font-medium">{dutchExamples.data[tense]}</p>}
                             </PopoverContent>
                           </Popover>
                         </div>
                         <span className="block text-xs font-normal text-muted-foreground">
-                          bv. {CONJUGATION_TENSE_HELP[tense].example} (zijn)
+                          {dutchExamples.data ? dutchExamples.data[tense] : dutchExamples.isError ? "Voorbeeld niet beschikbaar" : "Voorbeeld laden…"}
                         </span>
                       </th>
                     ))}
@@ -498,6 +501,11 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                   ))}
                 </tbody>
               </table>
+              {dutchExamples.isError && (
+                <Button variant="ghost" size="sm" onClick={() => dutchExamples.refetch()}>
+                  Nederlandse voorbeelden opnieuw laden
+                </Button>
+              )}
             </div>
           )}
         </CardContent>

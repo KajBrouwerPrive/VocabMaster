@@ -1,3 +1,3 @@
 # Architecture rules
 
-- Keep Dutch tense examples and explanations in a frontend-only reference module using one explicitly named example verb; this avoids presenting guessed Dutch conjugations as translations of stored Spanish forms.
+- Keep general tense explanations in a frontend reference module and generate verb-specific Dutch examples through an authenticated Lovable AI function, cached by Spanish infinitive and Dutch meaning; this supports irregular and newly imported verbs without guessed conjugations or database changes.
