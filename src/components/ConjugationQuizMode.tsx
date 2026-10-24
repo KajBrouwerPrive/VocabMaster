@@ -448,6 +448,7 @@ export function ConjugationQuizMode() {
                     type="number"
                     min={1}
                     max={100}
+                    className="max-w-[140px]"
                     value={questionCount === 0 ? "" : questionCount}
                     onChange={(e) => {
                       const v = e.target.value;
@@ -463,7 +464,7 @@ export function ConjugationQuizMode() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50">
+                <div className="flex items-center justify-between gap-4 p-4 rounded-lg bg-secondary/50 max-w-md">
                   <div>
                     <p className="font-medium">{t.quiz_check}</p>
                   </div>
@@ -478,7 +479,7 @@ export function ConjugationQuizMode() {
                 variant="hero"
                 onClick={startQuiz}
                 disabled={isLoading || selectedTenses.length === 0}
-                className="w-full"
+                className="w-full max-w-md"
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
