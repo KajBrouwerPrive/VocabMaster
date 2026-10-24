@@ -268,7 +268,7 @@ export function LearnMode({ refreshTrigger }: LearnModeProps) {
       <CardContent className="space-y-6">
         {/* Word Card */}
         <div
-          className="relative min-h-[200px] rounded-xl bg-secondary/50 p-8 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-secondary/70 border-2 border-black"
+          className="relative min-h-[340px] rounded-xl bg-secondary/50 p-8 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-secondary/70 border-2 border-black"
           onClick={() => {
             if (!showTranslation) {
               setShowTranslation(true);

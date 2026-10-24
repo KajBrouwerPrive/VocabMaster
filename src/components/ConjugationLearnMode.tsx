@@ -337,7 +337,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
       {/* Tense Selection with Checkboxes */}
       <Card>
         <CardContent className="p-4">
-          <div className="relative mb-3">
+          <div className="relative mb-3 max-w-md mx-auto">
             <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             <Input
               value={searchQuery}
