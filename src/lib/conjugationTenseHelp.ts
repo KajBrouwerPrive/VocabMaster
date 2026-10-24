@@ -28,6 +28,6 @@ export const CONJUGATION_TENSE_HELP = {
     explanation: "Subjuntivo presente: onder andere bij een wens, twijfel of gevoel over het heden of de toekomst. Nederlands heeft hier meestal geen aparte werkwoordsvorm.",
   },
   subjuntivo_imperfecto: {
-    explanation: "Subjuntivo imperfecto: onder andere bij een wens of twijfel in het verleden, of een denkbeeldige situatie.Ook: als ik jou was. Nederlands heeft hier meestal geen aparte werkwoordsvorm.",
+    explanation: "Subjuntivo imperfecto: onder andere bij een wens of twijfel in het verleden, of een denkbeeldige situatie. Nederlands heeft hier meestal geen aparte werkwoordsvorm.",
   },
 } as const;
