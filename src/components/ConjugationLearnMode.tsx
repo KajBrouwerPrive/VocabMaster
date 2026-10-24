@@ -11,6 +11,7 @@ import {
   Loader2,
   Search,
   X,
+  Info,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -25,6 +26,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CONJUGATION_TENSE_HELP } from "@/lib/conjugationTenseHelp";
 
 
 interface ConjugationLearnModeProps {
@@ -452,7 +455,29 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                     <th className="text-left p-2 font-medium text-muted-foreground"></th>
                     {selectedTenses.map((tense) => (
                       <th key={tense} className="text-left p-2 font-medium text-primary">
-                        {TENSE_LABELS[tense]}
+                        <div className="flex items-center gap-1">
+                          <span>{TENSE_LABELS[tense]}</span>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 shrink-0"
+                                aria-label={`Uitleg ${TENSE_LABELS[tense]}`}
+                                title={`Uitleg ${TENSE_LABELS[tense]}`}
+                              >
+                                <Info className="h-4 w-4" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="max-w-[calc(100vw-2rem)] text-sm font-normal" side="bottom">
+                              {CONJUGATION_TENSE_HELP[tense].explanation}
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <span className="block text-xs font-normal text-muted-foreground">
+                          bv. {CONJUGATION_TENSE_HELP[tense].example} (zijn)
+                        </span>
                       </th>
                     ))}
                   </tr>
