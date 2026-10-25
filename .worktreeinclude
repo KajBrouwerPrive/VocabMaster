@@ -1,0 +1,8 @@
+# Gitignored files that Claude Code copies into a fresh worktree (same syntax as .gitignore).
+# Only files that are BOTH gitignored AND match a pattern here are copied.
+#
+# The check needs no gitignored files today: .env is tracked, and the lint and type check
+# caches are rebuilt in node_modules/.cache/check.
+# Add a pattern here only when the check command starts depending on a gitignored file,
+# for example a machine-local environment file. Installed dependencies and build output are
+# deliberately not listed: a worktree installs its own (see CLAUDE.md).

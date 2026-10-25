@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a PR branch cancels that PR's running checks. Runs on the base branch are
+# never cancelled, so every merge keeps its own CI result.
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The check compares against the fork point of origin/main.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Lints only the files this PR changed: `eslint .` still has errors that predate the
+      # check (VMA-3). Replace with `npm run lint` on every event once those are fixed.
+      - name: Lint changed files
+        if: github.event_name == 'pull_request'
+        run: npm run check
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - run: npm run build

@@ -1,0 +1,124 @@
+name: Claude Code Review (official)
+
+# The only Claude workflow. Two jobs, so each gets the permissions it needs:
+#  - review:  automatic review when a non-draft PR is opened or marked ready for review
+#  - respond: acts on an explicit '@claude' comment on a PR (can also commit)
+#
+# The job id "review" is also the name of the status check. The "Worktree Afronden" script
+# waits for a check with exactly that name, so do not rename the job without updating the script.
+on:
+  pull_request:
+    # Never on synchronize: one review per PR, not one per push.
+    types: [opened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    # A newer review of the same PR replaces a running one. Comment runs are never
+    # cancelled: the 'respond' job has no concurrency group at all.
+    concurrency:
+      group: claude-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Alternative to the line above, when using an API key:
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          plugin_marketplaces: |
+            https://github.com/anthropics/claude-code.git
+          plugins: |
+            pr-review-toolkit@claude-code-plugins
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            REVIEW LANGUAGE: English
+
+            Please review this PR comprehensively.
+            Use the pr-review-toolkit agents to check:
+            - Code quality and style (code-reviewer)
+            - Test coverage (pr-test-analyzer)
+            - Error handling (silent-failure-hunter)
+            - Type design (type-design-analyzer)
+            - Comment accuracy (comment-analyzer)
+
+            Pay extra attention to: this is a Vite + React 19 + TypeScript app (tsconfig is
+            not strict: strictNullChecks and noImplicitAny are off, so check null and undefined
+            handling by hand) with shadcn/ui components and Supabase as the backend.
+            - Every user-facing string goes through the translations in
+              src/contexts/LanguageContext.tsx for all four app languages (nl, en, fr, es); flag
+              hard-coded UI text and keys missing in one of the languages.
+            - Supabase: new tables in supabase/migrations/ enable row level security with policies
+              that limit rows to the owning user or the admin role; flag service-role keys or
+              secrets in frontend code or .env, and queries that rely on the client to filter
+              other users' data. src/integrations/supabase/types.ts must match the migrations.
+            - Edge functions in supabase/functions/ run on Deno: they must check the caller's JWT
+              themselves where supabase/config.toml sets verify_jwt = false, validate their input,
+              and return explicit error responses instead of swallowing failures.
+            - Supabase calls in components: errors are checked and shown (toast), not ignored.
+            - Files in src/components/ui/ are generated shadcn/ui components; changes there need a
+              reason.
+            - New logic in src/lib/ comes with Vitest tests (src/**/*.test.ts).
+
+            Also check that the conventions in this repo's CLAUDE.md are followed and that
+            conventional commits are used correctly.
+
+            REVIEW FORMAT (mandatory). Report findings only, in exactly this order:
+            1. Verdict: one or two sentences stating whether the PR has blocking issues (yes/no).
+            2. Blocking issues: problems that must be fixed before merge (bugs, data loss, security
+               or trust-boundary problems, broken tests, missing error handling that hides failures).
+               For each: file and line, what is wrong, and the fix. Omit the section if there are none.
+            3. Non-blocking issues: suggestions, nits and improvements, short and one line each.
+               Omit the section if there are none.
+            Do NOT list what is fine or what you checked (conventions followed, scope, secrets,
+            i18n, tests present, and so on). If you found nothing, the verdict alone is the whole review.
+            Do NOT comment on the model named in the `Co-Authored-By` line of commits or the PR body.
+            Do NOT mention tools or MCP servers that are unavailable in this review job; that is
+            expected and not a finding.
+
+            Post review results as a PR comment using `gh pr comment`.
+            Use `gh pr review` for inline comments on specific code lines.
+            Write all reviews in English.
+          claude_args: |
+            --allowedTools "Bash(gh pr comment:*),Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob"
+
+  respond:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude') &&
+      github.event.comment.user.type != 'Bot'
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Alternative to the line above, when using an API key:
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Must match the '@claude' check in the if-condition above exactly. Without this line
+          # the action does not recognise its own (different) default trigger phrase in the
+          # comment and skips everything ("No trigger found, skipping").
+          trigger_phrase: "@claude"
