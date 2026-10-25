@@ -71,5 +71,5 @@ Architecture rules live in `AGENTS.md`.
 
 ### This repo
 - IssueTracker project: `VMA` (VocabMaster; pass `project: "VMA"` to `list_issues` and `save_issue`). Issue keys look like `VMA-123`.
-- Main checkout: `C:\Development\Prive\VocabMaster`. A file path in a post-merge step looks like `C:\Development\Prive\VocabMaster\<path>`, with a link `https://github.com/Pro-Solutio/smart-speller/blob/main/<path>`.
+- Main checkout: `C:\Development\Prive\VocabMaster`. A file path in a post-merge step looks like `C:\Development\Prive\VocabMaster\<path>`, with a link `https://github.com/Pro-Solutio/VocabMaster/blob/main/<path>`.
 - The `issues` MCP server is configured per user (user scope, not in `.mcp.json`): `http://localhost:3100/api/mcp`, with the API key in the environment variable `ISSUE_TRACKER_API_KEY`. Never write the key itself into the repo.
