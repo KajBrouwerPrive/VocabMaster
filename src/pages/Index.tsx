@@ -68,7 +68,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="w-full px-4 py-4">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg gradient-primary">
@@ -97,7 +97,7 @@ const Index = () => {
       <Navigation currentView={currentView} onViewChange={setCurrentView} isAdmin={isAdmin} />
 
       {/* Main Content */}
-      <main className="w-full px-4 py-6">
+      <main className="container mx-auto px-4 py-6 max-w-2xl">
         {currentView === "learn" && <LearnMode refreshTrigger={refreshTrigger} />}
         {currentView === "conjugations" && <ConjugationLearnMode refreshTrigger={conjugationRefreshTrigger} />}
         {currentView === "quiz" && <QuizMode />}
@@ -128,7 +128,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t mt-auto py-4">
-        <div className="w-full px-4 text-center text-sm text-muted-foreground">VocabMaster</div>
+        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">VocabMaster</div>
       </footer>
     </div>
   );

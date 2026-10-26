@@ -68,7 +68,7 @@ export function Navigation({ currentView, onViewChange, isAdmin }: NavigationPro
 
   return (
     <nav className="p-4">
-      <div className="grid grid-cols-3 gap-4 w-full">
+      <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto">
         {renderColumn(t.nav_learn, lerenItems)}
         {renderColumn(t.nav_quiz, toetsenItems)}
         {renderColumn(t.nav_add, toevoegenItems)}
