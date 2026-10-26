@@ -75,6 +75,12 @@ const ALL_TENSES: TenseType[] = [
   "subjuntivo_imperfecto",
 ];
 
+// Keeps the shown columns in the same order as the selection grid.
+const TENSE_ORDER = new Map<TenseType, number>(ALL_TENSES.map((tense, i) => [tense, i]));
+const sortTenses = (tenses: TenseType[]) =>
+  [...tenses].sort((a, b) => TENSE_ORDER.get(a)! - TENSE_ORDER.get(b)!);
+
+
 export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModeProps) {
   const { t } = useLanguage();
   const [allConjugations, setAllConjugations] = useState<VerbConjugationWithProgress[]>([]);
@@ -165,14 +171,15 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     setSelectedTenses((prev) => {
       if (prev.includes(tense)) {
         if (prev.length === 1) return prev;
-        return prev.filter((t) => t !== tense);
+        return sortTenses(prev.filter((t) => t !== tense));
       } else {
         if (prev.length >= maxTenses) {
           return prev;
         }
-        return [...prev, tense];
+        return sortTenses([...prev, tense]);
       }
     });
+
     setShowConjugations(false);
   };
 
