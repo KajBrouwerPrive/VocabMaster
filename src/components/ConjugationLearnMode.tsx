@@ -435,7 +435,14 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         </Card>
       ) : (
       <>
-      <Card className="overflow-hidden">
+      <Card
+        className="overflow-hidden"
+        style={
+          selectedTenses.length > 3
+            ? { marginInline: "calc(50% - 50vw)" }
+            : undefined
+        }
+      >
 
         <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
           <CardTitle className="text-center">
