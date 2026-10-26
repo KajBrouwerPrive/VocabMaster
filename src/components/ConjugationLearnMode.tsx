@@ -459,7 +459,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                   <tr className="border-b">
                     <th className="text-left p-2 font-medium text-muted-foreground"></th>
                     {selectedTenses.map((tense) => (
-                      <th key={tense} className="text-left p-2 font-medium text-primary">
+                      <th key={tense} className="text-left p-2 font-medium text-primary min-w-[130px]">
                         <div className="flex items-center gap-1">
                           <span>{TENSE_LABELS[tense]}</span>
                           <Popover>
@@ -491,11 +491,11 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                 <tbody>
                   {PRONOUNS.map((pronoun, idx) => (
                     <tr key={pronoun} className="border-b last:border-0">
-                      <td className="p-2 font-medium text-muted-foreground">{pronoun}</td>
+                      <td className="p-2 font-medium text-muted-foreground whitespace-nowrap">{pronoun}</td>
                       {selectedTenses.map((tense) => {
                         const forms = getConjugationForms(currentConjugation, tense);
                         return (
-                          <td key={tense} className="p-2 font-semibold">
+                          <td key={tense} className="p-2 font-semibold min-w-[130px]">
                             {forms[idx] || "-"}
                           </td>
                         );
