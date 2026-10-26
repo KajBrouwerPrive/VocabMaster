@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CONJUGATION_TENSE_HELP } from "@/lib/conjugationTenseHelp";
 import { useDutchConjugationExamples } from "@/hooks/useDutchConjugationExamples";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 interface ConjugationLearnModeProps {
@@ -85,6 +86,8 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const maxTenses = isMobile ? 3 : 6;
 
   const conjugations = useMemo(() => {
     let list = allConjugations;
@@ -164,7 +167,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         if (prev.length === 1) return prev;
         return prev.filter((t) => t !== tense);
       } else {
-        if (prev.length >= 3) {
+        if (prev.length >= maxTenses) {
           return prev;
         }
         return [...prev, tense];
