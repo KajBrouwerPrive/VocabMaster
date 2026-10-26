@@ -87,6 +87,8 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showConjugations, setShowConjugations] = useState(false);
   const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
+  const [tenseOrderMode, setTenseOrderMode] = useState<"standard" | "click">("standard");
+
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyUnseen, setShowOnlyUnseen] = useState(false);
   const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
@@ -167,18 +169,25 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     ];
   };
 
+  // Columns follow the fixed grid order, or the order in which tenses were clicked.
+  const displayTenses = useMemo(
+    () => (tenseOrderMode === "standard" ? sortTenses(selectedTenses) : selectedTenses),
+    [selectedTenses, tenseOrderMode]
+  );
+
   const toggleTense = (tense: TenseType) => {
     setSelectedTenses((prev) => {
       if (prev.includes(tense)) {
         if (prev.length === 1) return prev;
-        return sortTenses(prev.filter((t) => t !== tense));
+        return prev.filter((t) => t !== tense);
       } else {
         if (prev.length >= maxTenses) {
           return prev;
         }
-        return sortTenses([...prev, tense]);
+        return [...prev, tense];
       }
     });
+
 
     setShowConjugations(false);
   };
@@ -430,6 +439,30 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
               </label>
             ))}
           </div>
+          <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-sm text-muted-foreground">Kolomvolgorde:</span>
+            <div className="flex gap-1">
+              <Button
+                type="button"
+                size="sm"
+                variant={tenseOrderMode === "standard" ? "default" : "outline"}
+                onClick={() => setTenseOrderMode("standard")}
+                title="Tijden in de vaste volgorde van het selectievakjestabel"
+              >
+                Standaard
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={tenseOrderMode === "click" ? "default" : "outline"}
+                onClick={() => setTenseOrderMode("click")}
+                title="Tijden in de volgorde waarin je ze aanklikt"
+              >
+                Klikvolgorde
+              </Button>
+            </div>
+          </div>
+
         </CardContent>
       </Card>
 
@@ -475,7 +508,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-2 font-medium text-muted-foreground"></th>
-                    {selectedTenses.map((tense) => (
+                    {displayTenses.map((tense) => (
                       <th key={tense} className="text-left p-2 font-medium text-primary min-w-[130px]">
                         <div className="flex items-center gap-1">
                           <span>{TENSE_LABELS[tense]}</span>
@@ -509,7 +542,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                   {PRONOUNS.map((pronoun, idx) => (
                     <tr key={pronoun} className="border-b last:border-0">
                       <td className="p-2 font-medium text-muted-foreground whitespace-nowrap">{pronoun}</td>
-                      {selectedTenses.map((tense) => {
+                      {displayTenses.map((tense) => {
                         const forms = getConjugationForms(currentConjugation, tense);
                         return (
                           <td key={tense} className="p-2 font-semibold min-w-[130px]">
