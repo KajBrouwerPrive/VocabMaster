@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CONJUGATION_TENSE_HELP } from "@/lib/conjugationTenseHelp";
 import { useDutchConjugationExamples } from "@/hooks/useDutchConjugationExamples";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 interface ConjugationLearnModeProps {
@@ -85,6 +86,8 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [verbTypeFilter, setVerbTypeFilter] = useState<"all" | "regular" | "irregular">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  const maxTenses = isMobile ? 3 : 6;
 
   const conjugations = useMemo(() => {
     let list = allConjugations;
@@ -164,7 +167,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         if (prev.length === 1) return prev;
         return prev.filter((t) => t !== tense);
       } else {
-        if (prev.length >= 3) {
+        if (prev.length >= maxTenses) {
           return prev;
         }
         return [...prev, tense];
@@ -367,6 +370,9 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <p className="text-sm text-muted-foreground">
               {t.common_filter}:
+              <span className="ml-1 tabular-nums">
+                ({selectedTenses.length}/{maxTenses} tijden gekozen)
+              </span>
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex gap-1">
@@ -456,7 +462,7 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                   <tr className="border-b">
                     <th className="text-left p-2 font-medium text-muted-foreground"></th>
                     {selectedTenses.map((tense) => (
-                      <th key={tense} className="text-left p-2 font-medium text-primary">
+                      <th key={tense} className="text-left p-2 font-medium text-primary min-w-[130px]">
                         <div className="flex items-center gap-1">
                           <span>{TENSE_LABELS[tense]}</span>
                           <Popover>
@@ -488,11 +494,11 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                 <tbody>
                   {PRONOUNS.map((pronoun, idx) => (
                     <tr key={pronoun} className="border-b last:border-0">
-                      <td className="p-2 font-medium text-muted-foreground">{pronoun}</td>
+                      <td className="p-2 font-medium text-muted-foreground whitespace-nowrap">{pronoun}</td>
                       {selectedTenses.map((tense) => {
                         const forms = getConjugationForms(currentConjugation, tense);
                         return (
-                          <td key={tense} className="p-2 font-semibold">
+                          <td key={tense} className="p-2 font-semibold min-w-[130px]">
                             {forms[idx] || "-"}
                           </td>
                         );
