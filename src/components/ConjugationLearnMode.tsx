@@ -370,6 +370,9 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <p className="text-sm text-muted-foreground">
               {t.common_filter}:
+              <span className="ml-1 tabular-nums">
+                ({selectedTenses.length}/{maxTenses} tijden gekozen)
+              </span>
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               <div className="flex gap-1">
