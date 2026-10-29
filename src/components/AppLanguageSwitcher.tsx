@@ -20,9 +20,9 @@ export function AppLanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-2">
-      <Globe className="h-4 w-4 text-muted-foreground" />
+      <Globe className="hidden sm:block h-4 w-4 text-muted-foreground" aria-hidden="true" />
       <Select value={language} onValueChange={(value) => setLanguage(value as AppLanguage)}>
-        <SelectTrigger className="w-[140px]">
+        <SelectTrigger className="w-[124px] sm:w-[140px]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

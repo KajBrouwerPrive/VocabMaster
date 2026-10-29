@@ -61,6 +61,12 @@ interface Translations {
   learn_filter_learned: string;
   learn_filter_not_learned: string;
   learn_min_niveau: string;
+  nav_main: string;
+  nav_account_menu: string;
+  learn_more_actions: string;
+  learn_shortcuts_hint: string;
+  learn_delete_confirm_title: string;
+  learn_delete_confirm_description: string;
   
   // Filters
   filter_niveau: string;
@@ -218,6 +224,12 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Geleerd',
     learn_filter_not_learned: 'Niet geleerd',
     learn_min_niveau: 'Minimum niveau',
+    nav_main: 'Hoofdmenu',
+    nav_account_menu: 'Accountmenu',
+    learn_more_actions: 'Meer acties',
+    learn_shortcuts_hint: 'Spatie of Enter: omdraaien · ← →: bladeren',
+    learn_delete_confirm_title: 'Werkwoord verwijderen?',
+    learn_delete_confirm_description: 'Dit werkwoord wordt definitief verwijderd. Dit kun je niet ongedaan maken.',
     filter_niveau: 'Niveau',
     filter_thema: 'Thema',
     filter_difficult_words: 'Moeilijke woorden',
@@ -357,6 +369,12 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Learned',
     learn_filter_not_learned: 'Not learned',
     learn_min_niveau: 'Minimum level',
+    nav_main: 'Main menu',
+    nav_account_menu: 'Account menu',
+    learn_more_actions: 'More actions',
+    learn_shortcuts_hint: 'Space or Enter: flip · ← →: browse',
+    learn_delete_confirm_title: 'Delete verb?',
+    learn_delete_confirm_description: 'This verb will be deleted permanently. You can’t undo this.',
     filter_niveau: 'Level',
     filter_thema: 'Theme',
     filter_difficult_words: 'Difficult words',
@@ -496,6 +514,12 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Appris',
     learn_filter_not_learned: 'Non appris',
     learn_min_niveau: 'Niveau minimum',
+    nav_main: 'Menu principal',
+    nav_account_menu: 'Menu du compte',
+    learn_more_actions: 'Plus d’actions',
+    learn_shortcuts_hint: 'Espace ou Entrée : retourner · ← → : parcourir',
+    learn_delete_confirm_title: 'Supprimer le verbe ?',
+    learn_delete_confirm_description: 'Ce verbe sera supprimé définitivement. Cette action est irréversible.',
     filter_niveau: 'Niveau',
     filter_thema: 'Thème',
     filter_difficult_words: 'Mots difficiles',
@@ -635,6 +659,12 @@ const translations: Record<AppLanguage, Translations> = {
     learn_filter_learned: 'Aprendidas',
     learn_filter_not_learned: 'No aprendidas',
     learn_min_niveau: 'Nivel mínimo',
+    nav_main: 'Menú principal',
+    nav_account_menu: 'Menú de la cuenta',
+    learn_more_actions: 'Más acciones',
+    learn_shortcuts_hint: 'Espacio o Intro: girar · ← →: navegar',
+    learn_delete_confirm_title: '¿Eliminar verbo?',
+    learn_delete_confirm_description: 'Este verbo se eliminará definitivamente. No se puede deshacer.',
     filter_niveau: 'Nivel',
     filter_thema: 'Tema',
     filter_difficult_words: 'Palabras difíciles',
