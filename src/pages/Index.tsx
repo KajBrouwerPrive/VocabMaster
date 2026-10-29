@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navigation } from "@/components/Navigation";
+import { SectionTabs, BottomTabBar, SubViewSwitcher } from "@/components/Navigation";
 import { LearnMode } from "@/components/LearnMode";
 import { QuizMode } from "@/components/QuizMode";
 import { ConjugationQuizMode } from "@/components/ConjugationQuizMode";
@@ -14,13 +14,23 @@ import { AddConjugationForm } from "@/components/AddConjugationForm";
 import { RequestConjugationForm } from "@/components/RequestConjugationForm";
 import { AdminDashboard } from "@/components/AdminDashboard";
 import { AppLanguageSwitcher } from "@/components/AppLanguageSwitcher";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Button } from "@/components/ui/button";
+import { getInitials, type View } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 import { Languages, LogOut, Shield } from "lucide-react";
 
-type View = "learn" | "quiz" | "quiz-conjugations" | "add" | "suggest" | "import-words" | "import-conjugations" | "stats" | "conjugations" | "add-conjugation" | "request-conjugation" | "admin";
+// Views whose content needs more width than a single card column.
+const WIDE_VIEWS: ReadonlySet<View> = new Set<View>(["conjugations"]);
 
 const Index = () => {
   const { user, loading, signOut } = useAuth();
@@ -64,40 +74,58 @@ const Index = () => {
     return null;
   }
 
+  const navigationProps = { currentView, onViewChange: setCurrentView, isAdmin };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg gradient-primary">
-                <Languages className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">VocabMaster</h1>
+      <header className="border-b bg-card/95 backdrop-blur-sm sticky top-0 z-20">
+        <div className="mx-auto flex min-h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary">
+              <Languages className="h-5 w-5 text-primary-foreground" aria-hidden="true" />
             </div>
-            <div className="flex items-center gap-3">
-              <AppLanguageSwitcher />
-              {isAdmin && (
-                <div className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md text-sm">
-                  <Shield className="h-3 w-3" />
-                  Admin
-                </div>
-              )}
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                {t.common_logout}
-              </Button>
-            </div>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight">VocabMaster</h1>
+          </div>
+          <SectionTabs {...navigationProps} />
+          <div className="flex items-center gap-2">
+            <AppLanguageSwitcher />
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                aria-label={t.nav_account_menu}
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {getInitials(user.email)}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <span className="block truncate text-sm">{user.email}</span>
+                  {isAdmin && (
+                    <span className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+                      <Shield className="h-3 w-3" aria-hidden="true" />
+                      Admin
+                    </span>
+                  )}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleSignOut}>
+                  <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                  {t.common_logout}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
 
-      {/* Navigation */}
-      <Navigation currentView={currentView} onViewChange={setCurrentView} isAdmin={isAdmin} />
-
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 max-w-2xl">
+      <main
+        className={cn(
+          "mx-auto space-y-5 px-4 pt-6 pb-28 lg:pb-12",
+          WIDE_VIEWS.has(currentView) ? "max-w-5xl" : "max-w-2xl",
+        )}
+      >
+        <SubViewSwitcher {...navigationProps} />
         {currentView === "learn" && <LearnMode refreshTrigger={refreshTrigger} />}
         {currentView === "conjugations" && <ConjugationLearnMode refreshTrigger={conjugationRefreshTrigger} />}
         {currentView === "quiz" && <QuizMode />}
@@ -126,10 +154,7 @@ const Index = () => {
         {currentView === "import-conjugations" && <ImportConjugations onConjugationsAdded={handleConjugationsAdded} />}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t mt-auto py-4">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">VocabMaster</div>
-      </footer>
+      <BottomTabBar {...navigationProps} />
     </div>
   );
 };

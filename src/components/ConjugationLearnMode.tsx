@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -12,7 +13,28 @@ import {
   Search,
   X,
   Info,
+  MoreHorizontal,
+  SlidersHorizontal,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { readStoredList, writeStoredList } from "@/lib/storedSelection";
+import { useLearnShortcuts } from "@/hooks/useLearnShortcuts";
 import { useToast } from "@/hooks/use-toast";
 import {
   getConjugations,
@@ -80,13 +102,26 @@ const TENSE_ORDER = new Map<TenseType, number>(ALL_TENSES.map((tense, i) => [ten
 const sortTenses = (tenses: TenseType[]) =>
   [...tenses].sort((a, b) => TENSE_ORDER.get(a)! - TENSE_ORDER.get(b)!);
 
+const SELECTED_TENSES_STORAGE_KEY = "vocabmaster.conjugations.selectedTenses";
+const MAX_TENSES_DESKTOP = 6;
+const MAX_TENSES_MOBILE = 3;
+const DEFAULT_TENSES: TenseType[] = ["present"];
+const ROUND_ICON_BUTTON = "h-12 w-12 rounded-[14px] p-0 [&_svg]:size-5";
+const SEGMENT_BUTTON = "h-8 rounded-lg px-3.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+const segmentState = (isActive: boolean) =>
+  isActive ? "bg-primary text-primary-foreground font-semibold" : "text-foreground font-medium hover:bg-card";
+
 
 export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModeProps) {
   const { t } = useLanguage();
   const [allConjugations, setAllConjugations] = useState<VerbConjugationWithProgress[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showConjugations, setShowConjugations] = useState(false);
-  const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(["present"]);
+  const [selectedTenses, setSelectedTenses] = useState<TenseType[]>(
+    () => readStoredList(SELECTED_TENSES_STORAGE_KEY, ALL_TENSES, MAX_TENSES_DESKTOP) ?? DEFAULT_TENSES
+  );
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [tenseOrderMode, setTenseOrderMode] = useState<"standard" | "click">("standard");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +130,11 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const maxTenses = isMobile ? 3 : 6;
+  const maxTenses = isMobile ? MAX_TENSES_MOBILE : MAX_TENSES_DESKTOP;
+
+  useEffect(() => {
+    writeStoredList(SELECTED_TENSES_STORAGE_KEY, selectedTenses);
+  }, [selectedTenses]);
 
   const conjugations = useMemo(() => {
     let list = allConjugations;
@@ -141,21 +180,6 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
   useEffect(() => {
     loadConjugations();
   }, [refreshTrigger, loadConjugations]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        if (!showConjugations) {
-          handleShowConjugations();
-        } else {
-          goNext();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showConjugations, currentIndex, conjugations.length]);
 
   const getConjugationForms = (conj: VerbConjugationWithProgress, tense: TenseType) => {
     const prefix = tense;
@@ -332,6 +356,21 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
     }
   };
 
+  // Same flow as the buttons: reveal the table first, then move to the next verb.
+  useLearnShortcuts(
+    {
+      primary: () => (showConjugations ? goNext() : handleShowConjugations()),
+      next: goNext,
+      previous: goPrevious,
+    },
+    !isLoading && conjugations.length > 0,
+  );
+
+  const resetCard = () => {
+    setCurrentIndex(0);
+    setShowConjugations(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -352,119 +391,138 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
 
 
   return (
-    <div className="space-y-4">
-      {/* Tense Selection with Checkboxes */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="relative mb-3 max-w-md mx-auto">
-            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
+    <div className="space-y-5 animate-fade-in">
+      {/* Search and filter toggle */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <Input
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              resetCard();
+            }}
+            placeholder="Zoek werkwoord (bv. abusar)..."
+            aria-label="Zoek werkwoord"
+            className="h-10 bg-card pl-9 pr-9"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
                 setCurrentIndex(0);
-                setShowConjugations(false);
               }}
-              placeholder="Zoek werkwoord (bv. abusar)..."
-              className="pl-9 pr-9"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery("");
-                  setCurrentIndex(0);
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-                aria-label="Wis zoekopdracht"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+              aria-label="Wis zoekopdracht"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          aria-expanded={filtersOpen}
+          aria-controls="conjugation-filters"
+          onClick={() => setFiltersOpen((open) => !open)}
+          className={cn("h-10 bg-card", filtersOpen && "border-primary bg-accent text-accent-foreground hover:bg-accent")}
+        >
+          <SlidersHorizontal />
+          {t.common_filter}
+          <span className="tabular-nums text-muted-foreground">
+            · {selectedTenses.length}/{maxTenses} tijden
+          </span>
+          <ChevronDown className={cn("transition-transform", filtersOpen && "rotate-180")} />
+        </Button>
+      </div>
 
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <p className="text-sm text-muted-foreground">
-              {t.common_filter}:
-              <span className="ml-1 tabular-nums">
-                ({selectedTenses.length}/{maxTenses} tijden gekozen)
-              </span>
-            </p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex gap-1">
+      {filtersOpen && (
+        <section
+          id="conjugation-filters"
+          aria-label={t.common_filter}
+          className="space-y-4 rounded-2xl border bg-card p-4 sm:p-5 animate-fade-in"
+        >
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Type</span>
+              <div className="inline-flex gap-0.5 rounded-xl bg-muted p-1">
                 {(["all", "regular", "irregular"] as const).map((v) => (
-                  <Button
+                  <button
                     key={v}
                     type="button"
-                    size="sm"
-                    variant={verbTypeFilter === v ? "default" : "outline"}
+                    aria-pressed={verbTypeFilter === v}
                     onClick={() => {
                       setVerbTypeFilter(v);
-                      setCurrentIndex(0);
-                      setShowConjugations(false);
+                      resetCard();
                     }}
+                    className={cn(SEGMENT_BUTTON, segmentState(verbTypeFilter === v))}
                   >
                     {v === "all" ? "Alle" : v === "regular" ? "Regelmatig" : "Onregelmatig"}
-                  </Button>
+                  </button>
                 ))}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Alleen nieuwe</span>
-                <Switch
-                  checked={showOnlyUnseen}
-                  onCheckedChange={(checked) => {
-                    setShowOnlyUnseen(checked);
-                    setCurrentIndex(0);
-                    setShowConjugations(false);
-                  }}
-                />
+            </div>
+            <div className="space-y-2">
+              <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">Kolomvolgorde</span>
+              <div className="inline-flex gap-0.5 rounded-xl bg-muted p-1">
+                <button
+                  type="button"
+                  aria-pressed={tenseOrderMode === "standard"}
+                  onClick={() => setTenseOrderMode("standard")}
+                  title="Tijden in de vaste volgorde van het selectievakjestabel"
+                  className={cn(SEGMENT_BUTTON, segmentState(tenseOrderMode === "standard"))}
+                >
+                  Standaard
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={tenseOrderMode === "click"}
+                  onClick={() => setTenseOrderMode("click")}
+                  title="Tijden in de volgorde waarin je ze aanklikt"
+                  className={cn(SEGMENT_BUTTON, segmentState(tenseOrderMode === "click"))}
+                >
+                  Klikvolgorde
+                </button>
               </div>
             </div>
+            <label className="flex h-10 cursor-pointer items-center gap-2.5 text-sm sm:ml-auto">
+              <Switch
+                checked={showOnlyUnseen}
+                onCheckedChange={(checked) => {
+                  setShowOnlyUnseen(checked);
+                  resetCard();
+                }}
+              />
+              Alleen nieuwe
+            </label>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-            {ALL_TENSES.map((tense) => (
-              <label
-                key={tense}
-                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                  selectedTenses.includes(tense)
-                    ? "bg-primary/10 border border-primary/30"
-                    : "bg-secondary/30 border border-transparent hover:bg-secondary/50"
-                }`}
-              >
-                <Checkbox
-                  checked={selectedTenses.includes(tense)}
-                  onCheckedChange={() => toggleTense(tense)}
-                />
-                <span className="text-xs font-medium">{TENSE_LABELS[tense]}</span>
-              </label>
-            ))}
-          </div>
-          <div className="mt-3 flex items-center justify-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">Kolomvolgorde:</span>
-            <div className="flex gap-1">
-              <Button
-                type="button"
-                size="sm"
-                variant={tenseOrderMode === "standard" ? "default" : "outline"}
-                onClick={() => setTenseOrderMode("standard")}
-                title="Tijden in de vaste volgorde van het selectievakjestabel"
-              >
-                Standaard
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={tenseOrderMode === "click" ? "default" : "outline"}
-                onClick={() => setTenseOrderMode("click")}
-                title="Tijden in de volgorde waarin je ze aanklikt"
-              >
-                Klikvolgorde
-              </Button>
+          <div className="space-y-2">
+            <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Tijden · {selectedTenses.length}/{maxTenses} gekozen
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {ALL_TENSES.map((tense) => {
+                const isSelected = selectedTenses.includes(tense);
+                return (
+                  <label
+                    key={tense}
+                    className={cn(
+                      "flex h-9 cursor-pointer items-center gap-2 rounded-full border px-3 text-[13px] transition-colors",
+                      isSelected
+                        ? "border-primary bg-accent font-semibold text-accent-foreground"
+                        : "border-input bg-card font-medium hover:bg-muted",
+                    )}
+                  >
+                    <Checkbox checked={isSelected} onCheckedChange={() => toggleTense(tense)} />
+                    {TENSE_LABELS[tense]}
+                  </label>
+                );
+              })}
             </div>
           </div>
-
-        </CardContent>
-      </Card>
+        </section>
+      )}
 
       {/* Main Card */}
       {!currentConjugation ? (
@@ -475,41 +533,44 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
         </Card>
       ) : (
       <>
-      <Card
-        className="overflow-hidden"
-        style={
-          selectedTenses.length > 3
-            ? { marginInline: "calc(50% - 50vw)" }
-            : undefined
-        }
+      <section
+        aria-label={currentConjugation.infinitive}
+        className="overflow-hidden rounded-3xl border bg-card shadow-card"
       >
-
-        <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
-          <CardTitle className="text-center">
-            <span className="text-2xl font-bold">{currentConjugation.infinitive}</span>
-            <span className="block text-sm text-muted-foreground mt-1">
-              ({currentConjugation.translation})
+        <div className="flex flex-wrap items-end justify-between gap-3 border-b px-5 pt-6 pb-5 sm:px-7">
+          <div className="space-y-1.5">
+            <span className="inline-flex h-6 items-center rounded-full bg-accent px-2.5 text-xs font-semibold text-accent-foreground">
+              {(currentConjugation.verb_type || "regular") === "irregular" ? "Onregelmatig" : "Regelmatig"}
             </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{currentConjugation.infinitive}</h2>
+            <p className="text-base text-muted-foreground">{currentConjugation.translation}</p>
+          </div>
+          <span className="text-sm text-muted-foreground tabular-nums">
+            {currentIndex + 1} / {conjugations.length}
+          </span>
+        </div>
+        <div>
           {!showConjugations ? (
-            <Button
-              onClick={handleShowConjugations}
-              variant="secondary"
-              className="w-full h-24 text-lg"
-            >
-              <Eye className="h-5 w-5 mr-2" />
-              {t.learn_show_translation}
-            </Button>
+            <div className="p-4 sm:p-5">
+              <button
+                type="button"
+                onClick={handleShowConjugations}
+                className="flex h-28 w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-input bg-muted text-lg font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <Eye className="h-5 w-5" aria-hidden="true" />
+                {t.learn_show_translation}
+              </button>
+            </div>
           ) : (
             <div className="animate-in fade-in duration-300 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full border-collapse text-sm sm:text-[15px]">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2 font-medium text-muted-foreground"></th>
+                  <tr className="bg-muted/60">
+                    <th scope="col" className="sticky left-0 bg-muted px-4 py-3 text-left sm:px-6">
+                      <span className="sr-only">Persoon</span>
+                    </th>
                     {displayTenses.map((tense) => (
-                      <th key={tense} className="text-left p-2 font-medium text-primary min-w-[130px]">
+                      <th key={tense} scope="col" className="min-w-[150px] px-3 py-3 text-left align-top font-semibold text-accent-foreground">
                         <div className="flex items-center gap-1">
                           <span>{TENSE_LABELS[tense]}</span>
                           <Popover>
@@ -540,12 +601,20 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                 </thead>
                 <tbody>
                   {PRONOUNS.map((pronoun, idx) => (
-                    <tr key={pronoun} className="border-b last:border-0">
-                      <td className="p-2 font-medium text-muted-foreground whitespace-nowrap">{pronoun}</td>
+                    <tr key={pronoun} className={cn("border-t", idx % 2 === 1 && "bg-muted/40")}>
+                      <th
+                        scope="row"
+                        className={cn(
+                          "sticky left-0 whitespace-nowrap px-4 py-3 text-left font-medium text-muted-foreground sm:px-6",
+                          idx % 2 === 1 ? "bg-muted" : "bg-card",
+                        )}
+                      >
+                        {pronoun}
+                      </th>
                       {displayTenses.map((tense) => {
                         const forms = getConjugationForms(currentConjugation, tense);
                         return (
-                          <td key={tense} className="p-2 font-semibold min-w-[130px]">
+                          <td key={tense} className="min-w-[150px] px-3 py-3 font-semibold">
                             {forms[idx] || "-"}
                           </td>
                         );
@@ -555,51 +624,102 @@ export function ConjugationLearnMode({ refreshTrigger }: ConjugationLearnModePro
                 </tbody>
               </table>
               {dutchExamples.isError && (
-                <Button variant="ghost" size="sm" onClick={() => dutchExamples.refetch()}>
+                <Button variant="ghost" size="sm" className="m-3" onClick={() => dutchExamples.refetch()}>
                   Nederlandse voorbeelden opnieuw laden
                 </Button>
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       {/* Actions */}
-      <div className="flex justify-center gap-2 flex-wrap">
-        <Button variant="outline" size="icon" onClick={goPrevious} disabled={currentIndex === 0}>
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" size="icon" onClick={handleShuffle} title={t.learn_shuffle}>
-          <Shuffle className="h-4 w-4" />
-        </Button>
-        <Button variant="default" size="icon" onClick={handleMarkAsSeenAndNext} title={t.learn_learned}>
-          <Check className="h-4 w-4" />
-        </Button>
-        <Button variant="destructive" size="icon" onClick={handleDelete} title={t.common_delete}>
-          <Trash2 className="h-4 w-4" />
+      <div className="flex items-center justify-center gap-2.5">
+        <Button
+          variant="outline"
+          className={ROUND_ICON_BUTTON}
+          onClick={goPrevious}
+          disabled={currentIndex === 0}
+          aria-label={t.common_previous}
+        >
+          <ChevronLeft />
         </Button>
         <Button
           variant="outline"
-          size="icon"
+          className={ROUND_ICON_BUTTON}
+          onClick={handleShuffle}
+          aria-label={t.learn_shuffle}
+          title={t.learn_shuffle}
+        >
+          <Shuffle />
+        </Button>
+        <Button
+          className="h-12 flex-1 sm:flex-none rounded-[14px] px-7 text-base font-semibold [&_svg]:size-5"
+          onClick={handleMarkAsSeenAndNext}
+        >
+          <Check />
+          {t.learn_learned}
+        </Button>
+        <Button
+          variant="outline"
+          className={ROUND_ICON_BUTTON}
           onClick={goNext}
           disabled={currentIndex >= conjugations.length - 1}
+          aria-label={t.common_next}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight />
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className={ROUND_ICON_BUTTON} aria-label={t.learn_more_actions}>
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onSelect={() => setDeleteDialogOpen(true)}
+              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+              {t.common_delete}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.learn_delete_confirm_title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              <span className="font-semibold text-foreground">{currentConjugation.infinitive}</span>
+              {" · "}
+              {t.learn_delete_confirm_description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.common_cancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t.common_delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Progress */}
       <div className="text-center text-sm text-muted-foreground">
-        {currentIndex + 1} / {conjugations.length}
         {allConjugations.length > conjugations.length && (
-          <span className="ml-2">
-            ({allConjugations.length - conjugations.length} {t.learn_learned})
+          <span>
+            {allConjugations.length - conjugations.length} {t.learn_learned}
           </span>
         )}
+        <p className="mt-1 hidden md:block text-xs">{t.learn_shortcuts_hint}</p>
       </div>
       </>
       )}
     </div>
-
   );
 }
