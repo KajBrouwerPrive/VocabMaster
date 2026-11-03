@@ -4,7 +4,9 @@
       "Bash(npm ci)",
       "PowerShell(npm ci)",
       "Bash(npm ci *)",
-      "PowerShell(npm ci *)"
+      "PowerShell(npm ci *)",
+      "Bash(gh api repos/KajBrouwerPrive/VocabMaster/statuses/* -f state=success -f context=agent-klaar -f description=\"Agent done\")",
+      "PowerShell(gh api repos/KajBrouwerPrive/VocabMaster/statuses/* -f state=success -f context=agent-klaar -f description=\"Agent done\")"
     ],
     "deny": [
       "Bash(gh pr merge *)",
@@ -26,7 +28,14 @@
       "PowerShell(git push -f *)",
       "PowerShell(git push *--force*)",
       "PowerShell(git push * -f)",
-      "PowerShell(git push * +*)"
+      "PowerShell(git push * +*)",
+      "Edit(//**/.claude/settings*.json)",
+      "Edit(//**/.mcp.json)",
+      "Edit(//**/.husky/**)",
+      "Edit(//**/.git/hooks/**)",
+      "Edit(~/.claude/settings*.json)",
+      "Edit(~/.claude/hooks/**)",
+      "Edit(~/.claude/skills/**)"
     ]
   },
   "hooks": {

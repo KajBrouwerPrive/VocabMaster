@@ -4,27 +4,45 @@
 // permission rules match the command text only, not the directory, so this hook adds the
 // directory check. It applies to both shells, so a refusal in one cannot be bypassed in the other.
 //
+// It also guards the allow rule for the `agent-klaar` commit status: the `*` in that rule matches
+// spaces too, so it would allow extra arguments (another state, another endpoint). Any `gh api` call
+// that names `agent-klaar` is refused unless the whole command is exactly AGENT_READY_COMMAND for this
+// repo and a full 40-character SHA (CNT-43).
+//
 // Wired in .claude/settings.json under hooks.PreToolUse. Reads the hook input JSON on stdin and
 // prints a deny decision, or nothing to leave the normal permission flow in charge. The pure logic
 // is exported and unit-tested in scripts/__tests__/guard-install.test.mjs.
+//
+// Reuse in another repo: copy this file and change ALLOWED_INSTALL_FORMS below.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const GUARDED_TOOLS = Object.freeze(["Bash", "PowerShell"]);
 
-// The install forms an agent may use in its own worktree. They are named in the refusal message
-// (joined with " or "); the matching allow rules live in .claude/settings.json.
+// Per-repo setting: the install forms an agent may use in its own worktree. They are named in the
+// refusal message (joined with " or "); the matching allow rules live in .claude/settings.json.
 export const ALLOWED_INSTALL_FORMS = Object.freeze(["npm ci"]);
 
-// isInstallCommand recognizes npm, npx expo and bun (Lovable keeps a bun.lockb next to the npm
-// lockfile, so an agent may reach for bun).
+// Per-repo setting: the GitHub repo the `agent-klaar` status may be set on (this repo, never another).
+export const AGENT_READY_REPO = "KajBrouwerPrive/VocabMaster";
+export const AGENT_READY_CONTEXT = "agent-klaar";
+// The only accepted form, with <sha> standing for the full SHA from `git rev-parse HEAD`.
+export const AGENT_READY_COMMAND = `gh api repos/${AGENT_READY_REPO}/statuses/<sha> -f state=success -f context=${AGENT_READY_CONTEXT} -f description="Agent done"`;
+const FULL_COMMIT_SHA = "[0-9a-f]{40}";
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const AGENT_READY_PATTERN = new RegExp(`^${AGENT_READY_COMMAND.split("<sha>").map(escapeRegExp).join(FULL_COMMIT_SHA)}$`);
+
 // npm subcommands (and their aliases) that write node_modules or the lockfile.
 const NPM_INSTALL_SUBCOMMANDS = new Set(["ci", "clean-install", "install-clean", "install", "i", "in", "isntall", "add", "update", "up", "upgrade"]);
+// bun subcommands that write node_modules or the lockfile. A repo may keep a bun lockfile next to the
+// npm lockfile (Lovable does), so an agent may reach for bun even where npm is the install form.
+// `bun pm` and `bun create` are left out: they mostly read or scaffold a new project.
+const BUN_INSTALL_SUBCOMMANDS = new Set(["install", "i", "add", "a", "update", "remove", "rm", "link", "patch"]);
+// bun options that take a separate value, so the value is not mistaken for the subcommand.
+const BUN_OPTIONS_WITH_VALUE = new Set(["--cwd", "--config", "-c"]);
 // npm options that take a separate value, so the value is not mistaken for the subcommand.
 const NPM_OPTIONS_WITH_VALUE = new Set(["--prefix", "-C", "--workspace", "-w", "--cache", "--registry", "--userconfig"]);
-// bun subcommands that write node_modules or the lockfile.
-const BUN_INSTALL_SUBCOMMANDS = new Set(["install", "i", "add", "a", "update", "remove", "rm"]);
 const COMMAND_SEPARATOR = /&&|\|\||[;|&\n]/;
 // Programs that run their arguments as a command line, so quoted text after them is still code.
 const SHELL_WRAPPERS = ["bash", "sh", "zsh", "dash", "pwsh", "powershell", "cmd", "eval"];
@@ -228,11 +246,22 @@ function npmSubcommand(args) {
   return null;
 }
 
+/** @param {string[]} args the tokens after `bun`; "" when there is no subcommand */
+function bunSubcommand(args) {
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (BUN_OPTIONS_WITH_VALUE.has(arg)) index += 1;
+    else if (!arg.startsWith("-")) return arg.toLowerCase();
+  }
+  return "";
+}
+
 /**
  * True when the command installs dependencies: `npm ci`, `npm install` and aliases, `npm audit fix`,
- * `npx expo install`, `bun install` and the other bun subcommands that write dependencies. Text inside quotes is data (a grep pattern, an echo, a commit message) and does
- * not count, except as the command line of a shell wrapper (`bash -c "npm ci"`) or inside a command
- * substitution (`echo "$(npm ci)"`).
+ * `npx expo install`, `bun install` and the other bun subcommands that write dependencies. Text inside
+ * quotes is data (a grep pattern, an echo, a commit message) and does not count, except as the
+ * command line of a shell wrapper (`bash -c "npm ci"`) or inside a command substitution
+ * (`echo "$(npm ci)"`).
  * @param {string} command
  */
 export function isInstallCommand(command) {
@@ -246,7 +275,7 @@ export function isInstallCommand(command) {
     );
     if (hasInstallInSubstitution) return true;
     const bun = tokens.findIndex((token) => isProgram(token, "bun"));
-    if (bun !== -1 && BUN_INSTALL_SUBCOMMANDS.has(tokens.slice(bun + 1).find((arg) => !arg.startsWith("-"))?.toLowerCase() ?? "")) return true;
+    if (bun !== -1 && BUN_INSTALL_SUBCOMMANDS.has(bunSubcommand(tokens.slice(bun + 1)))) return true;
     const start = tokens.findIndex((token) => isProgram(token, "npm") || isProgram(token, "npx"));
     if (start === -1) return false;
     const args = tokens.slice(start + 1);
@@ -259,6 +288,32 @@ export function isInstallCommand(command) {
     if (NPM_INSTALL_SUBCOMMANDS.has(subcommand.name)) return true;
     return subcommand.name === "audit" && subcommand.rest.some((arg) => arg.toLowerCase() === "fix");
   });
+}
+
+/**
+ * True when the command contains a `gh api` call that names the `agent-klaar` context, also inside a
+ * shell wrapper (`bash -c "gh api ..."`). Text quoted as an argument of another program (a commit
+ * message, a grep pattern) is data and does not count.
+ * @param {string} command
+ */
+export function isAgentReadyStatusCall(command) {
+  return parseCommand(command).some((segmentTokens) => {
+    const tokens = segmentTokens.map((token) => token.text);
+    if (isShellWrapper(tokens[0])) {
+      return tokens.slice(1).some((arg) => isAgentReadyStatusCall(arg));
+    }
+    const start = tokens.findIndex((token) => isProgram(token, "gh"));
+    if (start === -1 || !tokens.slice(start + 1).includes("api")) return false;
+    return tokens.slice(start + 1).some((token) => token.includes(AGENT_READY_CONTEXT));
+  });
+}
+
+/**
+ * True when the whole command is exactly the accepted `agent-klaar` form for this repo.
+ * @param {string} command
+ */
+export function isAgentReadyCommand(command) {
+  return AGENT_READY_PATTERN.test(command.trim());
 }
 
 /** @param {string} directory an absolute path, Windows or POSIX style */
@@ -321,6 +376,9 @@ export function denyReason(input) {
   const rawCommand = input.tool_input?.command;
   if (!GUARDED_TOOLS.includes(input.tool_name ?? "") || typeof rawCommand !== "string") return null;
   const command = input.tool_name === HEREDOC_TOOL ? stripHeredocBodies(rawCommand) : rawCommand;
+  if (isAgentReadyStatusCall(command) && !isAgentReadyCommand(rawCommand)) {
+    return `The \`${AGENT_READY_CONTEXT}\` status may only be set with exactly \`${AGENT_READY_COMMAND}\` as a command of its own, with <sha> replaced by the full 40-character SHA from \`git rev-parse HEAD\` typed in literally: no \`$(...)\`, no variable, no other repo, no extra arguments. Retry once in that form; if it is refused too, stop and report.`;
+  }
   if (!isInstallCommand(command)) return null;
   if (!isInsideWorktree(input.cwd ?? "")) {
     return "Installs are only allowed in your own worktree under .claude/worktrees/, never in the main checkout. Do not retry in another shell: stop and report.";

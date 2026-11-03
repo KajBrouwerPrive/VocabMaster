@@ -1,4 +1,4 @@
-import { ALLOWED_INSTALL_FORMS, denyReason, isInsideWorktree, isInstallCommand, referencesOutsidePath, stripHeredocBodies } from "../guard-install.mjs";
+import { AGENT_READY_COMMAND, AGENT_READY_REPO, ALLOWED_INSTALL_FORMS, denyReason, isInsideWorktree, isInstallCommand, referencesOutsidePath, stripHeredocBodies } from "../guard-install.mjs";
 
 const MAIN_CHECKOUT = "C:\\Development\\Prive\\VocabMaster";
 const WORKTREE = "C:\\Development\\Prive\\VocabMaster\\.claude\\worktrees\\some-task-1a2b3c";
@@ -260,5 +260,39 @@ describe("heredocs", () => {
 
   it("does not read heredocs in PowerShell, which has none", () => {
     expect(call("PowerShell", "node - <<'EOF'\nnpm ci\nEOF", MAIN_CHECKOUT)).toMatch(/only allowed in your own worktree/);
+  });
+});
+
+describe("agent-klaar status", () => {
+  const call = (toolName, command, cwd = WORKTREE) => denyReason({ tool_name: toolName, tool_input: { command }, cwd });
+  const SHA = "0123456789abcdef0123456789abcdef01234567";
+  const TAIL = '-f state=success -f context=agent-klaar -f description="Agent done"';
+  const exact = `gh api repos/${AGENT_READY_REPO}/statuses/${SHA} ${TAIL}`;
+
+  it("names this repo", () => {
+    expect(AGENT_READY_REPO).toBe("KajBrouwerPrive/VocabMaster");
+    expect(AGENT_READY_COMMAND).toBe(`gh api repos/KajBrouwerPrive/VocabMaster/statuses/<sha> ${TAIL}`);
+  });
+
+  it.each(["Bash", "PowerShell"])("lets exactly the accepted form through via %s", (toolName) => {
+    expect(call(toolName, exact)).toBeNull();
+    expect(call(toolName, exact, MAIN_CHECKOUT)).toBeNull();
+  });
+
+  it.each([
+    ["another repo", `gh api repos/Pro-Solutio/elsewhere/statuses/${SHA} ${TAIL}`],
+    ["a short SHA", `gh api repos/${AGENT_READY_REPO}/statuses/${SHA.slice(0, 7)} ${TAIL}`],
+    ["a command substitution", `gh api repos/${AGENT_READY_REPO}/statuses/$(git rev-parse HEAD) ${TAIL}`],
+    ["a variable", `gh api repos/${AGENT_READY_REPO}/statuses/$SHA ${TAIL}`],
+    ["an extra state", `gh api repos/${AGENT_READY_REPO}/statuses/${SHA} -f state=failure ${TAIL}`],
+    ["trailing arguments", `${exact} -f target_url=https://example.com`],
+    ["a chained command", `git rev-parse HEAD && ${exact}`],
+    ["a shell wrapper", `bash -c "gh api repos/${AGENT_READY_REPO}/statuses/$(git rev-parse HEAD) -f context=agent-klaar"`],
+  ])("denies %s", (_why, command) => {
+    expect(call("Bash", command)).toMatch(/may only be set with exactly/);
+  });
+
+  it("ignores agent-klaar as quoted data of another program", () => {
+    expect(call("Bash", 'git commit -m "set agent-klaar via gh api"')).toBeNull();
   });
 });
