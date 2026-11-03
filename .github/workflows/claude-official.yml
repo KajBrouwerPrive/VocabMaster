@@ -6,6 +6,7 @@ name: Claude Code Review (official)
 #
 # The job id "review" is also the name of the status check. The "Worktree Afronden" script
 # waits for a check with exactly that name, so do not rename the job without updating the script.
+
 on:
   pull_request:
     # Never on synchronize: one review per PR, not one per push.
@@ -16,9 +17,13 @@ on:
 jobs:
   review:
     runs-on: ubuntu-latest
+    # Every job has a timeout (baseline workflow:minute-rules), so a hanging run cannot use 360 minutes.
+    timeout-minutes: 20
+    # Not on Dependabot PRs: they get no secrets, so the review would fail on every one of them.
     if: |
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       pull-requests: write
@@ -30,11 +35,16 @@ jobs:
       group: claude-review-${{ github.event.pull_request.number }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: anthropics/claude-code-action@v1
+      # Start time of this attempt, so the comment check below only counts comments of this run.
+      - id: started
+        run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: anthropics/claude-code-action@d535f5172dec02b204866b393d6b20b9b2aaf98d # v1.0.266
+        id: claude
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Alternative to the line above, when using an API key:
@@ -85,35 +95,103 @@ jobs:
             3. Non-blocking issues: suggestions, nits and improvements, short and one line each.
                Omit the section if there are none.
             Do NOT list what is fine or what you checked (conventions followed, scope, secrets,
-            i18n, tests present, and so on). If you found nothing, the verdict alone is the whole review.
+            Next.js/Expo APIs, i18n, the `Closes` line, tests present, and so on). If you found
+            nothing, the verdict alone is the whole review.
             Do NOT comment on the model named in the `Co-Authored-By` line of commits or the PR body.
-            Do NOT mention tools or MCP servers that are unavailable in this review job; that is
-            expected and not a finding.
+            Do NOT mention tools or MCP servers that are unavailable in this review job (for example
+            Linear MCP); that is expected and not a finding.
+
+            HOW TO WORK (mandatory):
+            - Get the changes with `gh pr diff ${{ github.event.pull_request.number }}`. There are no
+              unstaged changes in this checkout, so tell every agent you start to review this PR's
+              diff (it may use `gh pr diff`, `git diff`, `git log` and `git show`), not `git diff`
+              of the working tree.
+            - Only these tools are allowed: the agents, Read, Grep, Glob, `gh pr comment|review|diff|view`
+              and `git diff|log|show`. A refused tool call is not a reason to stop: carry on with
+              what you have.
+            - Wait for every agent you start to finish before you write the review.
+            - ALWAYS finish by posting exactly one PR comment with `gh pr comment`, also when an agent
+              or a tool failed (then say in the comment what could not be checked) and also when the
+              verdict alone is the whole review. Pass the text directly with `--body "..."`; command
+              substitution such as `$(cat ...)` is refused. The review job fails when no comment is
+              posted.
 
             Post review results as a PR comment using `gh pr comment`.
             Use `gh pr review` for inline comments on specific code lines.
             Write all reviews in English.
+          # --strict-mcp-config: only use the MCP servers the action passes itself. Without it,
+          # the checkout's .mcp.json loads the Linear server, which needs LINEAR_FAMILYSKILLS_API_KEY
+          # (not set in CI) and fails with 401 on every review.
+          # Agent/Task start the pr-review-toolkit agents (refused without them, FAM-327); those
+          # agents read the changes with git, hence the read-only git commands. No Write, Edit or
+          # other Bash.
           claude_args: |
-            --allowedTools "Bash(gh pr comment:*),Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Grep,Glob"
+            --strict-mcp-config --allowedTools "Agent,Task,Bash(gh pr comment:*),Bash(gh pr review:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Read,Grep,Glob"
+
+      # The action hides what Claude did (show_full_output is off, and a debug re-run does not
+      # show it either). Keep the transcript for a week, so a review without a comment can be
+      # explained. Only people with access to the repo can download it.
+      - name: Keep the review transcript
+        if: always() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: claude-review-transcript
+          path: ${{ steps.claude.outputs.execution_file }}
+          retention-days: 7
+
+      # The action can end green without posting anything (FAM-327, CNT-55). Without the review
+      # comment no agent sets 'agent-klaar' and the finish script never offers the PR, so fail
+      # instead. Exception: on a PR that changes this workflow the action skips itself (its
+      # workflow validation requires the file to match the default branch), so there is no
+      # comment to expect.
+      - name: Require the review comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          STARTED_AT: ${{ steps.started.outputs.at }}
+          # owner/repo/.github/workflows/<file>.yml@<ref>; the file name differs per repo.
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+          REVIEW_BOT: claude[bot]
+        run: |
+          workflow_file="${WORKFLOW_REF#"$REPO"/}"
+          workflow_file="${workflow_file%%@*}"
+          if ! git diff --quiet "origin/$DEFAULT_BRANCH" -- "$workflow_file"; then
+            echo "::notice::This PR changes $workflow_file, so the review action skipped itself; no comment expected."
+            exit 0
+          fi
+          count=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --paginate \
+            --jq "[.[] | select(.user.login == \"$REVIEW_BOT\" and .created_at >= \"$STARTED_AT\")] | length" \
+            | awk '{ total += $1 } END { print total + 0 }')
+          if [ "$count" -eq 0 ]; then
+            echo "::error::The Claude review posted no PR comment. Re-run this job."
+            exit 1
+          fi
+          echo "Found $count review comment(s) from $REVIEW_BOT."
 
   respond:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Only the owner and organisation members (CNT-67): this job has write access and the Claude
+    # token, and on a public repo anyone can comment. A comment from anyone else starts nothing.
     if: |
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '@claude') &&
-      github.event.comment.user.type != 'Bot'
+      github.event.comment.user.type != 'Bot' &&
+      (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
     permissions:
       contents: write
       pull-requests: write
       issues: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: anthropics/claude-code-action@v1
+      - uses: anthropics/claude-code-action@d535f5172dec02b204866b393d6b20b9b2aaf98d # v1.0.266
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Alternative to the line above, when using an API key:
@@ -122,3 +200,6 @@ jobs:
           # the action does not recognise its own (different) default trigger phrase in the
           # comment and skips everything ("No trigger found, skipping").
           trigger_phrase: "@claude"
+          # Same as the review job: keep the checkout's .mcp.json (Linear, no API key in CI) out of the run.
+          claude_args: |
+            --strict-mcp-config
