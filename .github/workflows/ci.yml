@@ -152,4 +152,4 @@ jobs:
             ' "$RUNNER_TEMP/npm-audit-base.json" "$RUNNER_TEMP/npm-audit-head.json" "$dir" || status=1
           done
           exit $status
-      # <!-- /baseline -->
+      #<!-- /baseline -->
