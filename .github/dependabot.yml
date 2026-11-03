@@ -1,0 +1,37 @@
+# Dependabot, shared baseline (Pro-Solutio/control, block file:dependabot; CNT-6).
+# Weekly on Monday and grouped, because every Dependabot PR runs CI and costs Actions minutes:
+#  - one PR per week for all minor and patch npm updates of the repo (all directories together);
+#  - major updates stay one PR each, since each can need code changes;
+#  - security updates grouped into one PR as well;
+#  - GitHub Actions versions in one weekly PR;
+#  - a cooldown of 7 days on version updates: a version published in the last week can still turn out
+#    to be malicious or broken (Semgrep rule dependabot-missing-cooldown). Security updates do not wait.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directories:
+      - "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    groups:
+      npm-minor-and-patch:
+        patterns: ["*"]
+        update-types: [minor, patch]
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
