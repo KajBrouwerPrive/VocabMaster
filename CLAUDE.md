@@ -37,7 +37,7 @@
 - Lovable edits this repo and pushes straight to main, so main moves often. `bun.lockb` is Lovable's lockfile; never edit or regenerate it. `npm ci` uses `package-lock.json` only. A PR that changes `package.json` says in its body that `bun.lockb` was not updated.
 - `npx eslint .` still reports errors that predate the check (VMA-3), so the check and CI lint only changed files. A file you change must be lint-clean: fix small existing errors in it, otherwise stop and report.
 - Tests are Vitest: put them next to the code as `src/**/*.test.{ts,tsx}`, or under `scripts/__tests__/` for scripts (the `include` in `vitest.config.ts`). The check runs only tests related to the changed files.
-- `.env` is tracked and holds only the public Supabase URL, project id and publishable key. Never put a secret in it; edge function secrets live in Supabase.
+- `.env` is not tracked (`.gitignore`); `.env.example` lists the variable names. Never read `.env` or put a secret in it; edge function secrets live in Supabase. A new worktree has no `.env`: ask the owner to copy it from the main checkout before starting the app.
 
 ## Working with the owner
 ### Generic
@@ -56,7 +56,7 @@
 <!-- /baseline -->
 
 ### This repo
-- The app (Vite dev server) starts from a worktree with the `.claude/launch.json` configuration `vocabmaster` (`npm run dev`, port 8080; `.env` is tracked, so it works without copying files). Vite moves to the next free port when 8080 is taken, so use the URL it prints. Take screenshots at 375x812 (mobile) and 1280x800 (desktop).
+- The app (Vite dev server) starts from a worktree with the `.claude/launch.json` configuration `vocabmaster` (`npm run dev`, port 8080; needs a `.env` in the worktree, see above). Vite moves to the next free port when 8080 is taken, so use the URL it prints. Take screenshots at 375x812 (mobile) and 1280x800 (desktop).
 - Almost every screen is behind the Supabase login. Never sign in with the owner's account or password: ask the owner for a test account, or describe the change precisely in the PR and ask the owner to check it on screen before merging. Screens that depend on AI edge functions or admin data stay a manual check after the merge.
 
 ## Issues

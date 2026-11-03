@@ -32,7 +32,10 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Create .env from the example and fill in the public Supabase URL and publishable key.
+cp .env.example .env
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
