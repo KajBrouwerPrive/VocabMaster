@@ -5,9 +5,7 @@
       "PowerShell(npm ci)",
       "Bash(npm ci *)",
       "PowerShell(npm ci *)",
-      "Bash(gh api repos/KajBrouwerPrive/VocabMaster/statuses/* -f state=success -f context=agent-klaar -f description=\"Agent done\")",
       "Bash(node C:/Development/control/scripts/agent-ready/agent-ready.mjs *)",
-      "PowerShell(gh api repos/KajBrouwerPrive/VocabMaster/statuses/* -f state=success -f context=agent-klaar -f description=\"Agent done\")",
       "PowerShell(node C:/Development/control/scripts/agent-ready/agent-ready.mjs *)"
     ],
     "deny": [

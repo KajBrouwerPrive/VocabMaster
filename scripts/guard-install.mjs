@@ -4,10 +4,8 @@
 // permission rules match the command text only, not the directory, so this hook adds the
 // directory check. It applies to both shells, so a refusal in one cannot be bypassed in the other.
 //
-// It also guards the allow rule for the `agent-klaar` commit status: the `*` in that rule matches
-// spaces too, so it would allow extra arguments (another state, another endpoint). Any `gh api` call
-// that names `agent-klaar` is refused unless the whole command is exactly AGENT_READY_COMMAND for this
-// repo and a full 40-character SHA (CNT-43).
+// The commit status the finish script waits for is guarded by the managed guard in the control repo
+// (rules `agent-ready-status` and `agent-ready-helper`, CNT-78 and CNT-80), not here.
 //
 // Wired in .claude/settings.json under hooks.PreToolUse. Reads the hook input JSON on stdin and
 // prints a deny decision, or nothing to leave the normal permission flow in charge. The pure logic
@@ -23,15 +21,6 @@ export const GUARDED_TOOLS = Object.freeze(["Bash", "PowerShell"]);
 // Per-repo setting: the install forms an agent may use in its own worktree. They are named in the
 // refusal message (joined with " or "); the matching allow rules live in .claude/settings.json.
 export const ALLOWED_INSTALL_FORMS = Object.freeze(["npm ci"]);
-
-// Per-repo setting: the GitHub repo the `agent-klaar` status may be set on (this repo, never another).
-export const AGENT_READY_REPO = "KajBrouwerPrive/VocabMaster";
-export const AGENT_READY_CONTEXT = "agent-klaar";
-// The only accepted form, with <sha> standing for the full SHA from `git rev-parse HEAD`.
-export const AGENT_READY_COMMAND = `gh api repos/${AGENT_READY_REPO}/statuses/<sha> -f state=success -f context=${AGENT_READY_CONTEXT} -f description="Agent done"`;
-const FULL_COMMIT_SHA = "[0-9a-f]{40}";
-const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const AGENT_READY_PATTERN = new RegExp(`^${AGENT_READY_COMMAND.split("<sha>").map(escapeRegExp).join(FULL_COMMIT_SHA)}$`);
 
 // npm subcommands (and their aliases) that write node_modules or the lockfile.
 const NPM_INSTALL_SUBCOMMANDS = new Set(["ci", "clean-install", "install-clean", "install", "i", "in", "isntall", "add", "update", "up", "upgrade"]);
@@ -290,32 +279,6 @@ export function isInstallCommand(command) {
   });
 }
 
-/**
- * True when the command contains a `gh api` call that names the `agent-klaar` context, also inside a
- * shell wrapper (`bash -c "gh api ..."`). Text quoted as an argument of another program (a commit
- * message, a grep pattern) is data and does not count.
- * @param {string} command
- */
-export function isAgentReadyStatusCall(command) {
-  return parseCommand(command).some((segmentTokens) => {
-    const tokens = segmentTokens.map((token) => token.text);
-    if (isShellWrapper(tokens[0])) {
-      return tokens.slice(1).some((arg) => isAgentReadyStatusCall(arg));
-    }
-    const start = tokens.findIndex((token) => isProgram(token, "gh"));
-    if (start === -1 || !tokens.slice(start + 1).includes("api")) return false;
-    return tokens.slice(start + 1).some((token) => token.includes(AGENT_READY_CONTEXT));
-  });
-}
-
-/**
- * True when the whole command is exactly the accepted `agent-klaar` form for this repo.
- * @param {string} command
- */
-export function isAgentReadyCommand(command) {
-  return AGENT_READY_PATTERN.test(command.trim());
-}
-
 /** @param {string} directory an absolute path, Windows or POSIX style */
 export function isInsideWorktree(directory) {
   return WORKTREE_SEGMENT.test(directory.replace(/\\/g, "/"));
@@ -376,9 +339,6 @@ export function denyReason(input) {
   const rawCommand = input.tool_input?.command;
   if (!GUARDED_TOOLS.includes(input.tool_name ?? "") || typeof rawCommand !== "string") return null;
   const command = input.tool_name === HEREDOC_TOOL ? stripHeredocBodies(rawCommand) : rawCommand;
-  if (isAgentReadyStatusCall(command) && !isAgentReadyCommand(rawCommand)) {
-    return `The \`${AGENT_READY_CONTEXT}\` status may only be set with exactly \`${AGENT_READY_COMMAND}\` as a command of its own, with <sha> replaced by the full 40-character SHA from \`git rev-parse HEAD\` typed in literally: no \`$(...)\`, no variable, no other repo, no extra arguments. Retry once in that form; if it is refused too, stop and report.`;
-  }
   if (!isInstallCommand(command)) return null;
   if (!isInsideWorktree(input.cwd ?? "")) {
     return "Installs are only allowed in your own worktree under .claude/worktrees/, never in the main checkout. Do not retry in another shell: stop and report.";
