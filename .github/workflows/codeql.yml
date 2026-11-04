@@ -1,0 +1,45 @@
+# CodeQL advanced setup, shared baseline for public repos (block workflow:codeql; CNT-97).
+# Replaces CodeQL default setup: default setup never starts on pull requests from Dependabot, so the
+# required checks `Analyze (actions)` and `Analyze (javascript-typescript)` stayed missing and blocked
+# every Dependabot PR. A `pull_request` run may always upload its results, Dependabot included.
+# Switch default setup off in the repo settings: while it is on, GitHub disables this workflow.
+# The job name gives the same check names as default setup, so the ruleset keeps its required checks.
+# The push to main is an exception to the minute rules (no-run-on-push-to-main): code scanning compares
+# every PR against the analysis of main, and the alerts on main come from this run.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  security-events: write
+  contents: read
+  actions: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: codeql-${{ matrix.language }}-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - "actions"
+          - "javascript-typescript"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: /language:${{ matrix.language }}
+
