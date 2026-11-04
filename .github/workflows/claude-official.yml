@@ -99,7 +99,7 @@ jobs:
             nothing, the verdict alone is the whole review.
             Do NOT comment on the model named in the `Co-Authored-By` line of commits or the PR body.
             Do NOT mention tools or MCP servers that are unavailable in this review job (for example
-            Linear MCP); that is expected and not a finding.
+            the Supabase or IssueTracker MCP); that is expected and not a finding.
 
             HOW TO WORK (mandatory):
             - Get the changes with `gh pr diff ${{ github.event.pull_request.number }}`. There are no
