@@ -24,9 +24,11 @@ jobs:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # A new push to a PR cancels its running analysis; a run on main is never cancelled, so every commit
+    # on main keeps the analysis that PRs are compared with.
     concurrency:
       group: codeql-${{ matrix.language }}-${{ github.event.pull_request.number || github.ref }}
-      cancel-in-progress: true
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     strategy:
       fail-fast: false
       matrix:
