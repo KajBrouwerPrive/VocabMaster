@@ -2,7 +2,8 @@
 # Replaces CodeQL default setup: default setup never starts on pull requests from Dependabot, so the
 # required checks `Analyze (actions)` and `Analyze (javascript-typescript)` stayed missing and blocked
 # every Dependabot PR. A `pull_request` run may always upload its results, Dependabot included.
-# Switch default setup off in the repo settings: while it is on, GitHub disables this workflow.
+# Switch default setup off in the repo settings: while it is on, uploads from this workflow are rejected
+# and the Analyze checks fail.
 # The job name gives the same check names as default setup, so the ruleset keeps its required checks.
 # The push to main is an exception to the minute rules (no-run-on-push-to-main): code scanning compares
 # every PR against the analysis of main, and the alerts on main come from this run.
