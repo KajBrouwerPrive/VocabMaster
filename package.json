@@ -63,7 +63,7 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
     "xlsx": "^0.18.5",
-    "zod": "^3.25.76"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -82,7 +82,7 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.72.1",
-    "vite": "^5.4.19",
-    "vitest": "^3.2.7"
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
   }
 }
