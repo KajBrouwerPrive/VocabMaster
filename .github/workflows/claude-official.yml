@@ -92,7 +92,11 @@ jobs:
             2. Blocking issues: problems that must be fixed before merge (bugs, data loss, security
                or trust-boundary problems, broken tests, missing error handling that hides failures).
                For each: file and line, what is wrong, and the fix. Omit the section if there are none.
-            3. Non-blocking issues: suggestions, nits and improvements, short and one line each.
+            3. Unrecorded decisions: choices in the diff that are not recorded under `## Besluiten` in the
+               PR body (see UNRECORDED DECISIONS below). This is a kind of finding of its own, never a
+               blocking or non-blocking issue. For each: file and line, and the choice in one line. Omit
+               the section if there are none.
+            4. Non-blocking issues: suggestions, nits and improvements, short and one line each.
                Omit the section if there are none.
             Do NOT list what is fine or what you checked (conventions followed, scope, secrets,
             Next.js/Expo APIs, i18n, the `Closes` line, tests present, and so on). If you found
@@ -100,6 +104,20 @@ jobs:
             Do NOT comment on the model named in the `Co-Authored-By` line of commits or the PR body.
             Do NOT mention tools or MCP servers that are unavailable in this review job (for example
             the Supabase or IssueTracker MCP); that is expected and not a finding.
+
+            UNRECORDED DECISIONS (mandatory):
+            - Agents record every decision with the `record_decision` tool of the `issues` MCP server.
+              A generated section `## Besluiten` in the PR body lists the recorded ones, between fixed
+              markers. Read the PR body with `gh pr view ${{ github.event.pull_request.number }}`.
+            - A decision is a choice between at least two realistic options that changes the result:
+              behaviour, structure, scope, data model, dependencies, or something hard to undo. Not a
+              decision: a step that a rule prescribes (CLAUDE.md, the baseline, a decision in
+              `baseline/decisions/`, the task brief), a choice the owner already made in the ticket, the
+              brief or the chat, and a choice without effect outside the change itself.
+            - Compare the diff with `## Besluiten`. Report every choice in the diff that is not in that
+              list, also when the section is absent. Do not treat the section as proof that a listed
+              decision was the right one; only check that the choice is recorded.
+            - Never write, edit or generate the `## Besluiten` section yourself.
 
             HOW TO WORK (mandatory):
             - Get the changes with `gh pr diff ${{ github.event.pull_request.number }}`. There are no
