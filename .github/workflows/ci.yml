@@ -120,36 +120,9 @@ jobs:
               (cd "$base" && npm audit --json > "$RUNNER_TEMP/npm-audit-base.json") || true
             fi
             (cd "$dir" && npm audit --json > "$RUNNER_TEMP/npm-audit-head.json") || true
-            node -e '
-              const fs = require("fs");
-              const [basePath, headPath, dir] = process.argv.slice(1);
-              const base = JSON.parse(fs.readFileSync(basePath, "utf8"));
-              const head = JSON.parse(fs.readFileSync(headPath, "utf8"));
-              if (head.error || !head.vulnerabilities) {
-                console.error(`npm audit gave no report for ${dir}: ${JSON.stringify(head.error ?? head)}`);
-                process.exit(2);
-              }
-              if (base.error) {
-                console.error(`npm audit failed at the PR base for ${dir}: ${JSON.stringify(base.error)}`);
-                process.exit(2);
-              }
-              const serious = (report) => {
-                const found = new Map();
-                for (const [name, entry] of Object.entries(report.vulnerabilities ?? {})) {
-                  for (const via of entry.via) {
-                    if (typeof via === "object" && (via.severity === "high" || via.severity === "critical")) {
-                      found.set(`${name} ${via.source}`, `${via.severity}: ${name} ${via.range}, ${via.title} (${via.url})`);
-                    }
-                  }
-                }
-                return found;
-              };
-              const before = serious(base);
-              const added = [...serious(head)].filter(([key]) => !before.has(key));
-              for (const [, text] of added) console.log(`::error title=npm audit (${dir})::${text}`);
-              console.log(`${dir}: ${added.length} new high or critical advisories`);
-              process.exit(added.length > 0 ? 1 : 0);
-            ' "$RUNNER_TEMP/npm-audit-base.json" "$RUNNER_TEMP/npm-audit-head.json" "$dir" || status=1
+            # The comparison is the shared script of block file:audit-diff (CNT-177), the same one the
+            # deno.lock scan of the Edge Functions uses.
+            node .github/scripts/audit-diff.mjs npm-audit "$RUNNER_TEMP/npm-audit-base.json" "$RUNNER_TEMP/npm-audit-head.json" "$dir" || status=1
           done
           exit $status
       #<!-- /baseline -->
