@@ -43,12 +43,35 @@ jobs:
       - id: started
         run: echo "at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
+      # Bun for the action, from the npm registry (CNT-225). The action's own 'Install Bun' step downloads it
+      # from GitHub Releases on every run, without a cache; a 504 there failed every review. With
+      # path_to_bun_executable set, the action skips that step. BUN_VERSION must equal 'bun-version' in
+      # action.yml of the pinned claude-code-action: bump both together (workflow-review-bun.test.mjs).
+      # An explicit prefix gives a known path. --allow-scripts=bun lets the package's postinstall (npm skips
+      # install scripts by default) put the native binary of @oven/bun-linux-x64 (also from npm) in place.
+      - name: Install Bun from npm
+        id: bun
+        env:
+          BUN_VERSION: "1.4.4"
+        run: |
+          prefix="$RUNNER_TEMP/bun"
+          npm install --global --prefix "$prefix" --allow-scripts=bun --no-audit --no-fund "bun@$BUN_VERSION"
+          bun_path="$prefix/bin/bun"
+          installed="$("$bun_path" --version)"
+          if [ "$installed" != "$BUN_VERSION" ]; then
+            echo "::error::Expected Bun $BUN_VERSION at $bun_path, got '$installed'."
+            exit 1
+          fi
+          echo "path=$bun_path" >> "$GITHUB_OUTPUT"
+
       - uses: anthropics/claude-code-action@d535f5172dec02b204866b393d6b20b9b2aaf98d # v1.0.266
         id: claude
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Alternative to the line above, when using an API key:
           # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Bun from the step above, so the action skips its download from GitHub Releases.
+          path_to_bun_executable: ${{ steps.bun.outputs.path }}
           plugin_marketplaces: |
             https://github.com/anthropics/claude-code.git
           plugins: |
@@ -209,11 +232,34 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Bun for the action, from the npm registry (CNT-225). The action's own 'Install Bun' step downloads it
+      # from GitHub Releases on every run, without a cache; a 504 there failed every review. With
+      # path_to_bun_executable set, the action skips that step. BUN_VERSION must equal 'bun-version' in
+      # action.yml of the pinned claude-code-action: bump both together (workflow-review-bun.test.mjs).
+      # An explicit prefix gives a known path. --allow-scripts=bun lets the package's postinstall (npm skips
+      # install scripts by default) put the native binary of @oven/bun-linux-x64 (also from npm) in place.
+      - name: Install Bun from npm
+        id: bun
+        env:
+          BUN_VERSION: "1.4.4"
+        run: |
+          prefix="$RUNNER_TEMP/bun"
+          npm install --global --prefix "$prefix" --allow-scripts=bun --no-audit --no-fund "bun@$BUN_VERSION"
+          bun_path="$prefix/bin/bun"
+          installed="$("$bun_path" --version)"
+          if [ "$installed" != "$BUN_VERSION" ]; then
+            echo "::error::Expected Bun $BUN_VERSION at $bun_path, got '$installed'."
+            exit 1
+          fi
+          echo "path=$bun_path" >> "$GITHUB_OUTPUT"
+
       - uses: anthropics/claude-code-action@d535f5172dec02b204866b393d6b20b9b2aaf98d # v1.0.266
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Alternative to the line above, when using an API key:
           # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Bun from the step above, so the action skips its download from GitHub Releases.
+          path_to_bun_executable: ${{ steps.bun.outputs.path }}
           # Must match the '@claude' check in the if-condition above exactly. Without this line
           # the action does not recognise its own (different) default trigger phrase in the
           # comment and skips everything ("No trigger found, skipping").
