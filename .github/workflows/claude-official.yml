@@ -11,6 +11,20 @@ on:
   pull_request:
     # Never on synchronize: one review per PR, not one per push.
     types: [opened, ready_for_review]
+    # No review for a PR that only changes documentation (CNT-232): the run costs a billed minute and
+    # Claude usage for prose. GitHub judges each file of the PR by the last pattern it matches (a leading
+    # '!' leaves it out) and starts the review when at least one file ends up included. Markdown and
+    # docs/** are left out; agent instructions and baseline blocks are taken back in, because they steer
+    # agents. The finish script reads this list (scripts/finish/review-paths.mjs in control) to know when
+    # no review comes, and only understands '**', '*' and a leading '!': it refuses any other syntax.
+    paths:
+      - "**"
+      - "!**.md"
+      - "!docs/**"
+      - "**/CLAUDE.md"
+      - "**/AGENTS.md"
+      - ".claude/**"
+      - "baseline/blocks/**"
   issue_comment:
     types: [created]
 
@@ -140,6 +154,11 @@ jobs:
             - Compare the diff with `## Besluiten`. Report every choice in the diff that is not in that
               list, also when the section is absent. Do not treat the section as proof that a listed
               decision was the right one; only check that the choice is recorded.
+            - Choices the owner already made are listed by the agent in the PR body under the heading
+              `## Keuzes van de eigenaar`, each with a reference to the ticket or the brief. Do not report
+              a choice listed there as an unrecorded decision, unless the reference is missing or wrong. Check
+              that the ticket or the brief really holds the choice; if a listed choice has no reference,
+              or the reference does not hold that choice, report it as an unrecorded decision.
             - Never write, edit or generate the `## Besluiten` section yourself.
 
             HOW TO WORK (mandatory):
