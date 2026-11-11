@@ -86,6 +86,9 @@ jobs:
           # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           # Bun from the step above, so the action skips its download from GitHub Releases.
           path_to_bun_executable: ${{ steps.bun.outputs.path }}
+          # Autonomous runs open their PR as the agent App of the organisation; without this the action refuses
+          # ("Workflow initiated by non-human actor", CNT-300). Only that one bot, never "*" (derived from agentApps).
+          allowed_bots: "kajbrouwerprive-agent"
           plugin_marketplaces: |
             https://github.com/anthropics/claude-code.git
           plugins: |
